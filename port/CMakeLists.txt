@@ -74,7 +74,8 @@ if(SUPAPLEX_BUILD_TESTS)
       OUTPUT ${TRACE_GEN_FILES}
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../tools/m68k2cpp.py
               ${CMAKE_CURRENT_SOURCE_DIR}/../tools/translate.json --trace-out ${TRACE_GEN_DIR}
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/m68k2cpp.py ${CMAKE_CURRENT_SOURCE_DIR}/../tools/translate.json
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/m68k2cpp.py ${CMAKE_CURRENT_SOURCE_DIR}/../tools/m68kdec.py
+              ${CMAKE_CURRENT_SOURCE_DIR}/../tools/translate.json ${CMAKE_CURRENT_SOURCE_DIR}/../tools/annotations.json
       COMMENT "Generating instrumented translation")
     add_library(supaplexgame_trace STATIC src/game/runtime.cpp ${TRACE_GEN_FILES})
     target_compile_definitions(supaplexgame_trace PUBLIC SUPAPLEX_TRACE)

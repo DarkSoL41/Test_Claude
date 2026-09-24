@@ -94,6 +94,7 @@ private:
     void doBlit();
     void startFrame();
     void runCopperUntil(int line, int hpos);
+    bool copperIdleForLine(int line) const;
     void renderLine(int line);
     void spriteDma(int line);
     void finishFrame();

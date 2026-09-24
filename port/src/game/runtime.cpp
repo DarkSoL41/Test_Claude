@@ -149,7 +149,7 @@ void native_saveHiscores() {
 
 void run() {
     bus->load(0x54000, g_env.adf->read("PHIL_00"));
-    sub_054000();
+    intro_main();
 }
 
 }  // namespace game

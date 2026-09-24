@@ -4,8 +4,8 @@
 
 namespace game {
 
-void sub_054000() {
-    push32(0x54006); sub_0540A4(); A7 += 4;  // 054000  jsr $540a4.l, $540a4
+void intro_main() {
+    push32(0x54006); intro_show_pictures(); A7 += 4;  // 054000  jsr $540a4.l, $540a4
     A6 = 0xDFF000;  // 054006  lea.l $dff000.l, a6
     A0 = 0x54672;  // 05400C  lea.l $54672.l, a0
     wr32(A6 + 0x80, A0);  // 054012  move.l a0, 128(a6)
@@ -46,9 +46,9 @@ L_05408E:
     callAddress(A0); return;  // 0540A2  jmp (a0)
 }
 
-void sub_0540A4() {
-    push32(0x540A8); sub_05411A(); A7 += 4;  // 0540A4  bsr $5411a
-    push32(0x540AC); sub_05414C(); A7 += 4;  // 0540A8  bsr $5414c
+void intro_show_pictures() {
+    push32(0x540A8); intro_copy_palettes(); A7 += 4;  // 0540A4  bsr $5411a
+    push32(0x540AC); intro_set_bitplanes(); A7 += 4;  // 0540A8  bsr $5414c
     A5 = 0xDFF000;  // 0540AC  movea.l #$dff000, a5
     wr32(A5 + 0x80, 0x54676);  // 0540B2  move.l #$54676, 128(a5)
     wr16(A5 + 0x88, (D0 & 0xFFFF));  // 0540BA  move.w d0, 136(a5)
@@ -82,7 +82,7 @@ L_05410C:
     return;  // 054118  rts 
 }
 
-void sub_05411A() {
+void intro_copy_palettes() {
     A0 = 0x5E8A6;  // 05411A  lea.l $5e8a6.l, a0
     A1 = 0x665C6;  // 054120  lea.l $665c6.l, a1
     A2 = 0x6E2E6;  // 054126  lea.l $6e2e6.l, a2
@@ -101,7 +101,7 @@ L_05413A:
     return;  // 05414A  rts 
 }
 
-void sub_05414C() {
+void intro_set_bitplanes() {
     D0 = 0x548A6;  // 05414C  move.l #$548a6, d0
     D1 = 0x5E8C6;  // 054152  move.l #$5e8c6, d1
     D2 = 0x665E6;  // 054158  move.l #$665e6, d2

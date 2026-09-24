@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
     PortRunner port;
     port.start(adf);
 
-    const uint32_t kStackLo = 0x7E000;  // stack contents (return frames) are not compared
+    const uint32_t kStackLo = 0x7F000;  // $7F000-$7FFFF: stack (interrupt frames), not compared; level bitmap ends at $7EFFF
     int mismatches = 0;
     std::mt19937 rng(uint32_t(seed < 0 ? 0 : seed));
     int holdLeft = 0;
@@ -167,6 +167,7 @@ int main(int argc, char** argv) {
         const uint8_t* b = port.hw.chip();
         int diffs = 0;
         uint32_t first = 0;
+        if (std::memcmp(a, b, kStackLo) != 0)
         for (uint32_t i = 0; i < kStackLo; i++) {
             if (a[i] != b[i]) {
                 if (!diffs) first = i;

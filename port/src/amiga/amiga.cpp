@@ -1,6 +1,7 @@
 #include "amiga.hpp"
 
 #include <cstdio>
+#include <algorithm>
 #include <cstring>
 
 #include "paula.hpp"
@@ -268,6 +269,17 @@ void Amiga::startFrame() {
     copWaiting_ = false;
 }
 
+// true if the copper cannot do anything before the end of this line
+bool Amiga::copperIdleForLine(int line) const {
+    if (!(dmacon_ & 0x0200) || !(dmacon_ & 0x0080)) return true;
+    if (!copWaiting_) return false;
+    int vm = copMaskV_ | 0x80;
+    int vb = line & 0xFF & vm, vw = copWaitV_ & vm;
+    if (vb < vw) return true;
+    if (vb > vw) return false;
+    return (0xE2 & copMaskH_) < (copWaitH_ & copMaskH_);
+}
+
 void Amiga::runCopperUntil(int line, int hpos) {
     if (!(dmacon_ & 0x0200) || !(dmacon_ & 0x0080)) return;  // DMAEN + COPEN
     for (int guard = 0; guard < 4096; guard++) {
@@ -341,7 +353,7 @@ void Amiga::renderLine(int line) {
     int vstart = diwstrt_ >> 8;
     int vstop = diwstop_ >> 8;
     if (!(vstop & 0x80)) vstop |= 0x100;
-    const int bpu = (bplcon0_ >> 12) & 7;
+    const int bpu = std::min((bplcon0_ >> 12) & 7, 6);
     const bool hires = bplcon0_ & 0x8000;
     const bool dma = (dmacon_ & 0x0200) && (dmacon_ & 0x0100);
     const bool active = dma && bpu > 0 && line >= vstart && line < vstop;
@@ -350,52 +362,79 @@ void Amiga::renderLine(int line) {
     if (nwords < 1) nwords = 1;
     if (nwords > 64) nwords = 64;
     uint16_t data[6][64];
-    const int ddf = ddfstrt_;
     if (active) {
-        for (int p = 0; p < bpu && p < 6; p++) {
+        for (int p = 0; p < bpu; p++) {
             for (int w = 0; w < nwords; w++) data[p][w] = chipW(bplpt_[p] + 2 * w);
             bplpt_[p] += 2 * nwords + ((p & 1) ? bpl2mod_ : bpl1mod_);
         }
     }
+    if (!out) {
+        if (!copperIdleForLine(line))
+            for (int cc = 0x19; cc < 0xE3; cc++) runCopperUntil(line, cc);
+        return;
+    }
+
+    // playfield colour indices for the 640 output (hires) positions
+    uint8_t pix[kOutWidth];
+    std::memset(pix, 0, sizeof pix);
     const int hstart = diwstrt_ & 0xFF;
     const int hstop = (diwstop_ & 0xFF) | 0x100;
+    if (active) {
+        const int sc1 = bplcon1_ & 15, sc2 = (bplcon1_ >> 4) & 15;
+        const int total = nwords * 16;
+        const int loFrom = std::max(hstart, 0x81), loTo = std::min(hstop, 0x81 + kOutWidth / 2);
+        for (int p = 0; p < bpu; p++) {
+            const int sc = (p & 1) ? sc2 : sc1;
+            const uint8_t bitv = uint8_t(1 << p);
+            const uint16_t* pd = data[p];
+            if (!hires) {
+                int st = loFrom - (0x81 + 2 * (ddfstrt_ - 0x38)) - sc;
+                for (int lo = loFrom; lo < loTo; lo++, st++) {
+                    if (st < 0 || st >= total) continue;
+                    if (pd[st >> 4] & (0x8000 >> (st & 15))) {
+                        int x = 2 * (lo - 0x81);
+                        pix[x] |= bitv;
+                        pix[x + 1] |= bitv;
+                    }
+                }
+            } else {
+                int hxFrom = 2 * loFrom, hxTo = 2 * loTo;
+                int st = hxFrom - (2 * 0x81 + 4 * (ddfstrt_ - 0x3C)) - 2 * sc;
+                for (int hx = hxFrom; hx < hxTo; hx++, st++) {
+                    if (st < 0 || st >= total) continue;
+                    if (pd[st >> 4] & (0x8000 >> (st & 15))) pix[hx - 2 * 0x81] |= bitv;
+                }
+            }
+        }
+    }
     const bool sprOn = (dmacon_ & 0x0200) && (dmacon_ & 0x0020);
-
-    // walk the line in colour clocks; the copper may change registers mid-line
-    const int firstLo = 0x81;                 // lowres hpos of output x = 0
+    if (sprOn) {
+        // sprites are in front of the playfields (BPLCON2 = $24)
+        for (int x = 0; x < kOutWidth; x += 2) {
+            int lo = (2 * 0x81 + x) >> 1;
+            for (int i = 0; i < 8; i++) {
+                const Sprite& sp = spr_[i];
+                if (!(sp.dataA | sp.dataB)) continue;
+                int sx = lo - (sp.hstart + 1);
+                if (sx < 0 || sx > 15) continue;
+                int bit = 0x8000 >> sx;
+                int v = ((sp.dataA & bit) ? 1 : 0) | ((sp.dataB & bit) ? 2 : 0);
+                if (v) { pix[x] = pix[x + 1] = uint8_t(16 + (i >> 1) * 4 + v); break; }
+            }
+        }
+    }
+    // fast path: the copper waits for a later line, no register changes in this line
+    if (copperIdleForLine(line)) {
+        for (int x = 0; x < kOutWidth; x++) out[x] = rgb_[color_[pix[x] & 31]];
+        return;
+    }
+    // walk the line in colour clocks; the copper may change colours mid-line
     for (int cc = 0x19; cc < 0xE3; cc++) {
         runCopperUntil(line, cc);
-        if (!out) continue;
-        const int sc1 = bplcon1_ & 15, sc2 = (bplcon1_ >> 4) & 15;
-        for (int sub = 0; sub < 4; sub++) {       // 4 hires pixels per colour clock
-            int hx = cc * 4 + sub;                  // hires hpos
-            int x = hx - 2 * firstLo;
+        int x0 = cc * 4 - 2 * 0x81;
+        for (int x = x0; x < x0 + 4; x++) {
             if (x < 0 || x >= kOutWidth) continue;
-            int lo = hx >> 1;
-            int idx = 0;
-            if (active && lo >= hstart && lo < hstop) {
-                for (int p = 0; p < bpu; p++) {
-                    int sc = (p & 1) ? sc2 : sc1;
-                    int s;
-                    if (hires) s = hx - (2 * 0x81 + 4 * (ddf - 0x3C)) - 2 * sc;
-                    else s = lo - (0x81 + 2 * (ddf - 0x38)) - sc;
-                    if (s < 0 || s >= nwords * 16) continue;
-                    if (data[p][s >> 4] & (0x8000 >> (s & 15))) idx |= 1 << p;
-                }
-            }
-            if (sprOn) {
-                // sprites are in front of the playfields (BPLCON2 = $24)
-                for (int i = 0; i < 8; i++) {
-                    const Sprite& sp = spr_[i];
-                    if (!(sp.dataA | sp.dataB)) continue;
-                    int sx = lo - (sp.hstart + 1);
-                    if (sx < 0 || sx > 15) continue;
-                    int bit = 0x8000 >> sx;
-                    int v = ((sp.dataA & bit) ? 1 : 0) | ((sp.dataB & bit) ? 2 : 0);
-                    if (v) { idx = 16 + (i >> 1) * 4 + v; break; }
-                }
-            }
-            out[x] = rgb_[color_[idx & 31]];
+            out[x] = rgb_[color_[pix[x] & 31]];
         }
     }
 }
