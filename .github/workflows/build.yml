@@ -51,7 +51,7 @@ jobs:
       - name: Accuracy (original 68000 code vs port)
         working-directory: port
         run: |
-          ./build/difftest --adf "../Supaplex (1991).adf" --frames 6400 --input tests/data/menu_tour.txt
+          ./tests/run_scenarios.sh build "../Supaplex (1991).adf"
           for l in 1 2 3 8 20 50 111; do
             ./build/difftest --adf "../Supaplex (1991).adf" --frames 6000 --random $l --level $l
           done

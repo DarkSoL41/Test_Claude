@@ -8,6 +8,10 @@
 // --level L      : at frame 690 (main menu) make level L selectable and select it
 //                  (the same memory poke is applied to both machines)
 // --coverage F   : write the reference's executed instructions to F
+// --poke F A V   : at frame F write word V to address A in both machines
+// --report A,B   : print when the reference executes these addresses
+// --autopilot F  : steer Murphy through the cells listed in F ("x y" per line,
+//                  "fire N" = hold fire N frames, "wait N"), starting at frame 760
 #include <condition_variable>
 #include <cstdio>
 #include <cstdlib>
@@ -16,6 +20,8 @@
 #include <map>
 #include <mutex>
 #include <random>
+#include <sstream>
+#include <vector>
 #include <string>
 #include <thread>
 
@@ -89,9 +95,12 @@ struct PortRunner : amiga::Host {
 int main(int argc, char** argv) {
     std::string adfPath = "Supaplex (1991).adf", script, dump;
     long frames = 1000, every = 0;
-    bool keepGoing = false;
+    bool keepGoing = false, clearSkips = false;
     long seed = -1, level = 0;
-    std::string coverage;
+    std::string coverage, autopilot;
+    struct Poke { long frame; uint32_t addr; uint16_t value; };
+    std::vector<Poke> pokes;
+    std::vector<uint32_t> reportPcs;
     uint32_t watch = 0;
     long watchFrom = 0, traceFrame = -1;
     for (int i = 1; i < argc; i++) {
@@ -106,6 +115,24 @@ int main(int argc, char** argv) {
         else if (a == "--random") seed = std::atol(next().c_str());
         else if (a == "--level") level = std::atol(next().c_str());
         else if (a == "--coverage") coverage = next();
+        else if (a == "--autopilot") autopilot = next();
+        else if (a == "--clear-skips") clearSkips = true;
+        else if (a == "--report") {
+            std::string list = next();
+            size_t q = 0;
+            while (q < list.size()) {
+                size_t e = list.find(',', q);
+                if (e == std::string::npos) e = list.size();
+                reportPcs.push_back(uint32_t(std::strtoul(list.substr(q, e - q).c_str(), nullptr, 16)));
+                q = e + 1;
+            }
+        } else if (a == "--poke") {
+            Poke pk;
+            pk.frame = std::atol(next().c_str());
+            pk.addr = uint32_t(std::strtoul(next().c_str(), nullptr, 16));
+            pk.value = uint16_t(std::strtoul(next().c_str(), nullptr, 16));
+            pokes.push_back(pk);
+        }
         else if (a == "--watch") watch = std::strtoul(next().c_str(), nullptr, 16);
         else if (a == "--watch-from") watchFrom = std::atol(next().c_str());
         else if (a == "--trace-frame") traceFrame = std::atol(next().c_str());
@@ -117,6 +144,7 @@ int main(int argc, char** argv) {
 
     RefEmu ref(adf);
     ref.bootIntro();
+    for (uint32_t pc : reportPcs) ref.reportPcs.insert(pc);
     PortRunner port;
     port.start(adf);
 
@@ -128,7 +156,64 @@ int main(int argc, char** argv) {
     auto poke16 = [&](uint32_t a, uint16_t v) {
         for (amiga::Amiga* m : {&ref.hw, &port.hw}) { m->chip()[a] = uint8_t(v >> 8); m->chip()[a + 1] = uint8_t(v); }
     };
+    // autopilot program
+    struct Step { char kind; int x, y; };
+    std::vector<Step> prog;
+    if (!autopilot.empty()) {
+        std::ifstream ap(autopilot);
+        std::string line;
+        while (std::getline(ap, line)) {
+            if (line.empty() || line[0] == '#') continue;
+            std::istringstream ls(line);
+            std::string w;
+            ls >> w;
+            if (w == "fire") { int n = 0; ls >> n; prog.push_back({'F', n, 0}); }
+            else if (w == "wait") { int n = 0; ls >> n; prog.push_back({'W', n, 0}); }
+            else { Step st{'C', std::atoi(w.c_str()), 0}; ls >> st.y; prog.push_back(st); }
+        }
+    }
+    size_t pc = 0;
+    int stepFrames = 0;
     for (long f = 0; f < frames; f++) {
+        if (std::getenv("AP_TRACE") && f >= 1040 && f < 1100) {
+            uint32_t cell = ref.hw.rd32(0x1131E);
+            int idx = int((cell - 0x11928) / 2);
+            std::printf("f%ld cell %d,%d moving %04X step %04X dir %04X in %04X scr %d,%d view %d,%d\n", f, idx % 60, idx / 60,
+                        ref.hw.chipW(0x11348), ref.hw.chipW(0x11388), ref.hw.chipW(0x118FE), ref.hw.chipW(0x11924),
+                        ref.hw.chipW(0x1133C), ref.hw.chipW(0x1133E), ref.hw.chipW(0x11340), ref.hw.chipW(0x11342));
+        }
+        if (!prog.empty() && f >= 760 && pc < prog.size()) {
+            static bool u = false, d = false, l = false, r = false;
+            bool fire = false;
+            Step& st = prog[pc];
+            if (st.kind == 'W') {
+                u = d = l = r = false;
+                if (++stepFrames >= st.x) { pc++; stepFrames = 0; }
+            } else if (st.kind == 'F') {
+                u = d = l = r = false;
+                fire = true;
+                if (++stepFrames >= st.x) { pc++; stepFrames = 0; }
+            } else {
+                // Murphy's cell = screen cell + top-left visible cell (exact at the end of a step)
+                int mx = int16_t(ref.hw.chipW(0x1133C)) + int16_t(ref.hw.chipW(0x11340));
+                int my = int16_t(ref.hw.chipW(0x1133E)) + int16_t(ref.hw.chipW(0x11342));
+                // waypoints reached (also mid-step) are consumed every frame
+                for (size_t k = pc; k < prog.size() && k < pc + 3; k++) {
+                    if (prog[k].kind != 'C') break;
+                    if (prog[k].x == mx && prog[k].y == my) { pc = k + 1; break; }
+                }
+                if (std::getenv("AP_DEBUG") && f % 20 == 0) std::printf("ap f%ld cell %d,%d next %zu\n", f, mx, my, pc);
+                if (pc < prog.size() && prog[pc].kind == 'C') {
+                    // the game reads the joystick only when a step ends, so the
+                    // direction to the next waypoint can be held all the time
+                    const Step& t = prog[pc];
+                    u = t.y < my; d = t.y > my; l = t.x < mx; r = t.x > mx;
+                    if ((u || d) && (l || r)) l = r = false;  // one axis at a time
+                }
+            }
+            ref.hw.setJoystick(u, d, l, r, fire);
+            port.hw.setJoystick(u, d, l, r, fire);
+        }
         if (watch && f == watchFrom) {
             ref.watchLo = watch; ref.watchHi = watch + 2;
 #ifdef SUPAPLEX_TRACE
@@ -143,10 +228,16 @@ int main(int argc, char** argv) {
         }
         in.apply(uint64_t(f), ref.hw);
         in.apply(uint64_t(f), port.hw);
+        for (const Poke& pk : pokes)
+            if (pk.frame == f) poke16(pk.addr, pk.value);
         if (level > 0 && f == 690) {
             // current player record ($113D6): +$14 = highest level reached; $140DC = selected level - 1
             uint32_t rec = ref.hw.rd32(0x113D6);
             if (rec) poke16(rec + 0x14, 111);
+            if (rec && clearSkips) {  // no skipped levels: completing 111 wins the game
+                poke16(rec + 0x00, 0x0100);
+                poke16(rec + 0x02, 0); poke16(rec + 0x04, 0); poke16(rec + 0x06, 0);
+            }
             poke16(0x140DC, uint16_t(level - 1));
         }
         if (seed >= 0 && f >= 700) {

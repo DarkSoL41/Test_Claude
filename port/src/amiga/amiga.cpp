@@ -502,6 +502,7 @@ void Amiga::deliverKey() {
     ciaaIcr_ |= 0x08;
     if (ciaaIcrMask_ & 0x08) {
         intreq_ |= 0x0008;  // PORTS
+        updateIrqLevel();
     }
 }
 
@@ -531,7 +532,7 @@ uint8_t Amiga::ciaReadValue(uint32_t a) {
             ciaaIcr_ |= 0x01;
             ciaaTa_ = ciaaTaLatch_;
             if (ciaaCra_ & 0x08) ciaaCra_ &= ~1;  // one-shot
-            if (ciaaIcrMask_ & 0x01) { intreq_ |= 0x0008; }
+            if (ciaaIcrMask_ & 0x01) { intreq_ |= 0x0008; updateIrqLevel(); }
         } else {
             ciaaTa_ -= 64;
         }

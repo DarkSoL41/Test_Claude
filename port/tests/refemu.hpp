@@ -4,6 +4,7 @@
 #pragma once
 #include <cstdint>
 #include <functional>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -40,6 +41,7 @@ public:
     void checkWatch(uint32_t a, uint32_t v, int n);
 
     std::FILE* pcTrace = nullptr;  // debugging: every executed PC
+    std::set<uint32_t> reportPcs;  // debugging: report when these addresses execute
 
     // code coverage: executed instruction addresses (chip RAM range)
     std::vector<uint8_t> executed = std::vector<uint8_t>(0x80000, 0);

@@ -29,7 +29,15 @@ class Script:
     def add(self, s):
         self.lines.append('%d %s' % (self.f, s))
 
+    def home(self):
+        # push the pointer into the top-left corner, where the game clamps it
+        for _ in range(8):
+            self.add('mouse -90 -90 0 0')
+            self.f += 2
+        self.cx = self.cy = 0
+
     def move_to(self, hx, y):
+        self.home()
         tx, ty = hx, 2 * y
         while self.cx != tx or self.cy != ty:
             dx = max(-100, min(100, tx - self.cx))
@@ -71,9 +79,8 @@ def main():
         s.zone(i, after=30)
     s.zone(9, after=150)        # statistics
     s.click(after=80)           # leave the statistics screen
-    s.zone(12, after=150)       # gfx tutor
-    for _ in range(4):
-        s.click(after=80)
+    s.zone(12, after=150)       # gfx tutor (one click leaves it)
+    s.click(after=80)
     s.zone(6, after=60)         # new player: type a name
     for k in ('T', 'E', 'S', 'T', 'BS', 'Z', 'RETURN'):
         s.key(k)
@@ -82,7 +89,6 @@ def main():
     s.zone(11, after=60)        # ok
     s.zone(8, after=100)        # skip level
     s.click(after=80)
-    s.zone(10, after=60)
     s.zone(14, after=60)        # 1/2 players
     s.zone(14, after=60)
     s.zone(13, after=2500)      # demo
@@ -90,6 +96,8 @@ def main():
     s.click(after=200)
     s.zone(7, after=100)        # delete player
     s.click(after=100)
+    s.zone(10, after=600)       # zone 10 starts the game
+    s.click(after=200)          # left button in a level: give up
     s.fire(after=600)           # start the selected level
     s.lines.append('# end %d' % s.f)
     out = sys.argv[1] if len(sys.argv) > 1 else 'port/tests/data/menu_tour.txt'
