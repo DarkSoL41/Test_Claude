@@ -326,4 +326,16 @@ void setSR(uint32_t v);  // may unmask pending interrupts
 // dispatch of computed jumps/calls (generated)
 void callAddress(uint32_t addr);
 
+// bsr/jsr: the return address goes on the emulated stack like on the 68000
+inline void call(void (*routine)(), uint32_t returnAddress) {
+    push32(returnAddress);
+    routine();
+    A7 += 4;
+}
+inline void callIndirect(uint32_t target, uint32_t returnAddress) {
+    push32(returnAddress);
+    callAddress(target);
+    A7 += 4;
+}
+
 }  // namespace game

@@ -5,7 +5,7 @@
 namespace game {
 
 void intro_main() {
-    push32(0x54006); intro_show_pictures(); A7 += 4;  // 054000  jsr $540a4.l, $540a4
+    call(intro_show_pictures, 0x54006);  // 054000  jsr $540a4.l
     A6 = 0xDFF000;  // 054006  lea.l $dff000.l, a6
     A0 = 0x54672;  // 05400C  lea.l $54672.l, a0
     wr32(A6 + 0x80, A0);  // 054012  move.l a0, 128(a6)
@@ -18,13 +18,13 @@ L_05402A:
     {  wr16(A0, logic<2>((D0 & 0xFFFF))); A0 += 2; }  // 05402A  move.w d0, (a0)+
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_05402A;  // 05402C  dbf.w d7, $5402a
     A0 = 0x78000;  // 054030  movea.l #$78000, a0
-    push32(0x5403A); native_diskInit(); A7 += 4;  // 054036  bsr $541ae
+    call(native_diskInit, 0x5403A);  // 054036  bsr $541ae
     D0 = 0x0;  // 05403A  moveq.l #$0, d0
     setW(D1, 0x82);  // 05403C  move.w #$82, d1
     setW(D2, logic<2>(0x5C));  // 054040  move.w #$5c, d2
     A0 = 0x7E00;  // 054044  movea.l #$7e00, a0
-    push32(0x54050); native_loadFile(); A7 += 4;  // 05404A  jsr $54264.l, $54264
-    push32(0x54056); native_diskMotorOff(); A7 += 4;  // 054050  jsr $54212.l, $54212
+    call(native_loadFile, 0x54050);  // 05404A  jsr $54264.l
+    call(native_diskMotorOff, 0x54056);  // 054050  jsr $54212.l
     wr8(0xBFD100, 0xFD);  // 054056  move.b #$fd, $bfd100.l
     ; // 05405E  nop 
     ; // 054060  nop 
@@ -39,45 +39,45 @@ L_05406E:
     ; // 05408A  nop 
     ; // 05408C  nop 
 L_05408E:
-    btst(rd8(0xBFEE01), 0);  // 05408E  btst.b #$0, $bfee01.l
-    if (CC_NE) goto L_05408E;  // 054096  bne $5408e
+    // 05408E  btst.b #$0, $bfee01.l
+    if ((rd8(0xBFEE01) & (1u << 0))) goto L_05408E;  // 054096  bne $5408e
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_05406E;  // 054098  dbf.w d0, $5406e
     A0 = 0x7E00;  // 05409C  movea.l #$7e00, a0
     callAddress(A0); return;  // 0540A2  jmp (a0)
 }
 
 void intro_show_pictures() {
-    push32(0x540A8); intro_copy_palettes(); A7 += 4;  // 0540A4  bsr $5411a
-    push32(0x540AC); intro_set_bitplanes(); A7 += 4;  // 0540A8  bsr $5414c
+    call(intro_copy_palettes, 0x540A8);  // 0540A4  bsr $5411a
+    call(intro_set_bitplanes, 0x540AC);  // 0540A8  bsr $5414c
     A5 = 0xDFF000;  // 0540AC  movea.l #$dff000, a5
     wr32(A5 + 0x80, 0x54676);  // 0540B2  move.l #$54676, 128(a5)
     wr16(A5 + 0x88, (D0 & 0xFFFF));  // 0540BA  move.w d0, 136(a5)
     wr16(A5 + 0x96, 0x8380);  // 0540BE  move.w #$8380, 150(a5)
     setW(D7, 0xFF);  // 0540C4  move.w #$ff, d7
 L_0540C8:
-    cmp<1>(0x64, rd8(A5 + 0x6));  // 0540C8  cmpi.b #$64, 6(a5)
-    if (CC_NE) goto L_0540C8;  // 0540CE  bne $540c8
+    // 0540C8  cmpi.b #$64, 6(a5)
+    if (rd8(A5 + 0x6) != 0x64) goto L_0540C8;  // 0540CE  bne $540c8
 L_0540D0:
-    cmp<1>(0x64, rd8(A5 + 0x6));  // 0540D0  cmpi.b #$64, 6(a5)
-    if (CC_EQ) goto L_0540D0;  // 0540D6  beq $540d0
+    // 0540D0  cmpi.b #$64, 6(a5)
+    if (rd8(A5 + 0x6) == 0x64) goto L_0540D0;  // 0540D6  beq $540d0
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_0540C8;  // 0540D8  dbf.w d7, $540c8
     wr32(A5 + 0x80, 0x54706);  // 0540DC  move.l #$54706, 128(a5)
     D7 = 0x64;  // 0540E4  moveq.l #$64, d7
 L_0540E6:
-    cmp<1>(0x64, rd8(A5 + 0x6));  // 0540E6  cmpi.b #$64, 6(a5)
-    if (CC_NE) goto L_0540E6;  // 0540EC  bne $540e6
+    // 0540E6  cmpi.b #$64, 6(a5)
+    if (rd8(A5 + 0x6) != 0x64) goto L_0540E6;  // 0540EC  bne $540e6
 L_0540EE:
-    cmp<1>(0x64, rd8(A5 + 0x6));  // 0540EE  cmpi.b #$64, 6(a5)
-    if (CC_EQ) goto L_0540EE;  // 0540F4  beq $540ee
+    // 0540EE  cmpi.b #$64, 6(a5)
+    if (rd8(A5 + 0x6) == 0x64) goto L_0540EE;  // 0540F4  beq $540ee
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_0540E6;  // 0540F6  dbf.w d7, $540e6
     wr32(A5 + 0x80, 0x547D6);  // 0540FA  move.l #$547d6, 128(a5)
     D7 = 0x64;  // 054102  moveq.l #$64, d7
 L_054104:
-    cmp<1>(0x64, rd8(A5 + 0x6));  // 054104  cmpi.b #$64, 6(a5)
-    if (CC_NE) goto L_054104;  // 05410A  bne $54104
+    // 054104  cmpi.b #$64, 6(a5)
+    if (rd8(A5 + 0x6) != 0x64) goto L_054104;  // 05410A  bne $54104
 L_05410C:
-    cmp<1>(0x64, rd8(A5 + 0x6));  // 05410C  cmpi.b #$64, 6(a5)
-    if (CC_EQ) goto L_05410C;  // 054112  beq $5410c
+    // 05410C  cmpi.b #$64, 6(a5)
+    if (rd8(A5 + 0x6) == 0x64) goto L_05410C;  // 054112  beq $5410c
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_054104;  // 054114  dbf.w d7, $54104
     return;  // 054118  rts 
 }

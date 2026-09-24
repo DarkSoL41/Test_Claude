@@ -13,25 +13,25 @@ main_entry:
         bsr     load_graphics_and_hiscores         ; 007E0E 6100064c             
         bsr     clear_irq_vectors                  ; 007E12 61000612             
         bsr     unpack_hiscore_file                ; 007E16 61000b72             
-        bsr     sub_009366                         ; 007E1A 6100154a             
+        bsr     set_menu_bitplanes                 ; 007E1A 6100154a             
         jsr     music_start                        ; 007E1E 4eb900010aaa         
         bsr     init_mouse_counters                ; 007E24 6100139e             
-        bsr     sub_00AAA8                         ; 007E28 61002c7e             
-        bsr     sub_0093EA                         ; 007E2C 610015bc             
-        bsr     sub_0094D6                         ; 007E30 610016a4             
-        bsr     sub_00951A                         ; 007E34 610016e4             
-        bsr     sub_0095B8                         ; 007E38 6100177e             
-        bsr     sub_00975C                         ; 007E3C 6100191e             
+        bsr     sort_positions                     ; 007E28 61002c7e             
+        bsr     draw_positions_list                ; 007E2C 610015bc             
+        bsr     draw_positions_scroll              ; 007E30 610016a4             
+        bsr     draw_player_list                   ; 007E34 610016e4             
+        bsr     draw_level_list                    ; 007E38 6100177e             
+        bsr     draw_hall_of_fame                  ; 007E3C 6100191e             
 L_007E40:
         bsr     main_menu                          ; 007E40 61001b7e             
         move.w  #$8040, $96(a5)                    ; 007E44 3b7c80400096         
         bsr     wait_blitter                       ; 007E4A 61007a5c             
         move.l  #$FFFFFFFF, $44(a5)                ; 007E4E 2b7cffffffff0044     
         bsr     convert_tile_sheets                ; 007E56 61000caa             
-        bsr     sub_0089CA                         ; 007E5A 61000b6e             
+        bsr     set_game_palette                   ; 007E5A 61000b6e             
         bsr     level_bytes_to_map                 ; 007E5E 61000d68             
         bsr     init_scroll_position               ; 007E62 61000eb8             
-        bsr     sub_008EE8                         ; 007E66 61001080             
+        bsr     set_panel_bitplanes                ; 007E66 61001080             
         bsr     draw_whole_level                   ; 007E6A 6100339e             
         bsr     build_object_lists                 ; 007E6E 61000d82             
         bsr     convert_special_tiles              ; 007E72 61000e10             
@@ -40,14 +40,14 @@ L_007E40:
         bsr     scan_zonks_normal                  ; 007E7E 6100654a             
         bsr     scan_infotrons                     ; 007E82 61006902             
         bsr     init_gfx_pointers                  ; 007E86 6100109a             
-        bsr     sub_009070                         ; 007E8A 610011e4             
-        bsr     sub_009152                         ; 007E8E 610012c2             
-        bsr     sub_009184                         ; 007E92 610012f0             
-        bsr     sub_009480                         ; 007E96 610015e8             
-        jsr     sub_00FF84                         ; 007E9A 4eb90000ff84         
-        jsr     sub_00FF9C                         ; 007EA0 4eb90000ff9c         
-        jsr     sub_01002E                         ; 007EA6 4eb90001002e         
-        bsr     sub_008F12                         ; 007EAC 61001064             
+        bsr     build_murphy_anim_tables           ; 007E8A 610011e4             
+        bsr     draw_level_title                   ; 007E8E 610012c2             
+        bsr     draw_player_name                   ; 007E92 610012f0             
+        bsr     draw_level_number                  ; 007E96 610015e8             
+        jsr     init_infotrons_needed              ; 007E9A 4eb90000ff84         
+        jsr     update_infotron_counter            ; 007EA0 4eb90000ff9c         
+        jsr     reset_panel_clock                  ; 007EA6 4eb90001002e         
+        bsr     start_game_copper                  ; 007EAC 61001064             
         clr.w   $1133A                             ; 007EB0 42790001133a         
         move.w  #$800F, $96(a5)                    ; 007EB6 3b7c800f0096         
         bsr     wait_blitter                       ; 007EBC 610079ea             
@@ -175,11 +175,11 @@ L_008088:
         tst.l   v_infotrons_left                   ; 0080D0 4ab9000111cc         
         bne     L_0080FA                           ; 0080D6 6622                 
         lea     $14A72, a2                         ; 0080D8 45f900014a72         
-        bsr     sub_00B2A0                         ; 0080DE 610031c0             
+        bsr     draw_text                          ; 0080DE 610031c0             
         lea     $14ADC, a2                         ; 0080E2 45f900014adc         
-        bsr     sub_00B2A0                         ; 0080E8 610031b6             
+        bsr     draw_text                          ; 0080E8 610031b6             
         lea     $14ABC, a2                         ; 0080EC 45f900014abc         
-        bsr     sub_00B2A0                         ; 0080F2 610031ac             
+        bsr     draw_text                          ; 0080F2 610031ac             
         bra     L_0081A6                           ; 0080F6 600000ae             
 L_0080FA:
         moveq   #0, d1                             ; 0080FA 7200                 
@@ -188,7 +188,7 @@ L_0080FA:
         sub.l   v_infotrons_left, d1               ; 008104 92b9000111cc         
         lea     $111C2, a6                         ; 00810A 4df9000111c2         
         move.l  d1, d4                             ; 008110 2801                 
-        jsr     sub_0100CC                         ; 008112 4eb9000100cc         
+        jsr     number_to_decimal                  ; 008112 4eb9000100cc         
         move.b  $111C9, d0                         ; 008118 1039000111c9         
         move.b  $111CA, d1                         ; 00811E 1239000111ca         
         cmpi.b  #$30, d0                           ; 008124 0c000030             
@@ -203,7 +203,7 @@ L_008134:
         move.b  $111CB, $14A99                     ; 008140 13f9000111cb00014a99 
         lea     $111C2, a6                         ; 00814A 4df9000111c2         
         move.l  (a7)+, d4                          ; 008150 281f                 
-        bsr     sub_0100CC                         ; 008152 61007f78             
+        bsr     number_to_decimal                  ; 008152 61007f78             
         move.b  $111C9, d0                         ; 008156 1039000111c9         
         move.b  $111CA, d1                         ; 00815C 1239000111ca         
         cmpi.b  #$30, d0                           ; 008162 0c000030             
@@ -217,11 +217,11 @@ L_008172:
         move.b  d1, $14AA8                         ; 008178 13c100014aa8         
         move.b  $111CB, $14AA9                     ; 00817E 13f9000111cb00014aa9 
         lea     $14A72, a2                         ; 008188 45f900014a72         
-        bsr     sub_00B2A0                         ; 00818E 61003110             
+        bsr     draw_text                          ; 00818E 61003110             
         lea     $14A80, a2                         ; 008192 45f900014a80         
-        bsr     sub_00B2A0                         ; 008198 61003106             
+        bsr     draw_text                          ; 008198 61003106             
         lea     $14ABC, a2                         ; 00819C 45f900014abc         
-        bsr     sub_00B2A0                         ; 0081A2 610030fc             
+        bsr     draw_text                          ; 0081A2 610030fc             
 L_0081A6:
         move.w  #$258, d7                          ; 0081A6 3e3c0258             
 L_0081AA:
@@ -272,17 +272,17 @@ L_008232:
         clr.l   $112FC                             ; 00826A 42b9000112fc         
         tst.w   $2(a0)                             ; 008270 4a680002             
         bne     L_008348                           ; 008274 660000d2             
-        bsr     sub_0083EE                         ; 008278 61000174             
+        bsr     game_completed                     ; 008278 61000174             
         bra     L_00829C                           ; 00827C 601e                 
 L_00827E:
         cmpi.w  #$6F, v_selected_level             ; 00827E 0c79006f000140dc     
         bne     L_00828E                           ; 008286 6606                 
-        bsr     sub_0083EE                         ; 008288 61000164             
+        bsr     game_completed                     ; 008288 61000164             
         bra     L_00829C                           ; 00828C 600e                 
 L_00828E:
         cmpi.w  #$6E, v_selected_level             ; 00828E 0c79006e000140dc     
         bne     L_00829C                           ; 008296 6604                 
-        bsr     sub_0083B0                         ; 008298 61000116             
+        bsr     level_110_completed                ; 008298 61000116             
 L_00829C:
         addq.w  #2, v_selected_level               ; 00829C 5479000140dc         
         movea.l v_player_record, a0                ; 0082A2 2079000113d6         
@@ -322,38 +322,38 @@ L_00832C:
         tst.w   $2(a0)                             ; 008334 4a680002             
         bne     L_008342                           ; 008338 6608                 
         subq.w  #1, v_selected_level               ; 00833A 5379000140dc         
-        bsr     sub_0083B0                         ; 008340 616e                 
+        bsr     level_110_completed                ; 008340 616e                 
 L_008342:
         subq.w  #1, v_selected_level               ; 008342 5379000140dc         
 L_008348:
         move.b  #2, $1B7C0                         ; 008348 13fc00020001b7c0     
         move.b  #2, $1B890                         ; 008350 13fc00020001b890     
-        bsr     sub_009366                         ; 008358 6100100c             
+        bsr     set_menu_bitplanes                 ; 008358 6100100c             
         tst.w   $112DE                             ; 00835C 4a79000112de         
         bne     L_008370                           ; 008362 660c                 
         tst.b   $1140A                             ; 008364 4a390001140a         
         bne     L_008370                           ; 00836A 6604                 
-        bsr     sub_00AA3E                         ; 00836C 610026d0             
+        bsr     add_level_time_to_player           ; 00836C 610026d0             
 L_008370:
-        bsr     sub_00AD10                         ; 008370 6100299e             
-        bsr     sub_00AAA8                         ; 008374 61002732             
-        bsr     sub_00ABBE                         ; 008378 61002844             
-        bsr     sub_0093EA                         ; 00837C 6100106c             
-        bsr     sub_00B3DA                         ; 008380 61003058             
+        bsr     draw_player_stats                  ; 008370 6100299e             
+        bsr     sort_positions                     ; 008374 61002732             
+        bsr     format_positions                   ; 008378 61002844             
+        bsr     draw_positions_list                ; 00837C 6100106c             
+        bsr     reset_level_state                  ; 008380 61003058             
         bsr     init_mouse_counters                ; 008384 61000e3e             
-        bsr     sub_00AAA8                         ; 008388 6100271e             
-        bsr     sub_0093EA                         ; 00838C 6100105c             
-        bsr     sub_0094D6                         ; 008390 61001144             
-        bsr     sub_00951A                         ; 008394 61001184             
-        bsr     sub_00961E                         ; 008398 61001284             
-        bsr     sub_00975C                         ; 00839C 610013be             
-        bsr     sub_00ABBE                         ; 0083A0 6100281c             
-        bsr     sub_00B3DA                         ; 0083A4 61003034             
+        bsr     sort_positions                     ; 008388 6100271e             
+        bsr     draw_positions_list                ; 00838C 6100105c             
+        bsr     draw_positions_scroll              ; 008390 61001144             
+        bsr     draw_player_list                   ; 008394 61001184             
+        bsr     draw_level_list_from_player        ; 008398 61001284             
+        bsr     draw_hall_of_fame                  ; 00839C 610013be             
+        bsr     format_positions                   ; 0083A0 6100281c             
+        bsr     reset_level_state                  ; 0083A4 61003034             
         bsr     save_hiscores                      ; 0083A8 61002cce             
         bra     L_007E40                           ; 0083AC 6000fa92             
 
 ; ----------------------------------------------------------------------------
-sub_0083B0:
+level_110_completed:
         movea.l v_player_record, a0                ; 0083B0 2079000113d6         
         tst.w   $2(a0)                             ; 0083B6 4a680002             
         beq     L_0083CA                           ; 0083BA 670e                 
@@ -364,17 +364,17 @@ L_0083CA:
         addq.w  #1, v_selected_level               ; 0083CA 5279000140dc         
         move.b  #$F, $1(a0)                        ; 0083D0 117c000f0001         
         move.w  #$3E7, $14(a0)                     ; 0083D6 317c03e70014         
-        bsr     sub_00AA3E                         ; 0083DC 61002660             
-        bsr     sub_00AEE2                         ; 0083E0 61002b00             
+        bsr     add_level_time_to_player           ; 0083DC 61002660             
+        bsr     update_hall_of_fame                ; 0083E0 61002b00             
         move.w  #1, $112DE                         ; 0083E4 33fc0001000112de     
         rts                                        ; 0083EC 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0083EE:
+game_completed:
         move.b  #$F, $1(a0)                        ; 0083EE 117c000f0001         
         move.w  #$3E7, $14(a0)                     ; 0083F4 317c03e70014         
-        bsr     sub_00AA3E                         ; 0083FA 61002642             
-        bsr     sub_00AEE2                         ; 0083FE 61002ae2             
+        bsr     add_level_time_to_player           ; 0083FA 61002642             
+        bsr     update_hall_of_fame                ; 0083FE 61002ae2             
         move.w  #1, $112DE                         ; 008402 33fc0001000112de     
         rts                                        ; 00840A 4e75                 
 
@@ -555,7 +555,7 @@ copy_bytes:
         rts                                        ; 0089C8 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0089CA:
+set_game_palette:
         tst.w   $1BD8E                             ; 0089CA 4a790001bd8e         
         bne     L_0089E8                           ; 0089D0 6616                 
         movea.l $1B5A8, a0                         ; 0089D2 20790001b5a8         
@@ -584,7 +584,7 @@ L_008A18:
         rts                                        ; 008A20 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_008A22:
+show_end_screen:
         bsr     clear_level_bitmap_5000            ; 008A22 610000c8             
         move.l  v_level_bitmap_ptr, d0             ; 008A26 20390001b5e8         
         lea     $1BBA6, a1                         ; 008A2C 43f90001bba6         
@@ -596,21 +596,21 @@ sub_008A22:
         move.l  $1B5F8, $1B604                     ; 008A4C 23f90001b5f80001b604 
         clr.w   $1B608                             ; 008A56 42790001b608         
         lea     $1451A, a2                         ; 008A5C 45f90001451a         
-        bsr     sub_00B2A0                         ; 008A62 6100283c             
+        bsr     draw_text                          ; 008A62 6100283c             
         lea     $14530, a2                         ; 008A66 45f900014530         
-        bsr     sub_00B2A0                         ; 008A6C 61002832             
+        bsr     draw_text                          ; 008A6C 61002832             
         lea     $14564, a2                         ; 008A70 45f900014564         
-        bsr     sub_00B2A0                         ; 008A76 61002828             
+        bsr     draw_text                          ; 008A76 61002828             
         lea     $145B6, a2                         ; 008A7A 45f9000145b6         
-        bsr     sub_00B2A0                         ; 008A80 6100281e             
+        bsr     draw_text                          ; 008A80 6100281e             
         lea     $145EC, a2                         ; 008A84 45f9000145ec         
-        bsr     sub_00B2A0                         ; 008A8A 61002814             
+        bsr     draw_text                          ; 008A8A 61002814             
         lea     $14622, a2                         ; 008A8E 45f900014622         
-        bsr     sub_00B2A0                         ; 008A94 6100280a             
+        bsr     draw_text                          ; 008A94 6100280a             
         lea     $14650, a2                         ; 008A98 45f900014650         
-        bsr     sub_00B2A0                         ; 008A9E 61002800             
+        bsr     draw_text                          ; 008A9E 61002800             
         lea     $14680, a2                         ; 008AA2 45f900014680         
-        bsr     sub_00B2A0                         ; 008AA8 610027f6             
+        bsr     draw_text                          ; 008AA8 610027f6             
         bsr     wait_button_click                  ; 008AAC 6100000a             
         clr.w   $1BCE4                             ; 008AB0 42790001bce4         
         rts                                        ; 008AB6 4e75                 
@@ -974,7 +974,7 @@ L_008EC0:
         rts                                        ; 008EE6 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_008EE8:
+set_panel_bitplanes:
         lea     $1B7C2, a0                         ; 008EE8 41f90001b7c2         
         move.w  #3, d0                             ; 008EEE 303c0003             
         move.l  $1B5C0, d1                         ; 008EF2 22390001b5c0         
@@ -989,7 +989,7 @@ L_008EF8:
         rts                                        ; 008F10 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_008F12:
+start_game_copper:
         move.l  #$1B6BE, $80(a5)                   ; 008F12 2b7c0001b6be0080     
         move.w  #$4000, $9A(a5)                    ; 008F1A 3b7c4000009a         
         rts                                        ; 008F20 4e75                 
@@ -1033,64 +1033,64 @@ init_gfx_pointers:
         rts                                        ; 00906E 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009070:
+build_murphy_anim_tables:
         lea     $11578, a1                         ; 009070 43f900011578         
         lea     $11598, a2                         ; 009076 45f900011598         
         move.w  #7, d7                             ; 00907C 3e3c0007             
-        bsr     sub_009140                         ; 009080 610000be             
+        bsr     copy_frame_pointers                ; 009080 610000be             
         lea     $115B8, a1                         ; 009084 43f9000115b8         
         lea     $115D8, a2                         ; 00908A 45f9000115d8         
         move.w  #7, d7                             ; 009090 3e3c0007             
-        bsr     sub_009140                         ; 009094 610000aa             
+        bsr     copy_frame_pointers                ; 009094 610000aa             
         lea     $115F8, a1                         ; 009098 43f9000115f8         
         lea     $11618, a2                         ; 00909E 45f900011618         
         move.w  #7, d7                             ; 0090A4 3e3c0007             
-        bsr     sub_009140                         ; 0090A8 61000096             
+        bsr     copy_frame_pointers                ; 0090A8 61000096             
         lea     $11638, a1                         ; 0090AC 43f900011638         
         lea     $11658, a2                         ; 0090B2 45f900011658         
         move.w  #7, d7                             ; 0090B8 3e3c0007             
-        bsr     sub_009140                         ; 0090BC 61000082             
+        bsr     copy_frame_pointers                ; 0090BC 61000082             
         lea     $11678, a1                         ; 0090C0 43f900011678         
         lea     $11698, a2                         ; 0090C6 45f900011698         
         move.w  #7, d7                             ; 0090CC 3e3c0007             
-        bsr     sub_009140                         ; 0090D0 616e                 
+        bsr     copy_frame_pointers                ; 0090D0 616e                 
         lea     $116B8, a1                         ; 0090D2 43f9000116b8         
         lea     $116D8, a2                         ; 0090D8 45f9000116d8         
         move.w  #7, d7                             ; 0090DE 3e3c0007             
-        bsr     sub_009140                         ; 0090E2 615c                 
+        bsr     copy_frame_pointers                ; 0090E2 615c                 
         lea     $116F8, a1                         ; 0090E4 43f9000116f8         
         lea     $11718, a2                         ; 0090EA 45f900011718         
         move.w  #7, d7                             ; 0090F0 3e3c0007             
-        bsr     sub_009140                         ; 0090F4 614a                 
+        bsr     copy_frame_pointers                ; 0090F4 614a                 
         lea     $11738, a1                         ; 0090F6 43f900011738         
         lea     $11758, a2                         ; 0090FC 45f900011758         
         move.w  #7, d7                             ; 009102 3e3c0007             
-        bsr     sub_009140                         ; 009106 6138                 
+        bsr     copy_frame_pointers                ; 009106 6138                 
         lea     $11778, a1                         ; 009108 43f900011778         
         lea     $11798, a2                         ; 00910E 45f900011798         
         move.w  #7, d7                             ; 009114 3e3c0007             
-        bsr     sub_009140                         ; 009118 6126                 
+        bsr     copy_frame_pointers                ; 009118 6126                 
         lea     $1183E, a1                         ; 00911A 43f90001183e         
         lea     $1180E, a2                         ; 009120 45f90001180e         
         move.w  #$B, d7                            ; 009126 3e3c000b             
-        bsr     sub_009140                         ; 00912A 6114                 
+        bsr     copy_frame_pointers                ; 00912A 6114                 
         lea     $1189E, a1                         ; 00912C 43f90001189e         
         lea     $1186E, a2                         ; 009132 45f90001186e         
         move.w  #$B, d7                            ; 009138 3e3c000b             
-        bsr     sub_009140                         ; 00913C 6102                 
+        bsr     copy_frame_pointers                ; 00913C 6102                 
         rts                                        ; 00913E 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009140:
+copy_frame_pointers:
         lea     v_gfx_frame_ptrs, a0               ; 009140 41f90001a85e         
         move.l  (a1)+, d0                          ; 009146 2019                 
         adda.l  d0, a0                             ; 009148 d1c0                 
         move.l  (a0), (a2)+                        ; 00914A 24d0                 
-        dbf     d7, sub_009140                     ; 00914C 51cffff2             
+        dbf     d7, copy_frame_pointers            ; 00914C 51cffff2             
         rts                                        ; 009150 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009152:
+draw_level_title:
         lea     $12A0E, a0                         ; 009152 41f900012a0e         
         lea     $1439C, a1                         ; 009158 43f90001439c         
         moveq   #$16, d0                           ; 00915E 7016                 
@@ -1100,11 +1100,11 @@ L_009160:
         lea     $14398, a2                         ; 009166 45f900014398         
         move.l  $1B5C0, $1B604                     ; 00916C 23f90001b5c00001b604 
         move.w  #1, $1B608                         ; 009176 33fc00010001b608     
-        bsr     sub_00B2A0                         ; 00917E 61002120             
+        bsr     draw_text                          ; 00917E 61002120             
         rts                                        ; 009182 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009184:
+draw_player_name:
         movea.l v_player_record, a0                ; 009184 2079000113d6         
         lea     $1141F, a1                         ; 00918A 43f90001141f         
         move.w  #7, d0                             ; 009190 303c0007             
@@ -1116,7 +1116,7 @@ L_009196:
         move.l  $1B5C0, $1B604                     ; 0091A2 23f90001b5c00001b604 
         subi.l  #$252, $1B604                      ; 0091AC 04b9000002520001b604 
         move.w  #1, $1B608                         ; 0091B6 33fc00010001b608     
-        bsr     sub_00B2A0                         ; 0091BE 610020e0             
+        bsr     draw_text                          ; 0091BE 610020e0             
         rts                                        ; 0091C2 4e75                 
 
 ; ----------------------------------------------------------------------------
@@ -1244,7 +1244,7 @@ L_009344:
         rts                                        ; 009364 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009366:
+set_menu_bitplanes:
         lea     $1B8FE, a0                         ; 009366 41f90001b8fe         
         move.l  $1B5F8, d0                         ; 00936C 20390001b5f8         
         move.w  #2, d7                             ; 009372 3e3c0002             
@@ -1262,7 +1262,7 @@ L_009376:
         moveq   #0, d0                             ; 0093A2 7000                 
 
 ; ----------------------------------------------------------------------------
-sub_0093A4:
+unpack_rle_picture:
         move.b  (a0), d1                           ; 0093A4 1210                 
         andi.b  #$80, d1                           ; 0093A6 02010080             
         cmpi.b  #$80, d1                           ; 0093AA 0c010080             
@@ -1277,7 +1277,7 @@ L_0093B8:
         cmp.l   d4, d0                             ; 0093BC b084                 
         beq     L_0093E8                           ; 0093BE 67000028             
         dbf     d1, L_0093B8                       ; 0093C2 51c9fff4             
-        bra     sub_0093A4                         ; 0093C6 6000ffdc             
+        bra     unpack_rle_picture                 ; 0093C6 6000ffdc             
 L_0093CA:
         moveq   #0, d1                             ; 0093CA 7200                 
         move.b  (a0), d1                           ; 0093CC 1210                 
@@ -1291,12 +1291,12 @@ L_0093D8:
         beq     L_0093E8                           ; 0093DE 6708                 
         dbf     d1, L_0093D8                       ; 0093E0 51c9fff6             
         addq.l  #2, a0                             ; 0093E4 5488                 
-        bra     sub_0093A4                         ; 0093E6 60bc                 
+        bra     unpack_rle_picture                 ; 0093E6 60bc                 
 L_0093E8:
         rts                                        ; 0093E8 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0093EA:
+draw_positions_list:
         clr.w   $1B608                             ; 0093EA 42790001b608         
         move.l  $1B5F8, $1B604                     ; 0093F0 23f90001b5f80001b604 
         moveq   #0, d0                             ; 0093FA 7000                 
@@ -1304,73 +1304,73 @@ sub_0093EA:
         mulu.w  #$16, d0                           ; 009402 c0fc0016             
         lea     $13056, a0                         ; 009406 41f900013056         
         adda.l  d0, a0                             ; 00940C d1c0                 
-        bsr     sub_009982                         ; 00940E 61000572             
+        bsr     copy_text_line_22                  ; 00940E 61000572             
         lea     $140C0, a2                         ; 009412 45f9000140c0         
         move.w  #$70, (a2)                         ; 009418 34bc0070             
         move.w  #$85, $2(a2)                       ; 00941C 357c00850002         
-        bsr     sub_00B2A0                         ; 009422 61001e7c             
+        bsr     draw_text                          ; 009422 61001e7c             
         lea     -$16(a0), a0                       ; 009426 41e8ffea             
-        bsr     sub_009982                         ; 00942A 61000556             
+        bsr     copy_text_line_22                  ; 00942A 61000556             
         move.w  #$70, (a2)                         ; 00942E 34bc0070             
         move.w  #$7C, $2(a2)                       ; 009432 357c007c0002         
-        bsr     sub_00B2A0                         ; 009438 61001e66             
+        bsr     draw_text                          ; 009438 61001e66             
         lea     -$16(a0), a0                       ; 00943C 41e8ffea             
-        bsr     sub_009982                         ; 009440 61000540             
+        bsr     copy_text_line_22                  ; 009440 61000540             
         move.w  #$70, (a2)                         ; 009444 34bc0070             
         move.w  #$73, $2(a2)                       ; 009448 357c00730002         
-        bsr     sub_00B2A0                         ; 00944E 61001e50             
+        bsr     draw_text                          ; 00944E 61001e50             
         lea     $42(a0), a0                        ; 009452 41e80042             
-        bsr     sub_009982                         ; 009456 6100052a             
+        bsr     copy_text_line_22                  ; 009456 6100052a             
         move.w  #$70, (a2)                         ; 00945A 34bc0070             
         move.w  #$8E, $2(a2)                       ; 00945E 357c008e0002         
-        bsr     sub_00B2A0                         ; 009464 61001e3a             
+        bsr     draw_text                          ; 009464 61001e3a             
         lea     $16(a0), a0                        ; 009468 41e80016             
-        bsr     sub_009982                         ; 00946C 61000514             
+        bsr     copy_text_line_22                  ; 00946C 61000514             
         move.w  #$70, (a2)                         ; 009470 34bc0070             
         move.w  #$97, $2(a2)                       ; 009474 357c00970002         
-        bsr     sub_00B2A0                         ; 00947A 61001e24             
+        bsr     draw_text                          ; 00947A 61001e24             
         rts                                        ; 00947E 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009480:
+draw_level_number:
         moveq   #0, d4                             ; 009480 7800                 
         move.w  $11300, d4                         ; 009482 383900011300         
         lea     $111DE, a6                         ; 009488 4df9000111de         
-        bsr     sub_0100CC                         ; 00948E 61006c3c             
+        bsr     number_to_decimal                  ; 00948E 61006c3c             
         moveq   #0, d0                             ; 009492 7000                 
         move.b  $111E7, d0                         ; 009494 1039000111e7         
         movea.l $1B5C0, a0                         ; 00949A 20790001b5c0         
         lea     $3EC(a0), a0                       ; 0094A0 41e803ec             
-        bsr     sub_00B7F0                         ; 0094A4 6100234a             
+        bsr     draw_panel_digit                   ; 0094A4 6100234a             
         moveq   #0, d0                             ; 0094A8 7000                 
         move.b  $111E6, d0                         ; 0094AA 1039000111e6         
         movea.l $1B5C0, a0                         ; 0094B0 20790001b5c0         
         lea     $3EB(a0), a0                       ; 0094B6 41e803eb             
-        bsr     sub_00B7F0                         ; 0094BA 61002334             
+        bsr     draw_panel_digit                   ; 0094BA 61002334             
         moveq   #0, d0                             ; 0094BE 7000                 
         move.b  $111E5, d0                         ; 0094C0 1039000111e5         
         movea.l $1B5C0, a0                         ; 0094C6 20790001b5c0         
         lea     $3EA(a0), a0                       ; 0094CC 41e803ea             
-        bsr     sub_00B7F0                         ; 0094D0 6100231e             
+        bsr     draw_panel_digit                   ; 0094D0 6100231e             
         rts                                        ; 0094D4 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0094D6:
+draw_positions_scroll:
         lea     $111D2, a6                         ; 0094D6 4df9000111d2         
         moveq   #0, d4                             ; 0094DC 7800                 
         move.w  $13028, d4                         ; 0094DE 383900013028         
         addq.w  #1, d4                             ; 0094E4 5244                 
-        bsr     sub_0100CC                         ; 0094E6 61006be4             
+        bsr     number_to_decimal                  ; 0094E6 61006be4             
         clr.w   $1B608                             ; 0094EA 42790001b608         
         lea     $144F8, a2                         ; 0094F0 45f9000144f8         
         move.l  $1B5F8, $1B604                     ; 0094F6 23f90001b5f80001b604 
         move.b  $111DA, $144FC                     ; 009500 13f9000111da000144fc 
         move.b  $111DB, $144FD                     ; 00950A 13f9000111db000144fd 
-        bsr     sub_00B2A0                         ; 009514 61001d8a             
+        bsr     draw_text                          ; 009514 61001d8a             
         rts                                        ; 009518 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00951A:
+draw_player_list:
         clr.w   $1B608                             ; 00951A 42790001b608         
         move.l  $1B5F8, $1B604                     ; 009520 23f90001b5f80001b604 
         moveq   #0, d0                             ; 00952A 7000                 
@@ -1386,39 +1386,39 @@ sub_00951A:
         adda.l  d1, a0                             ; 009552 d1c1                 
         tst.b   (a0)                               ; 009554 4a10                 
         bne     L_009564                           ; 009556 660c                 
-        bsr     sub_00B12A                         ; 009558 61001bd0             
+        bsr     show_message                       ; 009558 61001bd0             
         clr.l   v_player_record                    ; 00955C 42b9000113d6         
         bra     L_00956E                           ; 009562 600a                 
 L_009564:
         move.l  a0, v_player_record                ; 009564 23c8000113d6         
-        bsr     sub_00AD10                         ; 00956A 610017a4             
+        bsr     draw_player_stats                  ; 00956A 610017a4             
 L_00956E:
         movem.l (a7)+, d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6 ; 00956E 4cdf7ffc             
-        bsr     sub_009996                         ; 009572 61000422             
+        bsr     copy_text_line_b                   ; 009572 61000422             
         lea     $1438A, a2                         ; 009576 45f90001438a         
         move.w  #$70, (a2)                         ; 00957C 34bc0070             
         move.w  #$BD, $2(a2)                       ; 009580 357c00bd0002         
-        bsr     sub_00B2A0                         ; 009586 61001d18             
+        bsr     draw_text                          ; 009586 61001d18             
         lea     -$A(a0), a0                        ; 00958A 41e8fff6             
-        bsr     sub_009996                         ; 00958E 61000406             
+        bsr     copy_text_line_b                   ; 00958E 61000406             
         move.w  #$70, (a2)                         ; 009592 34bc0070             
         move.w  #$B4, $2(a2)                       ; 009596 357c00b40002         
-        bsr     sub_00B2A0                         ; 00959C 61001d02             
+        bsr     draw_text                          ; 00959C 61001d02             
         lea     $14(a0), a0                        ; 0095A0 41e80014             
-        bsr     sub_009996                         ; 0095A4 610003f0             
+        bsr     copy_text_line_b                   ; 0095A4 610003f0             
         move.w  #$70, (a2)                         ; 0095A8 34bc0070             
         move.w  #$C6, $2(a2)                       ; 0095AC 357c00c60002         
-        bsr     sub_00B2A0                         ; 0095B2 61001cec             
+        bsr     draw_text                          ; 0095B2 61001cec             
         rts                                        ; 0095B6 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0095B8:
+draw_level_list:
         clr.w   $1B608                             ; 0095B8 42790001b608         
         move.l  $1B5F8, $1B604                     ; 0095BE 23f90001b5f80001b604 
         tst.l   v_player_record                    ; 0095C8 4ab9000113d6         
-        beq     sub_00961E                         ; 0095CE 6700004e             
+        beq     draw_level_list_from_player        ; 0095CE 6700004e             
         tst.w   $140DE                             ; 0095D2 4a79000140de         
-        bne     sub_00961E                         ; 0095D8 66000044             
+        bne     draw_level_list_from_player        ; 0095D8 66000044             
         clr.w   v_selected_level                   ; 0095DC 4279000140dc         
         movea.l v_player_record, a0                ; 0095E2 2079000113d6         
         move.w  $14(a0), v_selected_level          ; 0095E8 33e80014000140dc     
@@ -1427,21 +1427,21 @@ sub_0095B8:
         cmpi.w  #$DE, v_selected_level             ; 0095FA 0c7900de000140dc     
         bgt     L_00960E                           ; 009602 6e0a                 
         move.w  #$6F, v_selected_level             ; 009604 33fc006f000140dc     
-        bra     sub_00961E                         ; 00960C 6010                 
+        bra     draw_level_list_from_player        ; 00960C 6010                 
 L_00960E:
         move.w  #$70, v_selected_level             ; 00960E 33fc0070000140dc     
-        bra     sub_00961E                         ; 009616 6006                 
+        bra     draw_level_list_from_player        ; 009616 6006                 
 L_009618:
         subq.w  #1, v_selected_level               ; 009618 5379000140dc         
 
 ; ----------------------------------------------------------------------------
-sub_00961E:
+draw_level_list_from_player:
         move.w  #1, $140DE                         ; 00961E 33fc0001000140de     
         moveq   #0, d4                             ; 009626 7800                 
         movea.l v_player_record, a0                ; 009628 2079000113d6         
         move.w  $2(a0), d4                         ; 00962E 38280002             
         lea     $111D2, a6                         ; 009632 4df9000111d2         
-        bsr     sub_0100CC                         ; 009638 61006a92             
+        bsr     number_to_decimal                  ; 009638 61006a92             
         move.b  $111D9, $112F5                     ; 00963C 13f9000111d9000112f5 
         move.b  $111DA, $112F6                     ; 009646 13f9000111da000112f6 
         move.b  $111DB, $112F7                     ; 009650 13f9000111db000112f7 
@@ -1449,7 +1449,7 @@ sub_00961E:
         movea.l v_player_record, a0                ; 00965C 2079000113d6         
         move.w  $4(a0), d4                         ; 009662 38280004             
         lea     $111D2, a6                         ; 009666 4df9000111d2         
-        bsr     sub_0100CC                         ; 00966C 61006a5e             
+        bsr     number_to_decimal                  ; 00966C 61006a5e             
         move.b  $111D9, $112F9                     ; 009670 13f9000111d9000112f9 
         move.b  $111DA, $112FA                     ; 00967A 13f9000111da000112fa 
         move.b  $111DB, $112FB                     ; 009684 13f9000111db000112fb 
@@ -1457,7 +1457,7 @@ sub_00961E:
         movea.l v_player_record, a0                ; 009690 2079000113d6         
         move.w  $6(a0), d4                         ; 009696 38280006             
         lea     $111D2, a6                         ; 00969A 4df9000111d2         
-        bsr     sub_0100CC                         ; 0096A0 61006a2a             
+        bsr     number_to_decimal                  ; 0096A0 61006a2a             
         move.b  $111D9, $112FD                     ; 0096A4 13f9000111d9000112fd 
         move.b  $111DA, $112FE                     ; 0096AE 13f9000111da000112fe 
         move.b  $111DB, $112FF                     ; 0096B8 13f9000111db000112ff 
@@ -1467,37 +1467,37 @@ sub_00961E:
         mulu.w  #$1C, d0                           ; 0096CC c0fc001c             
         lea     $13270, a0                         ; 0096D0 41f900013270         
         adda.l  d0, a0                             ; 0096D6 d1c0                 
-        bsr     sub_0099AA                         ; 0096D8 610002d0             
+        bsr     copy_text_line_c                   ; 0096D8 610002d0             
         lea     $143B4, a2                         ; 0096DC 45f9000143b4         
         move.w  #$148, (a2)                        ; 0096E2 34bc0148             
         move.w  #$BD, $2(a2)                       ; 0096E6 357c00bd0002         
-        bsr     sub_00B2A0                         ; 0096EC 61001bb2             
+        bsr     draw_text                          ; 0096EC 61001bb2             
         lea     $1B9D4, a6                         ; 0096F0 4df90001b9d4         
         move.w  #1, d7                             ; 0096F6 3e3c0001             
         move.w  #2, $11302                         ; 0096FA 33fc000200011302     
-        bsr     sub_009806                         ; 009702 61000102             
+        bsr     draw_game_parameters               ; 009702 61000102             
         lea     -$1C(a0), a0                       ; 009706 41e8ffe4             
-        bsr     sub_0099AA                         ; 00970A 6100029e             
+        bsr     copy_text_line_c                   ; 00970A 6100029e             
         move.w  #$148, (a2)                        ; 00970E 34bc0148             
         move.w  #$B4, $2(a2)                       ; 009712 357c00b40002         
-        bsr     sub_00B2A0                         ; 009718 61001b86             
+        bsr     draw_text                          ; 009718 61001b86             
         lea     $1B964, a6                         ; 00971C 4df90001b964         
         clr.w   d7                                 ; 009722 4247                 
         move.w  #1, $11302                         ; 009724 33fc000100011302     
-        bsr     sub_009806                         ; 00972C 610000d8             
+        bsr     draw_game_parameters               ; 00972C 610000d8             
         lea     $38(a0), a0                        ; 009730 41e80038             
-        bsr     sub_0099AA                         ; 009734 61000274             
+        bsr     copy_text_line_c                   ; 009734 61000274             
         move.w  #$148, (a2)                        ; 009738 34bc0148             
         move.w  #$C6, $2(a2)                       ; 00973C 357c00c60002         
-        bsr     sub_00B2A0                         ; 009742 61001b5c             
+        bsr     draw_text                          ; 009742 61001b5c             
         lea     $1BA44, a6                         ; 009746 4df90001ba44         
         clr.w   d7                                 ; 00974C 4247                 
         move.w  #3, $11302                         ; 00974E 33fc000300011302     
-        bsr     sub_009806                         ; 009756 610000ae             
+        bsr     draw_game_parameters               ; 009756 610000ae             
         rts                                        ; 00975A 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00975C:
+draw_hall_of_fame:
         move.w  #$11, d0                           ; 00975C 303c0011             
         lea     $13F30, a0                         ; 009760 41f900013f30         
         lea     $13F6A, a1                         ; 009766 43f900013f6a         
@@ -1508,7 +1508,7 @@ L_00976C:
         move.l  $1B5F8, $1B604                     ; 00977A 23f90001b5f80001b604 
         clr.w   $1B608                             ; 009784 42790001b608         
         lea     $13F66, a2                         ; 00978A 45f900013f66         
-        bsr     sub_00B2A0                         ; 009790 61001b0e             
+        bsr     draw_text                          ; 009790 61001b0e             
         move.w  #$11, d0                           ; 009794 303c0011             
         lea     $13F42, a0                         ; 009798 41f900013f42         
         lea     $13F6A, a1                         ; 00979E 43f900013f6a         
@@ -1519,7 +1519,7 @@ L_0097A4:
         move.l  $1B5F8, $1B604                     ; 0097B2 23f90001b5f80001b604 
         clr.w   $1B608                             ; 0097BC 42790001b608         
         lea     $13F66, a2                         ; 0097C2 45f900013f66         
-        bsr     sub_00B2A0                         ; 0097C8 61001ad6             
+        bsr     draw_text                          ; 0097C8 61001ad6             
         move.w  #$11, d0                           ; 0097CC 303c0011             
         lea     $13F54, a0                         ; 0097D0 41f900013f54         
         lea     $13F6A, a1                         ; 0097D6 43f900013f6a         
@@ -1530,11 +1530,11 @@ L_0097DC:
         move.l  $1B5F8, $1B604                     ; 0097EA 23f90001b5f80001b604 
         clr.w   $1B608                             ; 0097F4 42790001b608         
         lea     $13F66, a2                         ; 0097FA 45f900013f66         
-        bsr     sub_00B2A0                         ; 009800 61001a9e             
+        bsr     draw_text                          ; 009800 61001a9e             
         rts                                        ; 009804 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009806:
+draw_game_parameters:
         moveq   #0, d3                             ; 009806 7600                 
         moveq   #0, d4                             ; 009808 7800                 
         moveq   #0, d5                             ; 00980A 7a00                 
@@ -1543,7 +1543,7 @@ sub_009806:
         move.w  $14(a4), d4                        ; 009814 382c0014             
         movem.l d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6, -(a7) ; 009818 48e7fffe             
         lea     $111D2, a6                         ; 00981C 4df9000111d2         
-        bsr     sub_0100CC                         ; 009822 610068a8             
+        bsr     number_to_decimal                  ; 009822 610068a8             
         movea.l a1, a0                             ; 009826 2049                 
         movem.l (a7)+, d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6 ; 009828 4cdf7fff             
         move.b  $111D9, $140E1                     ; 00982C 13f9000111d9000140e1 
@@ -1647,7 +1647,7 @@ L_009972:
         rts                                        ; 009980 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009982:
+copy_text_line_22:
         move.l  a0, -(a7)                          ; 009982 2f08                 
         lea     $140C4, a1                         ; 009984 43f9000140c4         
         moveq   #$15, d0                           ; 00998A 7015                 
@@ -1658,7 +1658,7 @@ L_00998C:
         rts                                        ; 009994 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009996:
+copy_text_line_b:
         move.l  a0, -(a7)                          ; 009996 2f08                 
         lea     $1438E, a1                         ; 009998 43f90001438e         
         moveq   #7, d0                             ; 00999E 7007                 
@@ -1669,7 +1669,7 @@ L_0099A0:
         rts                                        ; 0099A8 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0099AA:
+copy_text_line_c:
         move.l  a0, -(a7)                          ; 0099AA 2f08                 
         lea     $143B8, a1                         ; 0099AC 43f9000143b8         
         move.w  #$1A, d0                           ; 0099B2 303c001a             
@@ -1713,11 +1713,11 @@ L_009A3E:
         bne     L_009B0A                           ; 009A4C 660000bc             
         tst.l   v_player_record                    ; 009A50 4ab9000113d6         
         bne     L_009A7A                           ; 009A56 6622                 
-        bsr     sub_00B108                         ; 009A58 610016ae             
+        bsr     clear_message_line                 ; 009A58 610016ae             
         move.l  $1B5F8, $1B604                     ; 009A5C 23f90001b5f80001b604 
         clr.w   $1B608                             ; 009A66 42790001b608         
         lea     $144BE, a2                         ; 009A6C 45f9000144be         
-        bsr     sub_00B2A0                         ; 009A72 6100182c             
+        bsr     draw_text                          ; 009A72 6100182c             
         bra     L_0099FE                           ; 009A76 6000ff86             
 L_009A7A:
         movea.l v_player_record, a0                ; 009A7A 2079000113d6         
@@ -1731,14 +1731,14 @@ L_009A7A:
         beq     L_0099FE                           ; 009AA6 6700ff56             
         cmpi.w  #$70, v_selected_level             ; 009AAA 0c790070000140dc     
         bne     L_009AF2                           ; 009AB2 663e                 
-        bsr     sub_008A22                         ; 009AB4 6100ef6c             
-        bsr     sub_009366                         ; 009AB8 6100f8ac             
-        bsr     sub_00AAA8                         ; 009ABC 61000fea             
-        bsr     sub_0093EA                         ; 009AC0 6100f928             
-        bsr     sub_0094D6                         ; 009AC4 6100fa10             
-        bsr     sub_00951A                         ; 009AC8 6100fa50             
-        bsr     sub_0095B8                         ; 009ACC 6100faea             
-        bsr     sub_00975C                         ; 009AD0 6100fc8a             
+        bsr     show_end_screen                    ; 009AB4 6100ef6c             
+        bsr     set_menu_bitplanes                 ; 009AB8 6100f8ac             
+        bsr     sort_positions                     ; 009ABC 61000fea             
+        bsr     draw_positions_list                ; 009AC0 6100f928             
+        bsr     draw_positions_scroll              ; 009AC4 6100fa10             
+        bsr     draw_player_list                   ; 009AC8 6100fa50             
+        bsr     draw_level_list                    ; 009ACC 6100faea             
+        bsr     draw_hall_of_fame                  ; 009AD0 6100fc8a             
         bra     main_menu                          ; 009AD4 6000feea             
 L_009AD8:
         cmpi.w  #$70, v_selected_level             ; 009AD8 0c790070000140dc     
@@ -1798,16 +1798,16 @@ L_009B96:
         move.b  #2, $1BAA8                         ; 009BAA 13fc00020001baa8     
         rts                                        ; 009BB2 4e75                 
 L_009BB4:
-        bsr     sub_00B108                         ; 009BB4 61001552             
+        bsr     clear_message_line                 ; 009BB4 61001552             
         move.l  $1B5F8, $1B604                     ; 009BB8 23f90001b5f80001b604 
         clr.w   $1B608                             ; 009BC2 42790001b608         
         lea     $144D6, a2                         ; 009BC8 45f9000144d6         
-        bsr     sub_00B2A0                         ; 009BCE 610016d0             
+        bsr     draw_text                          ; 009BCE 610016d0             
         bra     L_0099FE                           ; 009BD2 6000fe2a             
 
 ; ----------------------------------------------------------------------------
 menu_mouse_click:
-        bsr     sub_00B108                         ; 009BD6 61001530             
+        bsr     clear_message_line                 ; 009BD6 61001530             
         lea     $1B422, a0                         ; 009BDA 41f90001b422         
         moveq   #$E, d0                            ; 009BE0 700e                 
 L_009BE2:
@@ -1830,73 +1830,73 @@ L_009C0C:
         rts                                        ; 009C14 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009C16:
+menu_positions_up:
         tst.w   $13028                             ; 009C16 4a7900013028         
         beq     L_009C32                           ; 009C1C 67000014             
         bsr     wait_6_frames                      ; 009C20 61001b46             
         subq.w  #1, $13028                         ; 009C24 537900013028         
-        bsr     sub_0093EA                         ; 009C2A 6100f7be             
-        bsr     sub_0094D6                         ; 009C2E 6100f8a6             
+        bsr     draw_positions_list                ; 009C2A 6100f7be             
+        bsr     draw_positions_scroll              ; 009C2E 6100f8a6             
 L_009C32:
         rts                                        ; 009C32 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009C34:
+menu_positions_down:
         cmpi.w  #$13, $13028                       ; 009C34 0c79001300013028     
         beq     L_009C52                           ; 009C3C 67000014             
         bsr     wait_6_frames                      ; 009C40 61001b26             
         addq.w  #1, $13028                         ; 009C44 527900013028         
-        bsr     sub_0093EA                         ; 009C4A 6100f79e             
-        bsr     sub_0094D6                         ; 009C4E 6100f886             
+        bsr     draw_positions_list                ; 009C4A 6100f79e             
+        bsr     draw_positions_scroll              ; 009C4E 6100f886             
 L_009C52:
         rts                                        ; 009C52 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009C54:
+menu_player_up:
         bsr     wait_6_frames                      ; 009C54 61001b12             
         tst.w   $140E8                             ; 009C58 4a79000140e8         
         beq     L_009C76                           ; 009C5E 67000016             
         subq.w  #1, $140E8                         ; 009C62 5379000140e8         
-        bsr     sub_00951A                         ; 009C68 6100f8b0             
+        bsr     draw_player_list                   ; 009C68 6100f8b0             
         clr.w   $140DE                             ; 009C6C 4279000140de         
-        bsr     sub_0095B8                         ; 009C72 6100f944             
+        bsr     draw_level_list                    ; 009C72 6100f944             
 L_009C76:
         rts                                        ; 009C76 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009C78:
+menu_player_down:
         bsr     wait_6_frames                      ; 009C78 61001aee             
         cmpi.w  #$13, $140E8                       ; 009C7C 0c790013000140e8     
         beq     L_009C9C                           ; 009C84 67000016             
         addq.w  #1, $140E8                         ; 009C88 5279000140e8         
-        bsr     sub_00951A                         ; 009C8E 6100f88a             
+        bsr     draw_player_list                   ; 009C8E 6100f88a             
         clr.w   $140DE                             ; 009C92 4279000140de         
-        bsr     sub_0095B8                         ; 009C98 6100f91e             
+        bsr     draw_level_list                    ; 009C98 6100f91e             
 L_009C9C:
         rts                                        ; 009C9C 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009C9E:
+menu_levels_up:
         bsr     wait_6_frames                      ; 009C9E 61001ac8             
         tst.w   v_selected_level                   ; 009CA2 4a79000140dc         
         beq     L_009CB4                           ; 009CA8 670a                 
         subq.w  #1, v_selected_level               ; 009CAA 5379000140dc         
-        bsr     sub_00961E                         ; 009CB0 6100f96c             
+        bsr     draw_level_list_from_player        ; 009CB0 6100f96c             
 L_009CB4:
         rts                                        ; 009CB4 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009CB6:
+menu_levels_down:
         bsr     wait_6_frames                      ; 009CB6 61001ab0             
         cmpi.w  #$70, v_selected_level             ; 009CBA 0c790070000140dc     
         beq     L_009CCE                           ; 009CC2 670a                 
         addq.w  #1, v_selected_level               ; 009CC4 5279000140dc         
-        bsr     sub_00961E                         ; 009CCA 6100f952             
+        bsr     draw_level_list_from_player        ; 009CCA 6100f952             
 L_009CCE:
         rts                                        ; 009CCE 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009CD0:
+menu_new_player:
         moveq   #7, d0                             ; 009CD0 7007                 
         lea     $11410, a0                         ; 009CD2 41f900011410         
 L_009CD8:
@@ -1912,14 +1912,14 @@ L_009CE6:
         lea     $143D4, a2                         ; 009CFC 45f9000143d4         
         move.l  $1B5F8, $1B604                     ; 009D02 23f90001b5f80001b604 
         clr.w   $1B608                             ; 009D0C 42790001b608         
-        bsr     sub_00B2A0                         ; 009D12 6100158c             
+        bsr     draw_text                          ; 009D12 6100158c             
         moveq   #0, d0                             ; 009D16 7000                 
         moveq   #0, d4                             ; 009D18 7800                 
         moveq   #0, d5                             ; 009D1A 7a00                 
         moveq   #0, d6                             ; 009D1C 7c00                 
         moveq   #0, d7                             ; 009D1E 7e00                 
         lea     $11410, a2                         ; 009D20 45f900011410         
-        bsr     sub_0101D4                         ; 009D26 610064ac             
+        bsr     install_keyboard_irq               ; 009D26 610064ac             
 L_009D2A:
         bsr     read_keyboard                      ; 009D2A 610065ec             
         bcc     L_009D2A                           ; 009D2E 64fa                 
@@ -1929,10 +1929,10 @@ L_009D2A:
         beq     L_009D4A                           ; 009D3A 6700000e             
         cmpi.b  #8, d4                             ; 009D3E 0c040008             
         beq     L_009D2A                           ; 009D42 67e6                 
-        bsr     sub_009D8E                         ; 009D44 6148                 
+        bsr     name_entry_add_char                ; 009D44 6148                 
         bra     L_009D2A                           ; 009D46 6000ffe2             
 L_009D4A:
-        bsr     sub_0101FA                         ; 009D4A 610064ae             
+        bsr     remove_keyboard_irq                ; 009D4A 610064ae             
         bra     L_00A6D6                           ; 009D4E 60000986             
 L_009D52:
         tst.b   d4                                 ; 009D52 4a04                 
@@ -1956,7 +1956,7 @@ L_009D52:
         bra     L_009D2A                           ; 009D8C 609c                 
 
 ; ----------------------------------------------------------------------------
-sub_009D8E:
+name_entry_add_char:
         lea     $1B4D6, a0                         ; 009D8E 41f90001b4d6         
 L_009D94:
         tst.b   (a0)                               ; 009D94 4a10                 
@@ -1975,13 +1975,13 @@ L_009DA2:
         move.l  $1B5F8, $1B604                     ; 009DBA 23f90001b5f80001b604 
         lea     $1140C, a2                         ; 009DC4 45f90001140c         
         clr.w   $1B608                             ; 009DCA 42790001b608         
-        bsr     sub_00B2A0                         ; 009DD0 610014ce             
+        bsr     draw_text                          ; 009DD0 610014ce             
         movem.l (a7)+, d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6 ; 009DD4 4cdf7fff             
 L_009DD8:
         rts                                        ; 009DD8 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009DDA:
+menu_delete_player:
         tst.l   v_player_record                    ; 009DDA 4ab9000113d6         
         beq     L_009E64                           ; 009DE0 67000082             
         lea     $140FC, a0                         ; 009DE4 41f9000140fc         
@@ -1997,9 +1997,9 @@ L_009E02:
         clr.w   $1B608                             ; 009E08 42790001b608         
         move.l  $1B5F8, $1B604                     ; 009E0E 23f90001b5f80001b604 
         lea     $1448C, a2                         ; 009E18 45f90001448c         
-        bsr     sub_00B2A0                         ; 009E1E 61001480             
+        bsr     draw_text                          ; 009E1E 61001480             
         bsr     wait_6_frames                      ; 009E22 61001944             
-        bsr     sub_00A68A                         ; 009E26 61000862             
+        bsr     wait_click_and_release             ; 009E26 61000862             
         tst.l   d7                                 ; 009E2A 4a87                 
         bne     L_009E64                           ; 009E2C 6636                 
         move.w  #$13, d1                           ; 009E2E 323c0013             
@@ -2039,16 +2039,16 @@ L_009E80:
         clr.l   v_player_record                    ; 009E86 42b9000113d6         
         clr.l   $113DA                             ; 009E8C 42b9000113da         
         clr.w   $140DE                             ; 009E92 4279000140de         
-        bsr     sub_00AAA8                         ; 009E98 61000c0e             
-        bsr     sub_00ABBE                         ; 009E9C 61000d20             
-        bsr     sub_00AD10                         ; 009EA0 61000e6e             
-        bsr     sub_0093EA                         ; 009EA4 6100f544             
-        bsr     sub_00951A                         ; 009EA8 6100f670             
+        bsr     sort_positions                     ; 009E98 61000c0e             
+        bsr     format_positions                   ; 009E9C 61000d20             
+        bsr     draw_player_stats                  ; 009EA0 61000e6e             
+        bsr     draw_positions_list                ; 009EA4 6100f544             
+        bsr     draw_player_list                   ; 009EA8 6100f670             
         bsr     save_hiscores                      ; 009EAC 610011ca             
         rts                                        ; 009EB0 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009EB2:
+menu_skip_level:
         cmpi.w  #$6F, v_selected_level             ; 009EB2 0c79006f000140dc     
         bge     L_009FB4                           ; 009EBA 6c0000f8             
         movea.l v_player_record, a0                ; 009EBE 2079000113d6         
@@ -2070,9 +2070,9 @@ sub_009EB2:
         move.l  $1B5F8, $1B604                     ; 009EFC 23f90001b5f80001b604 
         clr.w   $1B608                             ; 009F06 42790001b608         
         lea     $144A6, a2                         ; 009F0C 45f9000144a6         
-        bsr     sub_00B2A0                         ; 009F12 6100138c             
+        bsr     draw_text                          ; 009F12 6100138c             
         bsr     wait_6_frames                      ; 009F16 61001850             
-        bsr     sub_00A68A                         ; 009F1A 6100076e             
+        bsr     wait_click_and_release             ; 009F1A 6100076e             
         tst.l   d7                                 ; 009F1E 4a87                 
         bne     L_009F96                           ; 009F20 6674                 
         lea     $13270, a0                         ; 009F22 41f900013270         
@@ -2085,7 +2085,7 @@ sub_009EB2:
         move.b  $2(a0), $113E6                     ; 009F44 13e80002000113e6     
         clr.b   $113E7                             ; 009F4C 4239000113e7         
         lea     $113E4, a4                         ; 009F52 49f9000113e4         
-        bsr     sub_010098                         ; 009F58 6100613e             
+        bsr     parse_decimal                      ; 009F58 6100613e             
         movea.l v_player_record, a1                ; 009F5C 2279000113d6         
         addq.l  #2, a1                             ; 009F62 5489                 
         move.w  #2, d1                             ; 009F64 323c0002             
@@ -2097,7 +2097,7 @@ L_009F68:
         move.l  $1B5F8, $1B604                     ; 009F72 23f90001b5f80001b604 
         clr.w   $1B608                             ; 009F7C 42790001b608         
         lea     $1441E, a2                         ; 009F82 45f90001441e         
-        bsr     sub_00B2A0                         ; 009F88 61001316             
+        bsr     draw_text                          ; 009F88 61001316             
 L_009F8C:
         btst.b  #6, $BFE001                        ; 009F8C 0839000600bfe001     
         beq     L_009F8C                           ; 009F94 67f6                 
@@ -2108,26 +2108,26 @@ L_009F98:
         movea.l v_player_record, a0                ; 009F9A 2079000113d6         
         addq.w  #1, $14(a0)                        ; 009FA0 52680014             
         addq.w  #1, v_selected_level               ; 009FA4 5279000140dc         
-        bsr     sub_0095B8                         ; 009FAA 6100f60c             
+        bsr     draw_level_list                    ; 009FAA 6100f60c             
         bsr     save_hiscores                      ; 009FAE 610010c8             
         rts                                        ; 009FB2 4e75                 
 L_009FB4:
-        bsr     sub_00B108                         ; 009FB4 61001152             
+        bsr     clear_message_line                 ; 009FB4 61001152             
         lea     $14476, a2                         ; 009FB8 45f900014476         
         move.l  $1B5F8, $1B604                     ; 009FBE 23f90001b5f80001b604 
         clr.w   $1B608                             ; 009FC8 42790001b608         
-        bsr     sub_00B2A0                         ; 009FCE 610012d0             
+        bsr     draw_text                          ; 009FCE 610012d0             
         rts                                        ; 009FD2 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_009FD4:
+menu_statistics:
         tst.l   v_player_record                    ; 009FD4 4ab9000113d6         
         bne     L_009FFC                           ; 009FDA 6620                 
-        bsr     sub_00B108                         ; 009FDC 6100112a             
+        bsr     clear_message_line                 ; 009FDC 6100112a             
         move.l  $1B5F8, $1B604                     ; 009FE0 23f90001b5f80001b604 
         clr.w   $1B608                             ; 009FEA 42790001b608         
         lea     $144BE, a2                         ; 009FF0 45f9000144be         
-        bsr     sub_00B2A0                         ; 009FF6 610012a8             
+        bsr     draw_text                          ; 009FF6 610012a8             
         rts                                        ; 009FFA 4e75                 
 L_009FFC:
         bsr     clear_level_bitmap_5000            ; 009FFC 6100eaee             
@@ -2141,24 +2141,24 @@ L_009FFC:
         move.l  $1B5F8, $1B604                     ; 00A028 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00A032 42790001b608         
         lea     $146A6, a2                         ; 00A038 45f9000146a6         
-        bsr     sub_00B2A0                         ; 00A03E 61001260             
+        bsr     draw_text                          ; 00A03E 61001260             
         lea     $146CE, a2                         ; 00A042 45f9000146ce         
-        bsr     sub_00B2A0                         ; 00A048 61001256             
+        bsr     draw_text                          ; 00A048 61001256             
         lea     $146EE, a2                         ; 00A04C 45f9000146ee         
-        bsr     sub_00B2A0                         ; 00A052 6100124c             
-        bsr     sub_00A15C                         ; 00A056 61000104             
+        bsr     draw_text                          ; 00A052 6100124c             
+        bsr     compute_statistics                 ; 00A056 61000104             
         lea     $14502, a0                         ; 00A05A 41f900014502         
         lea     $14BFF, a1                         ; 00A060 43f900014bff         
         move.w  #2, d0                             ; 00A066 303c0002             
-        bsr     sub_00A154                         ; 00A06A 610000e8             
+        bsr     copy_bytes_d0                      ; 00A06A 610000e8             
         lea     $14506, a0                         ; 00A06E 41f900014506         
         lea     $14BD8, a1                         ; 00A074 43f900014bd8         
         move.w  #7, d0                             ; 00A07A 303c0007             
-        bsr     sub_00A154                         ; 00A07E 610000d4             
+        bsr     copy_bytes_d0                      ; 00A07E 610000d4             
         lea     $1450E, a0                         ; 00A082 41f90001450e         
         lea     $14C1B, a1                         ; 00A088 43f900014c1b         
         move.w  #2, d0                             ; 00A08E 303c0002             
-        bsr     sub_00A154                         ; 00A092 610000c0             
+        bsr     copy_bytes_d0                      ; 00A092 610000c0             
         lea     $14C1B, a1                         ; 00A096 43f900014c1b         
         cmpi.b  #$30, (a1)                         ; 00A09C 0c110030             
         bne     L_00A0A6                           ; 00A0A0 6604                 
@@ -2167,50 +2167,50 @@ L_00A0A6:
         lea     $14512, a0                         ; 00A0A6 41f900014512         
         lea     $14C1F, a1                         ; 00A0AC 43f900014c1f         
         move.w  #1, d0                             ; 00A0B2 303c0001             
-        bsr     sub_00A154                         ; 00A0B6 6100009c             
+        bsr     copy_bytes_d0                      ; 00A0B6 6100009c             
         lea     $14514, a0                         ; 00A0BA 41f900014514         
         lea     $14C22, a1                         ; 00A0C0 43f900014c22         
         move.w  #1, d0                             ; 00A0C6 303c0001             
-        bsr     sub_00A154                         ; 00A0CA 61000088             
+        bsr     copy_bytes_d0                      ; 00A0CA 61000088             
         lea     $14B26, a2                         ; 00A0CE 45f900014b26         
-        bsr     sub_00B2A0                         ; 00A0D4 610011ca             
+        bsr     draw_text                          ; 00A0D4 610011ca             
         lea     $14B4C, a2                         ; 00A0D8 45f900014b4c         
-        bsr     sub_00B2A0                         ; 00A0DE 610011c0             
+        bsr     draw_text                          ; 00A0DE 610011c0             
         lea     $14BA2, a2                         ; 00A0E2 45f900014ba2         
-        bsr     sub_00B2A0                         ; 00A0E8 610011b6             
+        bsr     draw_text                          ; 00A0E8 610011b6             
         lea     $14BC0, a2                         ; 00A0EC 45f900014bc0         
-        bsr     sub_00B2A0                         ; 00A0F2 610011ac             
+        bsr     draw_text                          ; 00A0F2 610011ac             
         lea     $14BE2, a2                         ; 00A0F6 45f900014be2         
-        bsr     sub_00B2A0                         ; 00A0FC 610011a2             
+        bsr     draw_text                          ; 00A0FC 610011a2             
         lea     $14C04, a2                         ; 00A100 45f900014c04         
-        bsr     sub_00B2A0                         ; 00A106 61001198             
+        bsr     draw_text                          ; 00A106 61001198             
         cmpi.w  #1, $112DC                         ; 00A10A 0c790001000112dc     
         bne     L_00A12A                           ; 00A112 6616                 
         lea     $14CDC, a2                         ; 00A114 45f900014cdc         
-        bsr     sub_00B2A0                         ; 00A11A 61001184             
+        bsr     draw_text                          ; 00A11A 61001184             
         lea     $14D00, a2                         ; 00A11E 45f900014d00         
-        bsr     sub_00B2A0                         ; 00A124 6100117a             
+        bsr     draw_text                          ; 00A124 6100117a             
         bra     L_00A148                           ; 00A128 601e                 
 L_00A12A:
         lea     $14C26, a2                         ; 00A12A 45f900014c26         
-        bsr     sub_00B2A0                         ; 00A130 6100116e             
+        bsr     draw_text                          ; 00A130 6100116e             
         cmpi.w  #2, $112DC                         ; 00A134 0c790002000112dc     
         bne     L_00A148                           ; 00A13C 660a                 
         lea     $14D2C, a2                         ; 00A13E 45f900014d2c         
-        bsr     sub_00B2A0                         ; 00A144 6100115a             
+        bsr     draw_text                          ; 00A144 6100115a             
 L_00A148:
-        bsr     sub_00A48C                         ; 00A148 61000342             
+        bsr     return_to_menu                     ; 00A148 61000342             
         clr.w   $112DC                             ; 00A14C 4279000112dc         
         rts                                        ; 00A152 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A154:
+copy_bytes_d0:
         move.b  (a0)+, (a1)+                       ; 00A154 12d8                 
-        dbf     d0, sub_00A154                     ; 00A156 51c8fffc             
+        dbf     d0, copy_bytes_d0                  ; 00A156 51c8fffc             
         rts                                        ; 00A15A 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A15C:
+compute_statistics:
         moveq   #0, d0                             ; 00A15C 7000                 
         moveq   #0, d1                             ; 00A15E 7200                 
         moveq   #0, d2                             ; 00A160 7400                 
@@ -2221,7 +2221,7 @@ sub_00A15C:
         moveq   #0, d7                             ; 00A16A 7e00                 
         movea.l v_player_record, a0                ; 00A16C 2079000113d6         
         move.w  $14(a0), d0                        ; 00A172 30280014             
-        bsr     sub_00A3AE                         ; 00A176 61000236             
+        bsr     clamp_level_index                  ; 00A176 61000236             
         move.w  $10(a0), d1                        ; 00A17A 32280010             
         move.b  $12(a0), d2                        ; 00A17E 14280012             
         move.b  $13(a0), d3                        ; 00A182 16280013             
@@ -2239,7 +2239,7 @@ L_00A194:
         mulu.w  d2, d0                             ; 00A1A0 c0c2                 
         sub.w   d0, d5                             ; 00A1A2 9a40                 
         move.w  $14(a0), d0                        ; 00A1A4 30280014             
-        bsr     sub_00A3AE                         ; 00A1A8 61000204             
+        bsr     clamp_level_index                  ; 00A1A8 61000204             
         divu.w  #$A, d0                            ; 00A1AC 80fc000a             
         tst.w   d0                                 ; 00A1B0 4a40                 
         beq     L_00A1C0                           ; 00A1B2 670c                 
@@ -2251,7 +2251,7 @@ L_00A1C0:
         move.w  d6, d4                             ; 00A1C0 3806                 
         move.w  d6, $14516                         ; 00A1C2 33c600014516         
         lea     $111D2, a6                         ; 00A1C8 4df9000111d2         
-        bsr     sub_0100CC                         ; 00A1CE 61005efc             
+        bsr     number_to_decimal                  ; 00A1CE 61005efc             
         lea     $14C49, a0                         ; 00A1D2 41f900014c49         
         move.b  #$20, (a0)                         ; 00A1D8 10bc0020             
         move.b  #$20, $1(a0)                       ; 00A1DC 117c00200001         
@@ -2272,7 +2272,7 @@ L_00A220:
         move.w  d5, d4                             ; 00A228 3805                 
         move.w  d5, $14518                         ; 00A22A 33c500014518         
         lea     $111D2, a6                         ; 00A230 4df9000111d2         
-        bsr     sub_0100CC                         ; 00A236 61005e94             
+        bsr     number_to_decimal                  ; 00A236 61005e94             
         lea     $14C49, a0                         ; 00A23A 41f900014c49         
         move.b  #$2E, $3(a0)                       ; 00A240 117c002e0003         
         move.b  $111DB, $4(a0)                     ; 00A246 1179000111db0004     
@@ -2290,7 +2290,7 @@ L_00A220:
         move.w  d0, d4                             ; 00A27C 3800                 
         move.w  d4, $14516                         ; 00A27E 33c400014516         
         lea     $111D2, a6                         ; 00A284 4df9000111d2         
-        bsr     sub_0100CC                         ; 00A28A 61005e40             
+        bsr     number_to_decimal                  ; 00A28A 61005e40             
         lea     $14CAE, a0                         ; 00A28E 41f900014cae         
         move.b  #$20, (a0)                         ; 00A294 10bc0020             
         move.b  #$20, $1(a0)                       ; 00A298 117c00200001         
@@ -2327,7 +2327,7 @@ L_00A2EE:
         move.b  #$30, (a0)                         ; 00A32E 10bc0030             
         move.b  #$30, $1(a0)                       ; 00A332 117c00300001         
         lea     $111D2, a6                         ; 00A338 4df9000111d2         
-        bsr     sub_0100CC                         ; 00A33E 61005d8c             
+        bsr     number_to_decimal                  ; 00A33E 61005d8c             
         lea     $14CC3, a0                         ; 00A342 41f900014cc3         
         lea     $111DA, a1                         ; 00A348 43f9000111da         
         move.b  -$1(a1), (a0)                      ; 00A34E 10a9ffff             
@@ -2343,7 +2343,7 @@ L_00A374:
         moveq   #0, d4                             ; 00A374 7800                 
         move.w  $14516, d4                         ; 00A376 383900014516         
         lea     $111D2, a6                         ; 00A37C 4df9000111d2         
-        bsr     sub_0100CC                         ; 00A382 61005d48             
+        bsr     number_to_decimal                  ; 00A382 61005d48             
         lea     $14CD1, a0                         ; 00A386 41f900014cd1         
         lea     $111DA, a1                         ; 00A38C 43f9000111da         
         move.b  (a1), (a0)                         ; 00A392 1091                 
@@ -2356,7 +2356,7 @@ L_00A3A6:
         move.w  #2, $112DC                         ; 00A3A6 33fc0002000112dc     
 
 ; ----------------------------------------------------------------------------
-sub_00A3AE:
+clamp_level_index:
         cmpi.w  #$DD, d0                           ; 00A3AE 0c4000dd             
         blt     L_00A3B8                           ; 00A3B2 6d04                 
         move.w  #$6F, d0                           ; 00A3B4 303c006f             
@@ -2364,7 +2364,7 @@ L_00A3B8:
         rts                                        ; 00A3B8 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A3BA:
+menu_info_screen:
         bsr     clear_level_bitmap_5000            ; 00A3BA 6100e730             
         move.l  v_level_bitmap_ptr, d0             ; 00A3BE 20390001b5e8         
         lea     $1BBA6, a1                         ; 00A3C4 43f90001bba6         
@@ -2376,66 +2376,66 @@ sub_00A3BA:
         move.l  $1B5F8, $1B604                     ; 00A3E6 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00A3F0 42790001b608         
         lea     $146A6, a2                         ; 00A3F6 45f9000146a6         
-        bsr     sub_00B2A0                         ; 00A3FC 61000ea2             
+        bsr     draw_text                          ; 00A3FC 61000ea2             
         lea     $146CE, a2                         ; 00A400 45f9000146ce         
-        bsr     sub_00B2A0                         ; 00A406 61000e98             
+        bsr     draw_text                          ; 00A406 61000e98             
         lea     $146EE, a2                         ; 00A40A 45f9000146ee         
-        bsr     sub_00B2A0                         ; 00A410 61000e8e             
+        bsr     draw_text                          ; 00A410 61000e8e             
         lea     $1470C, a2                         ; 00A414 45f90001470c         
-        bsr     sub_00B2A0                         ; 00A41A 61000e84             
+        bsr     draw_text                          ; 00A41A 61000e84             
         lea     $14734, a2                         ; 00A41E 45f900014734         
-        bsr     sub_00B2A0                         ; 00A424 61000e7a             
+        bsr     draw_text                          ; 00A424 61000e7a             
         lea     $1475A, a2                         ; 00A428 45f90001475a         
-        bsr     sub_00B2A0                         ; 00A42E 61000e70             
+        bsr     draw_text                          ; 00A42E 61000e70             
         lea     $14782, a2                         ; 00A432 45f900014782         
-        bsr     sub_00B2A0                         ; 00A438 61000e66             
+        bsr     draw_text                          ; 00A438 61000e66             
         lea     $147B6, a2                         ; 00A43C 45f9000147b6         
-        bsr     sub_00B2A0                         ; 00A442 61000e5c             
+        bsr     draw_text                          ; 00A442 61000e5c             
         lea     $147F8, a2                         ; 00A446 45f9000147f8         
-        bsr     sub_00B2A0                         ; 00A44C 61000e52             
+        bsr     draw_text                          ; 00A44C 61000e52             
         lea     $14840, a2                         ; 00A450 45f900014840         
-        bsr     sub_00B2A0                         ; 00A456 61000e48             
+        bsr     draw_text                          ; 00A456 61000e48             
         lea     $14884, a2                         ; 00A45A 45f900014884         
-        bsr     sub_00B2A0                         ; 00A460 61000e3e             
+        bsr     draw_text                          ; 00A460 61000e3e             
         lea     $148BE, a2                         ; 00A464 45f9000148be         
-        bsr     sub_00B2A0                         ; 00A46A 61000e34             
+        bsr     draw_text                          ; 00A46A 61000e34             
         lea     $148F0, a2                         ; 00A46E 45f9000148f0         
-        bsr     sub_00B2A0                         ; 00A474 61000e2a             
+        bsr     draw_text                          ; 00A474 61000e2a             
         lea     $14940, a2                         ; 00A478 45f900014940         
-        bsr     sub_00B2A0                         ; 00A47E 61000e20             
+        bsr     draw_text                          ; 00A47E 61000e20             
         lea     $14976, a2                         ; 00A482 45f900014976         
-        bsr     sub_00B2A0                         ; 00A488 61000e16             
+        bsr     draw_text                          ; 00A488 61000e16             
 
 ; ----------------------------------------------------------------------------
-sub_00A48C:
+return_to_menu:
         bsr     wait_button_click                  ; 00A48C 6100e62a             
 L_00A490:
         move.l  #$1B896, $80(a5)                   ; 00A490 2b7c0001b8960080     
         move.w  #$100, $96(a5)                     ; 00A498 3b7c01000096         
-        bsr     sub_009366                         ; 00A49E 6100eec6             
-        bsr     sub_00AAA8                         ; 00A4A2 61000604             
-        bsr     sub_0093EA                         ; 00A4A6 6100ef42             
-        bsr     sub_0094D6                         ; 00A4AA 6100f02a             
-        bsr     sub_00951A                         ; 00A4AE 6100f06a             
-        bsr     sub_0095B8                         ; 00A4B2 6100f104             
-        bsr     sub_00975C                         ; 00A4B6 6100f2a4             
+        bsr     set_menu_bitplanes                 ; 00A49E 6100eec6             
+        bsr     sort_positions                     ; 00A4A2 61000604             
+        bsr     draw_positions_list                ; 00A4A6 6100ef42             
+        bsr     draw_positions_scroll              ; 00A4AA 6100f02a             
+        bsr     draw_player_list                   ; 00A4AE 6100f06a             
+        bsr     draw_level_list                    ; 00A4B2 6100f104             
+        bsr     draw_hall_of_fame                  ; 00A4B6 6100f2a4             
         move.w  #$8100, $96(a5)                    ; 00A4BA 3b7c81000096         
         rts                                        ; 00A4C0 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A4C2:
+menu_ok_start_level:
         move.w  #1, $113A0                         ; 00A4C2 33fc0001000113a0     
         rts                                        ; 00A4CA 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A4CC:
-        bsr     sub_00A556                         ; 00A4CC 61000088             
+menu_gfx_tutor:
+        bsr     clear_tutor_screen                 ; 00A4CC 61000088             
         movea.l $1B5BC, a0                         ; 00A4D0 20790001b5bc         
         movea.l v_level_bitmap_ptr, a1             ; 00A4D6 22790001b5e8         
         adda.l  #$F000, a1                         ; 00A4DC d3fc0000f000         
         move.l  #$14000, d4                        ; 00A4E2 283c00014000         
         moveq   #0, d0                             ; 00A4E8 7000                 
-        bsr     sub_0093A4                         ; 00A4EA 6100eeb8             
+        bsr     unpack_rle_picture                 ; 00A4EA 6100eeb8             
         move.l  v_level_bitmap_ptr, d0             ; 00A4EE 20390001b5e8         
         addi.l  #$F000, d0                         ; 00A4F4 06800000f000         
         lea     $1BB56, a1                         ; 00A4FA 43f90001bb56         
@@ -2463,7 +2463,7 @@ sub_00A4CC:
         rts                                        ; 00A554 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A556:
+clear_tutor_screen:
         movea.l v_level_bitmap_ptr, a0             ; 00A556 20790001b5e8         
         adda.l  #$F000, a0                         ; 00A55C d1fc0000f000         
         move.l  #$4FFF, d7                         ; 00A562 2e3c00004fff         
@@ -2473,7 +2473,8 @@ L_00A568:
         rts                                        ; 00A56E 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A570:
+; Демо: режим $113AC, уровень из PHIL_02, ввод из записи.
+menu_demo:
         move.w  #1, v_demo_mode                    ; 00A570 33fc0001000113ac     
         move.w  #1, $113A0                         ; 00A578 33fc0001000113a0     
         move.w  #1, $112DE                         ; 00A580 33fc0001000112de     
@@ -2482,7 +2483,8 @@ sub_00A570:
         rts                                        ; 00A598 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A59A:
+; Перечитать графику и рекорды с диска (с подтверждением кнопками мыши).
+menu_reload_disk:
         bsr     clear_level_bitmap_5000            ; 00A59A 6100e550             
         movea.l v_level_bitmap_ptr, a0             ; 00A59E 20790001b5e8         
         adda.w  #$1000, a0                         ; 00A5A4 d0fc1000             
@@ -2499,15 +2501,15 @@ sub_00A59A:
         move.l  d0, $1B604                         ; 00A5DC 23c00001b604         
         clr.w   $1B608                             ; 00A5E2 42790001b608         
         lea     $1499C, a2                         ; 00A5E8 45f90001499c         
-        bsr     sub_00B2A0                         ; 00A5EE 61000cb0             
+        bsr     draw_text                          ; 00A5EE 61000cb0             
         lea     $149BC, a2                         ; 00A5F2 45f9000149bc         
-        bsr     sub_00B2A0                         ; 00A5F8 61000ca6             
+        bsr     draw_text                          ; 00A5F8 61000ca6             
         lea     $149D8, a2                         ; 00A5FC 45f9000149d8         
-        bsr     sub_00B2A0                         ; 00A602 61000c9c             
+        bsr     draw_text                          ; 00A602 61000c9c             
         lea     $149FE, a2                         ; 00A606 45f9000149fe         
-        bsr     sub_00B2A0                         ; 00A60C 61000c92             
+        bsr     draw_text                          ; 00A60C 61000c92             
         lea     $14A26, a2                         ; 00A610 45f900014a26         
-        bsr     sub_00B2A0                         ; 00A616 61000c88             
+        bsr     draw_text                          ; 00A616 61000c88             
         bsr     wait_6_frames                      ; 00A61A 6100114c             
         bsr     wait_6_frames                      ; 00A61E 61001148             
         bsr     wait_6_frames                      ; 00A622 61001144             
@@ -2525,7 +2527,7 @@ L_00A634:
         adda.w  #$1000, a0                         ; 00A654 d0fc1000             
         bsr     clear_5000_bytes                   ; 00A658 6100e498             
         lea     $14A4E, a2                         ; 00A65C 45f900014a4e         
-        bsr     sub_00B2A0                         ; 00A662 61000c3c             
+        bsr     draw_text                          ; 00A662 61000c3c             
         bsr     load_graphics_and_hiscores         ; 00A666 6100ddf4             
         bsr     music_start                        ; 00A66A 6100643e             
         bsr     unpack_hiscore_file                ; 00A66E 6100e31a             
@@ -2537,9 +2539,9 @@ L_00A684:
         dc.b    $4E,$75                                                          ; 00A688 Nu
 
 ; ----------------------------------------------------------------------------
-sub_00A68A:
+wait_click_and_release:
         btst.b  #6, $BFE001                        ; 00A68A 0839000600bfe001     
-        beq     sub_00A68A                         ; 00A692 67f6                 
+        beq     wait_click_and_release             ; 00A692 67f6                 
 L_00A694:
         bsr     update_mouse_pointer               ; 00A694 6100eb5c             
         btst.b  #6, $BFE001                        ; 00A698 0839000600bfe001     
@@ -2563,17 +2565,17 @@ L_00A6D2:
         moveq   #$FFFFFFFF, d7                     ; 00A6D2 7eff                 
         rts                                        ; 00A6D4 4e75                 
 L_00A6D6:
-        bsr     sub_00B108                         ; 00A6D6 61000a30             
-        bsr     sub_00A6F2                         ; 00A6DA 6116                 
-        bsr     sub_00A73A                         ; 00A6DC 615c                 
-        bsr     sub_00A896                         ; 00A6DE 610001b6             
+        bsr     clear_message_line                 ; 00A6D6 61000a30             
+        bsr     name_length                        ; 00A6DA 6116                 
+        bsr     check_player_name                  ; 00A6DC 615c                 
+        bsr     find_free_player_slot              ; 00A6DE 610001b6             
         clr.w   $140DE                             ; 00A6E2 4279000140de         
-        bsr     sub_0095B8                         ; 00A6E8 6100eece             
+        bsr     draw_level_list                    ; 00A6E8 6100eece             
         bsr     save_hiscores                      ; 00A6EC 6100098a             
         rts                                        ; 00A6F0 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A6F2:
+name_length:
         lea     $11410, a0                         ; 00A6F2 41f900011410         
         moveq   #0, d0                             ; 00A6F8 7000                 
 L_00A6FA:
@@ -2602,7 +2604,7 @@ L_00A738:
         rts                                        ; 00A738 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A73A:
+check_player_name:
         lea     $1141F, a0                         ; 00A73A 41f90001141f         
         lea     $14442, a1                         ; 00A740 43f900014442         
         move.w  #7, d0                             ; 00A746 303c0007             
@@ -2674,39 +2676,39 @@ L_00A7D6:
         rts                                        ; 00A7F4 4e75                 
 L_00A7F6:
         move.w  #1, $1139C                         ; 00A7F6 33fc00010001139c     
-        bsr     sub_00B108                         ; 00A7FE 61000908             
+        bsr     clear_message_line                 ; 00A7FE 61000908             
         move.l  $1B5F8, $1B604                     ; 00A802 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00A80C 42790001b608         
         lea     $143E4, a2                         ; 00A812 45f9000143e4         
-        bsr     sub_00B2A0                         ; 00A818 61000a86             
+        bsr     draw_text                          ; 00A818 61000a86             
         rts                                        ; 00A81C 4e75                 
 L_00A81E:
         move.w  #1, $1139C                         ; 00A81E 33fc00010001139c     
-        bsr     sub_00B108                         ; 00A826 610008e0             
+        bsr     clear_message_line                 ; 00A826 610008e0             
         move.l  $1B5F8, $1B604                     ; 00A82A 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00A834 42790001b608         
         lea     $143F6, a2                         ; 00A83A 45f9000143f6         
-        bsr     sub_00B2A0                         ; 00A840 61000a5e             
+        bsr     draw_text                          ; 00A840 61000a5e             
         rts                                        ; 00A844 4e75                 
 L_00A846:
         move.w  #1, $1139C                         ; 00A846 33fc00010001139c     
-        bsr     sub_00B108                         ; 00A84E 610008b8             
+        bsr     clear_message_line                 ; 00A84E 610008b8             
         move.l  $1B5F8, $1B604                     ; 00A852 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00A85C 42790001b608         
         lea     $1444C, a2                         ; 00A862 45f90001444c         
-        bsr     sub_00B2A0                         ; 00A868 61000a36             
+        bsr     draw_text                          ; 00A868 61000a36             
         rts                                        ; 00A86C 4e75                 
 L_00A86E:
         move.w  #1, $1139C                         ; 00A86E 33fc00010001139c     
-        bsr     sub_00B108                         ; 00A876 61000890             
+        bsr     clear_message_line                 ; 00A876 61000890             
         move.l  $1B5F8, $1B604                     ; 00A87A 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00A884 42790001b608         
         lea     $1445C, a2                         ; 00A88A 45f90001445c         
-        bsr     sub_00B2A0                         ; 00A890 61000a0e             
+        bsr     draw_text                          ; 00A890 61000a0e             
         rts                                        ; 00A894 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A896:
+find_free_player_slot:
         tst.w   $1139C                             ; 00A896 4a790001139c         
         beq     L_00A8A0                           ; 00A89C 6702                 
         rts                                        ; 00A89E 4e75                 
@@ -2725,7 +2727,7 @@ L_00A8B2:
         move.w  #1, $1139C                         ; 00A8C4 33fc00010001139c     
         move.l  $1B5F8, $1B604                     ; 00A8CC 23f90001b5f80001b604 
         lea     $14408, a2                         ; 00A8D6 45f900014408         
-        bsr     sub_00B2A0                         ; 00A8DC 610009c2             
+        bsr     draw_text                          ; 00A8DC 610009c2             
         rts                                        ; 00A8E0 4e75                 
 L_00A8E2:
         move.l  a0, v_player_record                ; 00A8E2 23c8000113d6         
@@ -2736,19 +2738,19 @@ L_00A8E2:
         move.b  d1, -$1(a1)                        ; 00A8FE 1341ffff             
         clr.b   -$2(a1)                            ; 00A902 4229fffe             
         move.b  d1, $140E9                         ; 00A906 13c1000140e9         
-        bsr     sub_00A934                         ; 00A90C 6126                 
+        bsr     reset_player_record                ; 00A90C 6126                 
         movea.l a1, a3                             ; 00A90E 2649                 
-        bsr     sub_00A924                         ; 00A910 6112                 
+        bsr     copy_player_name                   ; 00A910 6112                 
         movea.l a0, a3                             ; 00A912 2648                 
         addq.l  #8, a3                             ; 00A914 508b                 
-        bsr     sub_00A924                         ; 00A916 610c                 
-        bsr     sub_00951A                         ; 00A918 6100ec00             
-        bsr     sub_00AD10                         ; 00A91C 610003f2             
-        bsr     sub_00A95E                         ; 00A920 613c                 
+        bsr     copy_player_name                   ; 00A916 610c                 
+        bsr     draw_player_list                   ; 00A918 6100ec00             
+        bsr     draw_player_stats                  ; 00A91C 610003f2             
+        bsr     build_positions_lines              ; 00A920 613c                 
         rts                                        ; 00A922 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A924:
+copy_player_name:
         lea     $1141F, a2                         ; 00A924 45f90001141f         
         moveq   #7, d0                             ; 00A92A 7007                 
 L_00A92C:
@@ -2757,7 +2759,7 @@ L_00A92C:
         rts                                        ; 00A932 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A934:
+reset_player_record:
         movea.l v_player_record, a0                ; 00A934 2079000113d6         
         clr.b   $1(a0)                             ; 00A93A 42280001             
         clr.w   $2(a0)                             ; 00A93E 42680002             
@@ -2770,7 +2772,7 @@ sub_00A934:
         rts                                        ; 00A95C 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00A95E:
+build_positions_lines:
         movea.l v_player_record, a0                ; 00A95E 2079000113d6         
         lea     $13056, a2                         ; 00A964 45f900013056         
         moveq   #0, d0                             ; 00A96A 7000                 
@@ -2835,13 +2837,13 @@ L_00A9E2:
         move.b  d0, $14(a1)                        ; 00AA20 13400014             
         move.b  d0, $15(a1)                        ; 00AA24 13400015             
         move.w  $140E8, $13028                     ; 00AA28 33f9000140e800013028 
-        bsr     sub_0093EA                         ; 00AA32 6100e9b6             
-        bsr     sub_0094D6                         ; 00AA36 6100ea9e             
+        bsr     draw_positions_list                ; 00AA32 6100e9b6             
+        bsr     draw_positions_scroll              ; 00AA36 6100ea9e             
         rts                                        ; 00AA3A 4e75                 
         dc.b    $4E,$75                                                          ; 00AA3C Nu
 
 ; ----------------------------------------------------------------------------
-sub_00AA3E:
+add_level_time_to_player:
         moveq   #0, d0                             ; 00AA3E 7000                 
         moveq   #0, d1                             ; 00AA40 7200                 
         moveq   #0, d2                             ; 00AA42 7400                 
@@ -2880,7 +2882,7 @@ L_00AA9A:
         rts                                        ; 00AAA6 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00AAA8:
+sort_positions:
         lea     $13F7E, a0                         ; 00AAA8 41f900013f7e         
         move.w  #$13F, d0                          ; 00AAAE 303c013f             
 L_00AAB2:
@@ -2981,7 +2983,7 @@ L_00ABB4:
         rts                                        ; 00ABBC 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00ABBE:
+format_positions:
         lea     $13F7E, a1                         ; 00ABBE 43f900013f7e         
         lea     $13056, a2                         ; 00ABC4 45f900013056         
         move.w  #$13, d7                           ; 00ABCA 3e3c0013             
@@ -2994,7 +2996,7 @@ L_00ABCE:
         moveq   #0, d4                             ; 00ABDA 7800                 
         move.w  (a1), d4                           ; 00ABDC 3811                 
         lea     $111D2, a6                         ; 00ABDE 4df9000111d2         
-        bsr     sub_0100CC                         ; 00ABE4 610054e6             
+        bsr     number_to_decimal                  ; 00ABE4 610054e6             
         move.b  $111D9, (a2)                       ; 00ABE8 14b9000111d9         
         move.b  $111DA, $1(a2)                     ; 00ABEE 1579000111da0001     
         move.b  $111DB, $2(a2)                     ; 00ABF6 1579000111db0002     
@@ -3009,20 +3011,20 @@ L_00ABCE:
         moveq   #0, d4                             ; 00AC2E 7800                 
         move.w  $A(a1), d4                         ; 00AC30 3829000a             
         lea     $111D2, a6                         ; 00AC34 4df9000111d2         
-        bsr     sub_0100CC                         ; 00AC3A 61005490             
+        bsr     number_to_decimal                  ; 00AC3A 61005490             
         move.b  $111D9, $D(a2)                     ; 00AC3E 1579000111d9000d     
         move.b  $111DA, $E(a2)                     ; 00AC46 1579000111da000e     
         move.b  $111DB, $F(a2)                     ; 00AC4E 1579000111db000f     
         moveq   #0, d4                             ; 00AC56 7800                 
         move.w  $C(a1), d4                         ; 00AC58 3829000c             
         lea     $111D2, a6                         ; 00AC5C 4df9000111d2         
-        bsr     sub_0100CC                         ; 00AC62 61005468             
+        bsr     number_to_decimal                  ; 00AC62 61005468             
         move.b  $111DA, $11(a2)                    ; 00AC66 1579000111da0011     
         move.b  $111DB, $12(a2)                    ; 00AC6E 1579000111db0012     
         moveq   #0, d4                             ; 00AC76 7800                 
         move.w  $E(a1), d4                         ; 00AC78 3829000e             
         lea     $111D2, a6                         ; 00AC7C 4df9000111d2         
-        bsr     sub_0100CC                         ; 00AC82 61005448             
+        bsr     number_to_decimal                  ; 00AC82 61005448             
         move.b  $111DA, $14(a2)                    ; 00AC86 1579000111da0014     
         move.b  $111DB, $15(a2)                    ; 00AC8E 1579000111db0015     
 L_00AC96:
@@ -3052,13 +3054,13 @@ L_00ACA4:
         bra     L_00AC96                           ; 00AD0E 6086                 
 
 ; ----------------------------------------------------------------------------
-sub_00AD10:
-        bsr     sub_00B108                         ; 00AD10 610003f6             
+draw_player_stats:
+        bsr     clear_message_line                 ; 00AD10 610003f6             
         movea.l v_player_record, a0                ; 00AD14 2079000113d6         
         moveq   #0, d4                             ; 00AD1A 7800                 
         move.w  $14(a0), d4                        ; 00AD1C 38280014             
         lea     $111D2, a6                         ; 00AD20 4df9000111d2         
-        bsr     sub_0100CC                         ; 00AD26 610053a4             
+        bsr     number_to_decimal                  ; 00AD26 610053a4             
         move.b  $111D9, $144F4                     ; 00AD2A 13f9000111d9000144f4 
         move.b  $111DA, $144F5                     ; 00AD34 13f9000111da000144f5 
         move.b  $111DB, $144F6                     ; 00AD3E 13f9000111db000144f6 
@@ -3068,7 +3070,7 @@ sub_00AD10:
         lea     $144F0, a2                         ; 00AD5C 45f9000144f0         
         move.l  $4(a2), $14502                     ; 00AD62 23ea000400014502     
         move.l  $1B5F8, $1B604                     ; 00AD6A 23f90001b5f80001b604 
-        bsr     sub_00B2A0                         ; 00AD74 6100052a             
+        bsr     draw_text                          ; 00AD74 6100052a             
         movea.l v_player_record, a0                ; 00AD78 2079000113d6         
         addq.l  #8, a0                             ; 00AD7E 5088                 
         lea     $1142C, a1                         ; 00AD80 43f90001142c         
@@ -3081,14 +3083,14 @@ L_00AD88:
         lea     $11428, a2                         ; 00AD9E 45f900011428         
         move.l  $4(a2), $14506                     ; 00ADA4 23ea000400014506     
         move.l  $8(a2), $1450A                     ; 00ADAC 23ea00080001450a     
-        bsr     sub_00B2A0                         ; 00ADB4 610004ea             
+        bsr     draw_text                          ; 00ADB4 610004ea             
         move.w  #$10, $1141A                       ; 00ADB8 33fc00100001141a     
         move.w  #$18, $1141C                       ; 00ADC0 33fc00180001141c     
         moveq   #0, d4                             ; 00ADC8 7800                 
         movea.l v_player_record, a0                ; 00ADCA 2079000113d6         
         move.w  $10(a0), d4                        ; 00ADD0 38280010             
         lea     $111D2, a6                         ; 00ADD4 4df9000111d2         
-        bsr     sub_0100CC                         ; 00ADDA 610052f0             
+        bsr     number_to_decimal                  ; 00ADDA 610052f0             
         move.b  $111D9, $144F4                     ; 00ADDE 13f9000111d9000144f4 
         move.b  $111DA, $144F5                     ; 00ADE8 13f9000111da000144f5 
         move.b  $111DB, $144F6                     ; 00ADF2 13f9000111db000144f6 
@@ -3098,12 +3100,12 @@ L_00AD88:
         lea     $144F0, a2                         ; 00AE10 45f9000144f0         
         move.l  $4(a2), $1450E                     ; 00AE16 23ea00040001450e     
         move.l  $1B5F8, $1B604                     ; 00AE1E 23f90001b5f80001b604 
-        bsr     sub_00B2A0                         ; 00AE28 61000476             
+        bsr     draw_text                          ; 00AE28 61000476             
         moveq   #0, d4                             ; 00AE2C 7800                 
         movea.l v_player_record, a0                ; 00AE2E 2079000113d6         
         move.b  $12(a0), d4                        ; 00AE34 18280012             
         lea     $111D2, a6                         ; 00AE38 4df9000111d2         
-        bsr     sub_0100CC                         ; 00AE3E 6100528c             
+        bsr     number_to_decimal                  ; 00AE3E 6100528c             
         move.b  $111DA, $144F4                     ; 00AE42 13f9000111da000144f4 
         move.b  $111DB, $144F5                     ; 00AE4C 13f9000111db000144f5 
         clr.b   $144F6                             ; 00AE56 4239000144f6         
@@ -3112,12 +3114,12 @@ L_00AD88:
         lea     $144F0, a2                         ; 00AE6A 45f9000144f0         
         move.w  $4(a2), $14512                     ; 00AE70 33ea000400014512     
         move.l  $1B5F8, $1B604                     ; 00AE78 23f90001b5f80001b604 
-        bsr     sub_00B2A0                         ; 00AE82 6100041c             
+        bsr     draw_text                          ; 00AE82 6100041c             
         moveq   #0, d4                             ; 00AE86 7800                 
         movea.l v_player_record, a0                ; 00AE88 2079000113d6         
         move.b  $13(a0), d4                        ; 00AE8E 18280013             
         lea     $111D2, a6                         ; 00AE92 4df9000111d2         
-        bsr     sub_0100CC                         ; 00AE98 61005232             
+        bsr     number_to_decimal                  ; 00AE98 61005232             
         move.b  $111DA, $144F4                     ; 00AE9C 13f9000111da000144f4 
         move.b  $111DB, $144F5                     ; 00AEA6 13f9000111db000144f5 
         clr.b   $144F6                             ; 00AEB0 4239000144f6         
@@ -3126,11 +3128,12 @@ L_00AD88:
         lea     $144F0, a2                         ; 00AEC4 45f9000144f0         
         move.w  $4(a2), $14514                     ; 00AECA 33ea000400014514     
         move.l  $1B5F8, $1B604                     ; 00AED2 23f90001b5f80001b604 
-        bsr     sub_00B2A0                         ; 00AEDC 610003c2             
+        bsr     draw_text                          ; 00AEDC 610003c2             
         rts                                        ; 00AEE0 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00AEE2:
+; Обновить «зал славы» ($13F30): вставить игрока, если его время лучше.
+update_hall_of_fame:
         moveq   #3, d3                             ; 00AEE2 7603                 
         moveq   #0, d4                             ; 00AEE4 7800                 
         moveq   #0, d5                             ; 00AEE6 7a00                 
@@ -3143,18 +3146,18 @@ L_00AEF8:
         move.b  $9(a0), $11403                     ; 00AF00 13e8000900011403     
         move.w  $A(a0), $11404                     ; 00AF08 33e8000a00011404     
         lea     $11402, a4                         ; 00AF10 49f900011402         
-        bsr     sub_010098                         ; 00AF16 61005180             
+        bsr     parse_decimal                      ; 00AF16 61005180             
         move.l  d0, d5                             ; 00AF1A 2a00                 
         move.w  #$3030, $11402                     ; 00AF1C 33fc303000011402     
         move.b  $D(a0), $11404                     ; 00AF24 13e8000d00011404     
         move.b  $E(a0), $11405                     ; 00AF2C 13e8000e00011405     
         lea     $11402, a4                         ; 00AF34 49f900011402         
-        bsr     sub_010098                         ; 00AF3A 6100515c             
+        bsr     parse_decimal                      ; 00AF3A 6100515c             
         move.l  d0, d6                             ; 00AF3E 2c00                 
         move.w  #$3030, $11402                     ; 00AF40 33fc303000011402     
         move.w  $10(a0), $11404                    ; 00AF48 33e8001000011404     
         lea     $11402, a4                         ; 00AF50 49f900011402         
-        bsr     sub_010098                         ; 00AF56 61005140             
+        bsr     parse_decimal                      ; 00AF56 61005140             
         move.l  d0, d7                             ; 00AF5A 2e00                 
         move.w  $10(a1), d4                        ; 00AF5C 38290010             
         cmp.w   d4, d5                             ; 00AF60 ba44                 
@@ -3203,19 +3206,19 @@ L_00AFB0:
 L_00AFC0:
         lea     $13F42, a3                         ; 00AFC0 47f900013f42         
         lea     $13F54, a4                         ; 00AFC6 49f900013f54         
-        bsr     sub_00AFEE                         ; 00AFCC 6120                 
+        bsr     copy_hof_line                      ; 00AFCC 6120                 
         lea     $13F30, a3                         ; 00AFCE 47f900013f30         
         lea     $13F42, a4                         ; 00AFD4 49f900013f42         
-        bsr     sub_00AFEE                         ; 00AFDA 6112                 
+        bsr     copy_hof_line                      ; 00AFDA 6112                 
         bra     L_00AFFA                           ; 00AFDC 601c                 
 L_00AFDE:
         lea     $13F42, a3                         ; 00AFDE 47f900013f42         
         lea     $13F54, a4                         ; 00AFE4 49f900013f54         
-        bsr     sub_00AFEE                         ; 00AFEA 6102                 
+        bsr     copy_hof_line                      ; 00AFEA 6102                 
         bra     L_00AFFA                           ; 00AFEC 600c                 
 
 ; ----------------------------------------------------------------------------
-sub_00AFEE:
+copy_hof_line:
         move.w  #$11, d0                           ; 00AFEE 303c0011             
 L_00AFF2:
         move.b  (a3)+, (a4)+                       ; 00AFF2 18db                 
@@ -3232,23 +3235,23 @@ L_00B004:
         moveq   #0, d4                             ; 00B00A 7800                 
         move.w  $10(a4), d4                        ; 00B00C 382c0010             
         lea     $111DE, a6                         ; 00B010 4df9000111de         
-        bsr     sub_0100CC                         ; 00B016 610050b4             
+        bsr     number_to_decimal                  ; 00B016 610050b4             
         move.b  $111E5, $9(a3)                     ; 00B01A 1779000111e50009     
         move.b  $111E6, $A(a3)                     ; 00B022 1779000111e6000a     
         move.b  $111E7, $B(a3)                     ; 00B02A 1779000111e7000b     
         moveq   #0, d4                             ; 00B032 7800                 
         move.b  $12(a4), d4                        ; 00B034 182c0012             
         lea     $111DE, a6                         ; 00B038 4df9000111de         
-        bsr     sub_0100CC                         ; 00B03E 6100508c             
+        bsr     number_to_decimal                  ; 00B03E 6100508c             
         move.b  $111E6, $D(a3)                     ; 00B042 1779000111e6000d     
         move.b  $111E7, $E(a3)                     ; 00B04A 1779000111e7000e     
         moveq   #0, d4                             ; 00B052 7800                 
         move.b  $13(a4), d4                        ; 00B054 182c0013             
         lea     $111DE, a6                         ; 00B058 4df9000111de         
-        bsr     sub_0100CC                         ; 00B05E 6100506c             
+        bsr     number_to_decimal                  ; 00B05E 6100506c             
         move.b  $111E6, $10(a3)                    ; 00B062 1779000111e60010     
         move.b  $111E7, $11(a3)                    ; 00B06A 1779000111e70011     
-        bsr     sub_00975C                         ; 00B072 6100e6e8             
+        bsr     draw_hall_of_fame                  ; 00B072 6100e6e8             
         rts                                        ; 00B076 4e75                 
 
 ; ----------------------------------------------------------------------------
@@ -3290,7 +3293,7 @@ copy_bytes_d7:
         rts                                        ; 00B106 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B108:
+clear_message_line:
         movea.l v_level_bitmap_ptr, a0             ; 00B108 20790001b5e8         
         lea     $2DCB(a0), a0                      ; 00B10E 41e82dcb             
         movea.l a0, a1                             ; 00B112 2248                 
@@ -3306,7 +3309,7 @@ L_00B118:
         rts                                        ; 00B128 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B12A:
+show_message:
         movem.l d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6, -(a7) ; 00B12A 48e7fffe             
         lea     $1142C, a0                         ; 00B12E 41f90001142c         
         moveq   #7, d0                             ; 00B134 7007                 
@@ -3316,7 +3319,7 @@ L_00B136:
         move.l  $1B5F8, $1B604                     ; 00B13E 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00B148 42790001b608         
         lea     $11428, a2                         ; 00B14E 45f900011428         
-        bsr     sub_00B2A0                         ; 00B154 6100014a             
+        bsr     draw_text                          ; 00B154 6100014a             
         move.w  #$208, $144F0                      ; 00B158 33fc0208000144f0     
         move.b  #$20, $144F4                       ; 00B160 13fc0020000144f4     
         move.b  #$20, $144F5                       ; 00B168 13fc0020000144f5     
@@ -3325,23 +3328,23 @@ L_00B136:
         move.l  $1B5F8, $1B604                     ; 00B17E 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00B188 42790001b608         
         lea     $144F0, a2                         ; 00B18E 45f9000144f0         
-        bsr     sub_00B2A0                         ; 00B194 6100010a             
+        bsr     draw_text                          ; 00B194 6100010a             
         move.w  #$1A8, $144F0                      ; 00B198 33fc01a8000144f0     
         move.l  $1B5F8, $1B604                     ; 00B1A0 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00B1AA 42790001b608         
         lea     $144F0, a2                         ; 00B1B0 45f9000144f0         
-        bsr     sub_00B2A0                         ; 00B1B6 610000e8             
+        bsr     draw_text                          ; 00B1B6 610000e8             
         clr.b   $144F6                             ; 00B1BA 4239000144f6         
         move.w  #$1C8, $144F0                      ; 00B1C0 33fc01c8000144f0     
         move.l  $1B5F8, $1B604                     ; 00B1C8 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00B1D2 42790001b608         
         lea     $144F0, a2                         ; 00B1D8 45f9000144f0         
-        bsr     sub_00B2A0                         ; 00B1DE 610000c0             
+        bsr     draw_text                          ; 00B1DE 610000c0             
         move.w  #$1E0, $144F0                      ; 00B1E2 33fc01e0000144f0     
         move.l  $1B5F8, $1B604                     ; 00B1EA 23f90001b5f80001b604 
         clr.w   $1B608                             ; 00B1F4 42790001b608         
         lea     $144F0, a2                         ; 00B1FA 45f9000144f0         
-        bsr     sub_00B2A0                         ; 00B200 6100009e             
+        bsr     draw_text                          ; 00B200 6100009e             
         movem.l (a7)+, d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6 ; 00B204 4cdf7fff             
         rts                                        ; 00B208 4e75                 
 
@@ -3394,7 +3397,8 @@ blit_tile_16x16:
         rts                                        ; 00B29E 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B2A0:
+; Нарисовать текстовую запись a2 (координаты + строка) шрифтом меню/панели.
+draw_text:
         movem.l d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6, -(a7) ; 00B2A0 48e7fffe             
         movea.l $1B604, a0                         ; 00B2A4 20790001b604         
         moveq   #0, d0                             ; 00B2AA 7000                 
@@ -3418,13 +3422,13 @@ L_00B2DA:
         mulu.w  #$50, d1                           ; 00B2DA c2fc0050             
         move.l  #$50, d6                           ; 00B2DE 2c3c00000050         
 L_00B2E4:
-        bsr     sub_00B31E                         ; 00B2E4 6138                 
+        bsr     find_glyph                         ; 00B2E4 6138                 
         movea.l $1B5D8, a1                         ; 00B2E6 22790001b5d8         
         adda.l  d4, a1                             ; 00B2EC d3c4                 
         adda.l  d1, a0                             ; 00B2EE d1c1                 
         adda.l  d0, a0                             ; 00B2F0 d1c0                 
         movea.l a0, a6                             ; 00B2F2 2c48                 
-        bsr     sub_00B33C                         ; 00B2F4 6146                 
+        bsr     blit_glyph                         ; 00B2F4 6146                 
 L_00B2F6:
         addq.l  #1, a2                             ; 00B2F6 528a                 
         tst.b   (a2)                               ; 00B2F8 4a12                 
@@ -3432,17 +3436,17 @@ L_00B2F6:
         movea.l a6, a0                             ; 00B2FE 204e                 
         adda.l  #1, a0                             ; 00B300 d1fc00000001         
         movea.l a0, a6                             ; 00B306 2c48                 
-        bsr     sub_00B31E                         ; 00B308 6114                 
+        bsr     find_glyph                         ; 00B308 6114                 
         movea.l $1B5D8, a1                         ; 00B30A 22790001b5d8         
         adda.l  d4, a1                             ; 00B310 d3c4                 
-        bsr     sub_00B33C                         ; 00B312 6128                 
+        bsr     blit_glyph                         ; 00B312 6128                 
         bra     L_00B2F6                           ; 00B314 6000ffe0             
 L_00B318:
         movem.l (a7)+, d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6 ; 00B318 4cdf7fff             
         rts                                        ; 00B31C 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B31E:
+find_glyph:
         lea     $1B52A, a3                         ; 00B31E 47f90001b52a         
         move.b  (a2), d5                           ; 00B324 1a12                 
 L_00B326:
@@ -3457,7 +3461,7 @@ L_00B336:
         rts                                        ; 00B33A 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B33C:
+blit_glyph:
         moveq   #6, d7                             ; 00B33C 7e06                 
 L_00B33E:
         move.b  (a1), (a0)                         ; 00B33E 1091                 
@@ -3520,60 +3524,61 @@ L_00B3C4:
         rts                                        ; 00B3D8 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B3DA:
+; Сброс состояния перед уровнем: переменные, списки объектов, таблицы.
+reset_level_state:
         move.w  #1, $1BD8E                         ; 00B3DA 33fc00010001bd8e     
-        bsr     sub_00B4E0                         ; 00B3E2 610000fc             
-        bsr     sub_00B572                         ; 00B3E6 6100018a             
+        bsr     clear_level_variables              ; 00B3E2 610000fc             
+        bsr     clear_game_variables               ; 00B3E6 6100018a             
         move.l  #$1676, d0                         ; 00B3EA 203c00001676         
         lea     $14D5E, a0                         ; 00B3F0 41f900014d5e         
-        bsr     sub_00B586                         ; 00B3F6 6100018e             
+        bsr     clear_bytes                        ; 00B3F6 6100018e             
         move.l  #$3E8, d0                          ; 00B3FA 203c000003e8         
         lea     v_moving_zonks, a0                 ; 00B400 41f9000163d4         
-        bsr     sub_00B586                         ; 00B406 6100017e             
+        bsr     clear_bytes                        ; 00B406 6100017e             
         move.l  #$1676, d0                         ; 00B40A 203c00001676         
         lea     $167BC, a0                         ; 00B410 41f9000167bc         
-        bsr     sub_00B586                         ; 00B416 6100016e             
+        bsr     clear_bytes                        ; 00B416 6100016e             
         move.l  #$3E8, d0                          ; 00B41A 203c000003e8         
         lea     v_moving_infotrons, a0             ; 00B420 41f900017e32         
-        bsr     sub_00B586                         ; 00B426 6100015e             
+        bsr     clear_bytes                        ; 00B426 6100015e             
         move.l  #$3E8, d0                          ; 00B42A 203c000003e8         
         lea     $1821A, a0                         ; 00B430 41f90001821a         
-        bsr     sub_00B586                         ; 00B436 6100014e             
+        bsr     clear_bytes                        ; 00B436 6100014e             
         move.l  #$3E8, d0                          ; 00B43A 203c000003e8         
         lea     $18602, a0                         ; 00B440 41f900018602         
-        bsr     sub_00B586                         ; 00B446 6100013e             
+        bsr     clear_bytes                        ; 00B446 6100013e             
         move.l  #$7D0, d0                          ; 00B44A 203c000007d0         
         lea     v_orange_disks, a0                 ; 00B450 41f9000189ee         
-        bsr     sub_00B586                         ; 00B456 6100012e             
+        bsr     clear_bytes                        ; 00B456 6100012e             
         move.l  #$20, d0                           ; 00B45A 203c00000020         
         lea     $191BE, a0                         ; 00B460 41f9000191be         
-        bsr     sub_00B586                         ; 00B466 6100011e             
+        bsr     clear_bytes                        ; 00B466 6100011e             
         move.l  #$1680, d0                         ; 00B46A 203c00001680         
         lea     v_cell_screen_ptrs, a0             ; 00B470 41f9000191de         
-        bsr     sub_00B586                         ; 00B476 6100010e             
+        bsr     clear_bytes                        ; 00B476 6100010e             
         move.l  #$960, d0                          ; 00B47A 203c00000960         
         lea     v_gfx_frame_ptrs, a0               ; 00B480 41f90001a85e         
-        bsr     sub_00B586                         ; 00B486 610000fe             
+        bsr     clear_bytes                        ; 00B486 610000fe             
         move.l  #$24, d0                           ; 00B48A 203c00000024         
         lea     $1B1BE, a0                         ; 00B490 41f90001b1be         
-        bsr     sub_00B586                         ; 00B496 610000ee             
+        bsr     clear_bytes                        ; 00B496 610000ee             
         lea     v_explosions, a0                   ; 00B49A 41f90001b1e2         
         move.l  #$240, d0                          ; 00B4A0 203c00000240         
-        bsr     sub_00B586                         ; 00B4A6 610000de             
+        bsr     clear_bytes                        ; 00B4A6 610000de             
         lea     v_map, a0                          ; 00B4AA 41f900011928         
         move.l  #$B40, d0                          ; 00B4B0 203c00000b40         
-        bsr     sub_00B586                         ; 00B4B6 610000ce             
+        bsr     clear_bytes                        ; 00B4B6 610000ce             
         lea     v_level_buffer, a0                 ; 00B4BA 41f900012468         
         move.l  #$5A0, d0                          ; 00B4C0 203c000005a0         
-        bsr     sub_00B586                         ; 00B4C6 610000be             
+        bsr     clear_bytes                        ; 00B4C6 610000be             
         lea     v_special_ports, a0                ; 00B4CA 41f900012a28         
         move.l  #$600, d0                          ; 00B4D0 203c00000600         
-        bsr     sub_00B586                         ; 00B4D6 610000ae             
-        bsr     sub_00B58E                         ; 00B4DA 610000b2             
+        bsr     clear_bytes                        ; 00B4D6 610000ae             
+        bsr     clear_level_title                  ; 00B4DA 610000b2             
         rts                                        ; 00B4DE 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B4E0:
+clear_level_variables:
         clr.l   $11372                             ; 00B4E0 42b900011372         
         clr.w   $140DE                             ; 00B4E6 4279000140de         
         clr.w   v_port_passage_dir                 ; 00B4EC 4279000113e8         
@@ -3601,7 +3606,7 @@ sub_00B4E0:
         rts                                        ; 00B570 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B572:
+clear_game_variables:
         lea     $112CE, a0                         ; 00B572 41f9000112ce         
         lea     c_tile_empty, a1                   ; 00B578 43f9000113b8         
 L_00B57E:
@@ -3611,14 +3616,14 @@ L_00B57E:
         rts                                        ; 00B584 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B586:
+clear_bytes:
         clr.b   (a0)+                              ; 00B586 4218                 
         subq.l  #1, d0                             ; 00B588 5380                 
-        bne     sub_00B586                         ; 00B58A 66fa                 
+        bne     clear_bytes                        ; 00B58A 66fa                 
         rts                                        ; 00B58C 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B58E:
+clear_level_title:
         lea     $12A0D, a0                         ; 00B58E 41f900012a0d         
         move.l  #$18, d0                           ; 00B594 203c00000018         
 L_00B59A:
@@ -3634,8 +3639,8 @@ L_00B59A:
 game_frame:
         tst.b   $6(a5)                             ; 00B5A4 4a2d0006             
         bne     game_frame                         ; 00B5A8 66fa                 
-        bsr     sound_frame                        ; 00B5AA 61004b58             
-        bsr     sub_0101A6                         ; 00B5AE 61004bf6             
+        bsr     sound_effects_frame                ; 00B5AA 61004b58             
+        bsr     stop_samples_ch0_ch2               ; 00B5AE 61004bf6             
         bsr     music_tick                         ; 00B5B2 610055c4             
         addq.b  #1, v_frame_div50                  ; 00B5B6 523900011294         
         cmpi.b  #$32, v_frame_div50                ; 00B5BC 0c39003200011294     
@@ -3723,7 +3728,7 @@ L_00B6EE:
         bsr     blit_murphy_pending                ; 00B6FC 610002ec             
         tst.b   v_frame_div50                      ; 00B700 4a3900011294         
         beq     L_00B70C                           ; 00B706 6704                 
-        bsr     sub_00FF9C                         ; 00B708 61004892             
+        bsr     update_infotron_counter            ; 00B708 61004892             
 L_00B70C:
         cmpi.b  #$FF, $6(a5)                       ; 00B70C 0c2d00ff0006         
         bne     L_00B70C                           ; 00B712 66f8                 
@@ -3791,68 +3796,68 @@ L_00B7C6:
         clr.w   v_clock_hours                      ; 00B7DE 427900011298         
         rts                                        ; 00B7E4 4e75                 
 L_00B7E6:
-        bsr     sub_00B802                         ; 00B7E6 611a                 
-        bsr     sub_00B83C                         ; 00B7E8 6152                 
-        bsr     sub_00B878                         ; 00B7EA 6100008c             
+        bsr     draw_clock_seconds                 ; 00B7E6 611a                 
+        bsr     draw_clock_minutes                 ; 00B7E8 6152                 
+        bsr     draw_clock_hours                   ; 00B7EA 6100008c             
         rts                                        ; 00B7EE 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B7F0:
+draw_panel_digit:
         subi.b  #$30, d0                           ; 00B7F0 04000030             
         movea.l $1B5D4, a1                         ; 00B7F4 22790001b5d4         
         adda.l  d0, a1                             ; 00B7FA d3c0                 
-        bsr     sub_010082                         ; 00B7FC 61004884             
+        bsr     draw_digit_7x9                     ; 00B7FC 61004884             
         rts                                        ; 00B800 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B802:
+draw_clock_seconds:
         moveq   #0, d4                             ; 00B802 7800                 
         move.b  v_clock_seconds, d4                ; 00B804 183900011296         
         lea     $111D2, a6                         ; 00B80A 4df9000111d2         
-        bsr     sub_0100CC                         ; 00B810 610048ba             
+        bsr     number_to_decimal                  ; 00B810 610048ba             
         moveq   #0, d0                             ; 00B814 7000                 
         move.b  $111DB, d0                         ; 00B816 1039000111db         
         movea.l $1B5C0, a0                         ; 00B81C 20790001b5c0         
         lea     $183(a0), a0                       ; 00B822 41e80183             
-        bsr     sub_00B7F0                         ; 00B826 61c8                 
+        bsr     draw_panel_digit                   ; 00B826 61c8                 
         move.b  $111DA, d0                         ; 00B828 1039000111da         
         movea.l $1B5C0, a0                         ; 00B82E 20790001b5c0         
         lea     $182(a0), a0                       ; 00B834 41e80182             
-        bsr     sub_00B7F0                         ; 00B838 61b6                 
+        bsr     draw_panel_digit                   ; 00B838 61b6                 
         rts                                        ; 00B83A 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B83C:
+draw_clock_minutes:
         moveq   #0, d4                             ; 00B83C 7800                 
         move.b  v_clock_minutes, d4                ; 00B83E 183900011297         
         lea     $111D2, a6                         ; 00B844 4df9000111d2         
-        bsr     sub_0100CC                         ; 00B84A 61004880             
+        bsr     number_to_decimal                  ; 00B84A 61004880             
         moveq   #0, d0                             ; 00B84E 7000                 
         move.b  $111DB, d0                         ; 00B850 1039000111db         
         movea.l $1B5C0, a0                         ; 00B856 20790001b5c0         
         lea     $180(a0), a0                       ; 00B85C 41e80180             
-        bsr     sub_00B7F0                         ; 00B860 618e                 
+        bsr     draw_panel_digit                   ; 00B860 618e                 
         move.b  $111DA, d0                         ; 00B862 1039000111da         
         movea.l $1B5C0, a0                         ; 00B868 20790001b5c0         
         lea     $17F(a0), a0                       ; 00B86E 41e8017f             
-        bsr     sub_00B7F0                         ; 00B872 6100ff7c             
+        bsr     draw_panel_digit                   ; 00B872 6100ff7c             
         rts                                        ; 00B876 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00B878:
+draw_clock_hours:
         moveq   #0, d4                             ; 00B878 7800                 
         move.w  v_clock_hours, d4                  ; 00B87A 383900011298         
         lea     $111D2, a6                         ; 00B880 4df9000111d2         
-        bsr     sub_0100CC                         ; 00B886 61004844             
+        bsr     number_to_decimal                  ; 00B886 61004844             
         moveq   #0, d0                             ; 00B88A 7000                 
         move.b  $111DB, d0                         ; 00B88C 1039000111db         
         movea.l $1B5C0, a0                         ; 00B892 20790001b5c0         
         lea     $17D(a0), a0                       ; 00B898 41e8017d             
-        bsr     sub_00B7F0                         ; 00B89C 6100ff52             
+        bsr     draw_panel_digit                   ; 00B89C 6100ff52             
         move.b  $111DA, d0                         ; 00B8A0 1039000111da         
         movea.l $1B5C0, a0                         ; 00B8A6 20790001b5c0         
         lea     $17C(a0), a0                       ; 00B8AC 41e8017c             
-        bsr     sub_00B7F0                         ; 00B8B0 6100ff3e             
+        bsr     draw_panel_digit                   ; 00B8B0 6100ff3e             
         rts                                        ; 00B8B4 4e75                 
 
 ; ----------------------------------------------------------------------------
@@ -8762,7 +8767,7 @@ L_00FE44:
         subi.l  #$7A, d2                           ; 00FE52 04820000007a         
         subi.l  #v_map, d2                         ; 00FE58 048200011928         
         lsl.w   #1, d2                             ; 00FE5E e34a                 
-        bsr     sub_00FF60                         ; 00FE60 610000fe             
+        bsr     register_infotron                  ; 00FE60 610000fe             
 L_00FE64:
         tst.l   $8(a4)                             ; 00FE64 4aac0008             
         beq     L_00FE84                           ; 00FE68 671a                 
@@ -8771,7 +8776,7 @@ L_00FE64:
         subi.l  #$78, d2                           ; 00FE72 048200000078         
         subi.l  #v_map, d2                         ; 00FE78 048200011928         
         lsl.w   #1, d2                             ; 00FE7E e34a                 
-        bsr     sub_00FF60                         ; 00FE80 610000de             
+        bsr     register_infotron                  ; 00FE80 610000de             
 L_00FE84:
         tst.l   $C(a4)                             ; 00FE84 4aac000c             
         beq     L_00FEA4                           ; 00FE88 671a                 
@@ -8780,7 +8785,7 @@ L_00FE84:
         subi.l  #$76, d2                           ; 00FE92 048200000076         
         subi.l  #v_map, d2                         ; 00FE98 048200011928         
         lsl.w   #1, d2                             ; 00FE9E e34a                 
-        bsr     sub_00FF60                         ; 00FEA0 610000be             
+        bsr     register_infotron                  ; 00FEA0 610000be             
 L_00FEA4:
         tst.l   $10(a4)                            ; 00FEA4 4aac0010             
         beq     L_00FEC0                           ; 00FEA8 6716                 
@@ -8789,7 +8794,7 @@ L_00FEA4:
         subq.l  #2, d2                             ; 00FEB2 5582                 
         subi.l  #v_map, d2                         ; 00FEB4 048200011928         
         lsl.w   #1, d2                             ; 00FEBA e34a                 
-        bsr     sub_00FF60                         ; 00FEBC 610000a2             
+        bsr     register_infotron                  ; 00FEBC 610000a2             
 L_00FEC0:
         tst.l   $14(a4)                            ; 00FEC0 4aac0014             
         beq     L_00FED8                           ; 00FEC4 6712                 
@@ -8797,7 +8802,7 @@ L_00FEC0:
         move.l  a1, d2                             ; 00FECA 2409                 
         subi.l  #v_map, d2                         ; 00FECC 048200011928         
         lsl.w   #1, d2                             ; 00FED2 e34a                 
-        bsr     sub_00FF60                         ; 00FED4 6100008a             
+        bsr     register_infotron                  ; 00FED4 6100008a             
 L_00FED8:
         tst.l   $18(a4)                            ; 00FED8 4aac0018             
         beq     L_00FEF2                           ; 00FEDC 6714                 
@@ -8806,7 +8811,7 @@ L_00FED8:
         addq.l  #2, d2                             ; 00FEE6 5482                 
         subi.l  #v_map, d2                         ; 00FEE8 048200011928         
         lsl.w   #1, d2                             ; 00FEEE e34a                 
-        bsr     sub_00FF60                         ; 00FEF0 616e                 
+        bsr     register_infotron                  ; 00FEF0 616e                 
 L_00FEF2:
         tst.l   $1C(a4)                            ; 00FEF2 4aac001c             
         beq     L_00FF10                           ; 00FEF6 6718                 
@@ -8815,7 +8820,7 @@ L_00FEF2:
         addi.l  #$76, d2                           ; 00FF00 068200000076         
         subi.l  #v_map, d2                         ; 00FF06 048200011928         
         lsl.w   #1, d2                             ; 00FF0C e34a                 
-        bsr     sub_00FF60                         ; 00FF0E 6150                 
+        bsr     register_infotron                  ; 00FF0E 6150                 
 L_00FF10:
         tst.l   $20(a4)                            ; 00FF10 4aac0020             
         beq     L_00FF2E                           ; 00FF14 6718                 
@@ -8824,7 +8829,7 @@ L_00FF10:
         addi.l  #$78, d2                           ; 00FF1E 068200000078         
         subi.l  #v_map, d2                         ; 00FF24 048200011928         
         lsl.w   #1, d2                             ; 00FF2A e34a                 
-        bsr     sub_00FF60                         ; 00FF2C 6132                 
+        bsr     register_infotron                  ; 00FF2C 6132                 
 L_00FF2E:
         tst.l   $24(a4)                            ; 00FF2E 4aac0024             
         beq     L_00FF4C                           ; 00FF32 6718                 
@@ -8833,7 +8838,7 @@ L_00FF2E:
         addi.l  #$7A, d2                           ; 00FF3C 06820000007a         
         subi.l  #v_map, d2                         ; 00FF42 048200011928         
         lsl.w   #1, d2                             ; 00FF48 e34a                 
-        bsr     sub_00FF60                         ; 00FF4A 6114                 
+        bsr     register_infotron                  ; 00FF4A 6114                 
 L_00FF4C:
         move.w  #9, d6                             ; 00FF4C 3c3c0009             
 L_00FF50:
@@ -8844,7 +8849,7 @@ L_00FF50:
         rts                                        ; 00FF5E 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00FF60:
+register_infotron:
         lea     $167BC, a0                         ; 00FF60 41f9000167bc         
 L_00FF66:
         move.w  $2(a0), d3                         ; 00FF66 36280002             
@@ -8862,16 +8867,17 @@ L_00FF7C:
         rts                                        ; 00FF82 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00FF84:
+init_infotrons_needed:
         tst.b   v_infotrons_needed                 ; 00FF84 4a3900012a26         
-        beq     sub_00FF9C                         ; 00FF8A 6710                 
+        beq     update_infotron_counter            ; 00FF8A 6710                 
         moveq   #0, d0                             ; 00FF8C 7000                 
         move.b  v_infotrons_needed, d0             ; 00FF8E 103900012a26         
         move.l  d0, v_infotrons_left               ; 00FF94 23c0000111cc         
         rts                                        ; 00FF9A 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_00FF9C:
+; Пересчитать и нарисовать число оставшихся инфотронов на панели.
+update_infotron_counter:
         movem.l d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6, -(a7) ; 00FF9C 48e7fffe             
         lea     $167B8, a0                         ; 00FFA0 41f9000167b8         
 L_00FFA6:
@@ -8886,7 +8892,7 @@ L_00FFA6:
         subq.l  #1, v_infotrons_left               ; 00FFBE 53b9000111cc         
         bra     L_00FFA6                           ; 00FFC4 60e0                 
 L_00FFC6:
-        bsr     sub_0100C0                         ; 00FFC6 610000f8             
+        bsr     infotrons_to_text                  ; 00FFC6 610000f8             
         moveq   #0, d0                             ; 00FFCA 7000                 
         movea.l $1B5C0, a0                         ; 00FFCC 20790001b5c0         
         lea     $40C(a0), a0                       ; 00FFD2 41e8040c             
@@ -8895,54 +8901,54 @@ L_00FFC6:
         move.b  $3(a2), d0                         ; 00FFE2 102a0003             
         subi.w  #$30, d0                           ; 00FFE6 04400030             
         adda.l  d0, a1                             ; 00FFEA d3c0                 
-        bsr     sub_010082                         ; 00FFEC 61000094             
+        bsr     draw_digit_7x9                     ; 00FFEC 61000094             
         movea.l $1B5C0, a0                         ; 00FFF0 20790001b5c0         
         lea     $40B(a0), a0                       ; 00FFF6 41e8040b             
         movea.l $1B5D4, a1                         ; 00FFFA 22790001b5d4         
         move.b  $2(a2), d0                         ; 010000 102a0002             
         subi.w  #$30, d0                           ; 010004 04400030             
         adda.l  d0, a1                             ; 010008 d3c0                 
-        bsr     sub_010082                         ; 01000A 6176                 
+        bsr     draw_digit_7x9                     ; 01000A 6176                 
         movea.l $1B5C0, a0                         ; 01000C 20790001b5c0         
         lea     $40A(a0), a0                       ; 010012 41e8040a             
         movea.l $1B5D4, a1                         ; 010016 22790001b5d4         
         move.b  $1(a2), d0                         ; 01001C 102a0001             
         subi.w  #$30, d0                           ; 010020 04400030             
         adda.l  d0, a1                             ; 010024 d3c0                 
-        bsr     sub_010082                         ; 010026 615a                 
+        bsr     draw_digit_7x9                     ; 010026 615a                 
         movem.l (a7)+, d0/d1/d2/d3/d4/d5/d6/d7/a0/a1/a2/a3/a4/a5/a6 ; 010028 4cdf7fff             
         rts                                        ; 01002C 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_01002E:
+reset_panel_clock:
         clr.w   v_clock_hours                      ; 01002E 427900011298         
         clr.b   v_clock_minutes                    ; 010034 423900011297         
         clr.b   v_clock_seconds                    ; 01003A 423900011296         
         movea.l $1B5C0, a4                         ; 010040 28790001b5c0         
         lea     $17C(a4), a4                       ; 010046 49ec017c             
-        bsr     sub_01005C                         ; 01004A 6110                 
-        bsr     sub_01005C                         ; 01004C 610e                 
+        bsr     draw_panel_zero                    ; 01004A 6110                 
+        bsr     draw_panel_zero                    ; 01004C 610e                 
         addq.l  #1, a4                             ; 01004E 528c                 
-        bsr     sub_01005C                         ; 010050 610a                 
-        bsr     sub_01005C                         ; 010052 6108                 
+        bsr     draw_panel_zero                    ; 010050 610a                 
+        bsr     draw_panel_zero                    ; 010052 6108                 
         addq.l  #1, a4                             ; 010054 528c                 
-        bsr     sub_01005C                         ; 010056 6104                 
-        bsr     sub_01005C                         ; 010058 6102                 
+        bsr     draw_panel_zero                    ; 010056 6104                 
+        bsr     draw_panel_zero                    ; 010058 6102                 
         rts                                        ; 01005A 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_01005C:
+draw_panel_zero:
         movea.l a4, a0                             ; 01005C 204c                 
         moveq   #0, d0                             ; 01005E 7000                 
         movea.l $1B5D4, a1                         ; 010060 22790001b5d4         
-        bsr     sub_010082                         ; 010066 611a                 
+        bsr     draw_digit_7x9                     ; 010066 611a                 
         addq.l  #1, a4                             ; 010068 528c                 
         rts                                        ; 01006A 4e75                 
         dc.b    $76,$08,$10,$91,$D1,$FC,$00,$00,$00,$28,$D3,$FC,$00,$00,$00,$0A  ; 01006C v........(......
         dc.b    $51,$CB,$FF,$F0,$4E,$75                                          ; 01007C Q...Nu
 
 ; ----------------------------------------------------------------------------
-sub_010082:
+draw_digit_7x9:
         moveq   #6, d3                             ; 010082 7606                 
 L_010084:
         move.b  (a1), (a0)                         ; 010084 1091                 
@@ -8952,7 +8958,7 @@ L_010084:
         rts                                        ; 010096 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_010098:
+parse_decimal:
         moveq   #0, d0                             ; 010098 7000                 
         moveq   #0, d2                             ; 01009A 7400                 
 L_01009C:
@@ -8974,12 +8980,13 @@ L_0100BC:
         rts                                        ; 0100BE 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0100C0:
+infotrons_to_text:
         lea     $111C2, a6                         ; 0100C0 4df9000111c2         
         move.l  v_infotrons_left, d4               ; 0100C6 2839000111cc         
 
 ; ----------------------------------------------------------------------------
-sub_0100CC:
+; Число d4 -> десятичные ASCII-цифры по адресу a6 (без ведущих нулей).
+number_to_decimal:
         neg.l   d4                                 ; 0100CC 4484                 
         lea     $111E8, a0                         ; 0100CE 41f9000111e8         
         move.w  #$FFFF, d1                         ; 0100D4 323cffff             
@@ -9008,25 +9015,26 @@ L_0100FA:
         rts                                        ; 010102 4e75                 
 
 ; ----------------------------------------------------------------------------
-sound_frame:
+; Звуковые эффекты: запуск образцов через несколько кадров после запроса.
+sound_effects_frame:
         tst.w   $11380                             ; 010104 4a7900011380         
         beq     L_01011E                           ; 01010A 6712                 
         addq.w  #1, $11380                         ; 01010C 527900011380         
         cmpi.w  #5, $11380                         ; 010112 0c79000500011380     
         bne     L_01011E                           ; 01011A 6602                 
-        bsr     sub_01013A                         ; 01011C 611c                 
+        bsr     play_sample_ch0_ch2                ; 01011C 611c                 
 L_01011E:
         tst.w   $11382                             ; 01011E 4a7900011382         
         beq     L_010138                           ; 010124 6712                 
         addq.w  #1, $11382                         ; 010126 527900011382         
         cmpi.w  #5, $11382                         ; 01012C 0c79000500011382     
         bne     L_010138                           ; 010134 6602                 
-        bsr     sub_01017A                         ; 010136 6142                 
+        bsr     play_sample_ch1                    ; 010136 6142                 
 L_010138:
         rts                                        ; 010138 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_01013A:
+play_sample_ch0_ch2:
         move.l  $1B5B8, $A0(a5)                    ; 01013A 2b790001b5b800a0     
         move.l  $1B5B8, $C0(a5)                    ; 010142 2b790001b5b800c0     
         move.w  #$1DBE, $A4(a5)                    ; 01014A 3b7c1dbe00a4         
@@ -9041,7 +9049,7 @@ sub_01013A:
         rts                                        ; 010178 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_01017A:
+play_sample_ch1:
         move.l  $1B5B0, $B0(a5)                    ; 01017A 2b790001b5b000b0     
         move.w  #$2BC, $B4(a5)                     ; 010182 3b7c02bc00b4         
         move.w  #$40, $B8(a5)                      ; 010188 3b7c004000b8         
@@ -9053,7 +9061,7 @@ sub_01017A:
         rts                                        ; 0101A4 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0101A6:
+stop_samples_ch0_ch2:
         cmpi.w  #$1C, $11380                       ; 0101A6 0c79001c00011380     
         blt     L_0101D2                           ; 0101AE 6d22                 
         move.l  #0, $A0(a5)                        ; 0101B0 2b7c0000000000a0     
@@ -9065,7 +9073,7 @@ L_0101D2:
         rts                                        ; 0101D2 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0101D4:
+install_keyboard_irq:
         move.l  a0, -(a7)                          ; 0101D4 2f08                 
         lea     $68.w, a0                          ; 0101D6 41f80068             
         move.l  (a0), $10292                       ; 0101DA 23d000010292         
@@ -9076,7 +9084,7 @@ sub_0101D4:
         rts                                        ; 0101F8 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_0101FA:
+remove_keyboard_irq:
         move.w  #8, $DFF09A                        ; 0101FA 33fc000800dff09a     
         move.b  #$7F, $BFED01                      ; 010202 13fc007f00bfed01     
         move.l  $10292, $68.w                      ; 01020A 21f9000102920068     
@@ -9527,21 +9535,21 @@ L_010D56:
         bra     L_010D56                           ; 010D60 60f4                 
 
 ; ----------------------------------------------------------------------------
-sub_010D62:
+music_arpeggio_hi:
         clr.l   d0                                 ; 010D62 4280                 
         move.b  $3(a6), d0                         ; 010D64 102e0003             
         lsr.b   #4, d0                             ; 010D68 e808                 
         bra     L_010D48                           ; 010D6A 60dc                 
 
 ; ----------------------------------------------------------------------------
-sub_010D6C:
+music_arpeggio_lo:
         clr.l   d0                                 ; 010D6C 4280                 
         move.b  $3(a6), d0                         ; 010D6E 102e0003             
         andi.b  #$F, d0                            ; 010D72 0200000f             
         bra     L_010D48                           ; 010D76 60d0                 
 
 ; ----------------------------------------------------------------------------
-sub_010D78:
+music_arpeggio_base:
         move.w  $10(a6), d2                        ; 010D78 342e0010             
 L_010D7C:
         move.w  d2, $6(a5)                         ; 010D7C 3b420006             

@@ -633,11 +633,11 @@ class Emitter:
         if mn == 'bra':
             return [self.target_code(fe, ins.target, body)]
         if mn == 'bsr' or (mn == 'jsr' and ins.target is not None):
-            return ['push32(0x%X); %s(); A7 += 4;' % (ins.addr + ins.size, self.fname(ins.target))]
+            return ['call(%s, 0x%X);' % (self.fname(ins.target), ins.addr + ins.size)]
         if mn == 'jsr':
             pre, post = [], []
             a = self.addr_expr(ops[0], 'l', pre, post)
-            return ['push32(0x%X); callAddress(%s); A7 += 4;' % (ins.addr + ins.size, a)]
+            return ['callIndirect(%s, 0x%X);' % (a, ins.addr + ins.size)]
         if mn == 'jmp':
             if ins.target is not None:
                 return [self.target_code(fe, ins.target, body)]
@@ -666,6 +666,56 @@ class Emitter:
         if mn == 'trap':
             return ['/* trap #%d ignored */' % ops[0].val]
         raise NotImplementedError('%06X %s' % (ins.addr, ins))
+
+    def cond_expr(self, ins, cc):
+        """C++ condition equivalent to 'ins' followed by b<cc>, or None."""
+        name = CC[cc]
+        for o in ins.ops:
+            if o.kind in ('post', 'pre'):
+                return None
+        sz = ins.sz
+        if ins.mn == 'btst':
+            bit, dst = ins.ops
+            szz = 'l' if dst.kind == 'dn' else 'b'
+            v = self.read(dst, szz, [], [])
+            b = str(bit.val & (31 if dst.kind == 'dn' else 7)) if bit.kind == 'imm' else \
+                '(D%d & %d)' % (bit.reg, 31 if dst.kind == 'dn' else 7)
+            if name == 'eq':
+                return '!(%s & (1u << %s))' % (v, b)
+            if name == 'ne':
+                return '(%s & (1u << %s))' % (v, b)
+            return None
+        n = 4 if ins.mn == 'cmpa' else SZN[sz]
+        st = {1: 'int8_t', 2: 'int16_t', 4: 'int32_t'}[n]
+
+        def signed(x):
+            if x.startswith('0x'):
+                v = int(x, 16)
+                bits = n * 8
+                if v >= 1 << (bits - 1):
+                    v -= 1 << bits
+                return str(v)
+            return '%s(%s)' % (st, x)
+        if ins.mn == 'tst':
+            v = self.read(ins.ops[0], sz, [], [])
+            table = {'eq': '%s == 0' % v, 'ne': '%s != 0' % v, 'mi': '%s < 0' % signed(v), 'pl': '%s >= 0' % signed(v),
+                     'gt': '%s > 0' % signed(v), 'le': '%s <= 0' % signed(v), 'ge': '%s >= 0' % signed(v),
+                     'lt': '%s < 0' % signed(v), 'hi': '%s != 0' % v, 'ls': '%s == 0' % v}
+            return table.get(name)
+        src, dst = ins.ops
+        s_ = self.read(src, sz if ins.mn != 'cmpa' else sz, [], [])
+        if ins.mn == 'cmpa':
+            d_ = 'A%d' % dst.reg
+            if sz == 'w':
+                s_ = 'sxw(%s)' % s_
+        else:
+            d_ = self.read(dst, sz, [], [])
+        table = {'eq': '%s == %s' % (d_, s_), 'ne': '%s != %s' % (d_, s_),
+                 'hi': '%s > %s' % (d_, s_), 'ls': '%s <= %s' % (d_, s_),
+                 'cc': '%s >= %s' % (d_, s_), 'cs': '%s < %s' % (d_, s_),
+                 'gt': '%s > %s' % (signed(d_), signed(s_)), 'ge': '%s >= %s' % (signed(d_), signed(s_)),
+                 'lt': '%s < %s' % (signed(d_), signed(s_)), 'le': '%s <= %s' % (signed(d_), signed(s_))}
+        return table.get(name)
 
     def rmw_simple(self, o, sz, val):
         pre, post = [], []
@@ -723,10 +773,36 @@ class Emitter:
                 self.labels.update(c for c in self.p.code_consts if c in body)
         out = []
         order = sorted(body)
+        # fold "compare/test + conditional branch" into a plain C++ condition when
+        # the flags are not needed afterwards (and the branch is not a jump target)
+        self.folded = {}
+        for a in order:
+            ins = self.p.insns[a]
+            if ins.mn not in ('cmp', 'cmpi', 'cmpa', 'tst', 'btst'):
+                continue
+            nxt = a + ins.size
+            if nxt not in body or nxt in self.labels:
+                continue
+            b = self.p.insns[nxt]
+            if b.cc is None or not b.mn.startswith('b') or b.mn in ('bra', 'bsr'):
+                continue
+            if self.p.live_out.get((e, nxt), True):
+                continue
+            cond = self.cond_expr(ins, b.cc)
+            if cond:
+                self.folded[a] = None
+                self.folded[nxt] = cond
         lines_by_addr = {}
         for a in order:
             ins = self.p.insns[a]
             live = self.p.live_out.get((e, a), True)
+            if a in self.folded:
+                cond = self.folded[a]
+                if cond is None:
+                    lines_by_addr[a] = []
+                else:
+                    lines_by_addr[a] = ['if (%s) %s' % (cond, self.target_code(e, ins.target, body))]
+                continue
             try:
                 lines_by_addr[a] = self.emit_insn(e, body, ins, live)
             except NotImplementedError as ex:
@@ -757,7 +833,10 @@ class Emitter:
                 ls = ['TRACE_PC(0x%X);' % a] + ls if ls else ['TRACE_PC(0x%X);' % a]
                 ls = [' '.join(ls)]
             if not ls:
-                out.append('    ; // %06X  %s' % (a, txt))
+                if a in self.folded:
+                    out.append('    // %06X  %s' % (a, txt))
+                else:
+                    out.append('    ; // %06X  %s' % (a, txt))
             else:
                 out.append('    %s  // %06X  %s' % (ls[0], a, txt))
                 for extra in ls[1:]:

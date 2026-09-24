@@ -39,7 +39,7 @@ class Insn:
     def __repr__(self):
         s = self.mn + ('.' + self.sz if self.sz else '')
         ops = ', '.join(repr(o) for o in self.ops)
-        if self.target is not None:
+        if self.target is not None and not (self.mn in ('jsr', 'jmp') and self.ops):
             ops = (ops + ', ' if ops else '') + '$%x' % self.target
         return '%06X %s %s' % (self.addr, s, ops)
 
