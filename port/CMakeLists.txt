@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release)
 endif()
+if(MSVC)
+  # the translated routines are large; silence CRT deprecation warnings
+  add_compile_options(/bigobj /utf-8)
+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+endif()
 
 option(SUPAPLEX_BUILD_TESTS "Build the reference emulator and comparison tools (needs Musashi)" ON)
 

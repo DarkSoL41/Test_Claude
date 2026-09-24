@@ -1,7 +1,6 @@
 #include "game/runtime.hpp"
 
 #include <cstdio>
-#include <cstdlib>
 #include <fstream>
 #include <iterator>
 #include <vector>
@@ -66,7 +65,6 @@ void serviceInterrupts() {
         wr16(A7, getSR());
         wr32(A7 + 2, 0);
         cpu.srHigh = uint16_t((cpu.srHigh & 0xF8FF) | (level << 8) | 0x2000);
-        if (std::getenv("TRACE_IRQ")) std::fprintf(stderr, "port irq %d frame %llu line %d\n", level, (unsigned long long)bus->frameCount(), bus->beamLine());
         g_irqDepth++;
         callAddress(rd32(0x60 + 4 * uint32_t(level)));
         g_irqDepth--;

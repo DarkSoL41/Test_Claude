@@ -25,11 +25,11 @@ void callAddress(uint32_t addr) {
     case 0x8AB8: wait_button_click(); return;
     case 0x8AEC: clear_level_bitmap_5000(); return;
     case 0x8AF2: clear_5000_bytes(); return;
-    case 0x8B02: sub_008B02(); return;
-    case 0x8B36: sub_008B36(); return;
-    case 0x8B4A: sub_008B4A(); return;
-    case 0x8B72: sub_008B72(); return;
-    case 0x8B96: sub_008B96(); return;
+    case 0x8B02: convert_tile_sheets(); return;
+    case 0x8B36: copy_sheet1_to_buffer(); return;
+    case 0x8B4A: copy_sheet2_to_buffer(); return;
+    case 0x8B72: interleave_line(); return;
+    case 0x8B96: blit_buffer_to_sheet(); return;
     case 0x8BC8: level_bytes_to_map(); return;
     case 0x8BF2: build_object_lists(); return;
     case 0x8C84: convert_special_tiles(); return;

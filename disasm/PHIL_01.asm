@@ -27,7 +27,7 @@ L_007E40:
         move.w  #$8040, $96(a5)                    ; 007E44 3b7c80400096         
         bsr     wait_blitter                       ; 007E4A 61007a5c             
         move.l  #$FFFFFFFF, $44(a5)                ; 007E4E 2b7cffffffff0044     
-        bsr     sub_008B02                         ; 007E56 61000caa             
+        bsr     convert_tile_sheets                ; 007E56 61000caa             
         bsr     sub_0089CA                         ; 007E5A 61000b6e             
         bsr     level_bytes_to_map                 ; 007E5E 61000d68             
         bsr     init_scroll_position               ; 007E62 61000eb8             
@@ -650,24 +650,27 @@ L_008AFA:
         rts                                        ; 008B00 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_008B02:
+; Листы тайлов хранятся по плоскостям ($2620 байт на плоскость); здесь они
+; переводятся в interleaved (через буфер $52000 и блиттер), если ещё не
+; переведены ($1BD8E).
+convert_tile_sheets:
         tst.w   $1BD8E                             ; 008B02 4a790001bd8e         
         beq     L_008B0C                           ; 008B08 6702                 
         rts                                        ; 008B0A 4e75                 
 L_008B0C:
-        bsr     sub_008B36                         ; 008B0C 6128                 
+        bsr     copy_sheet1_to_buffer              ; 008B0C 6128                 
         movea.l v_level_bitmap_ptr, a4             ; 008B0E 28790001b5e8         
         movea.l v_tile_gfx_ptr, a6                 ; 008B14 2c790001b5a4         
-        bsr     sub_008B96                         ; 008B1A 6100007a             
-        bsr     sub_008B4A                         ; 008B1E 612a                 
+        bsr     blit_buffer_to_sheet               ; 008B1A 6100007a             
+        bsr     copy_sheet2_to_buffer              ; 008B1E 612a                 
         movea.l v_level_bitmap_ptr, a4             ; 008B20 28790001b5e8         
         movea.l v_tile_gfx_ptr, a6                 ; 008B26 2c790001b5a4         
         adda.l  #$9880, a6                         ; 008B2C ddfc00009880         
-        bsr     sub_008B96                         ; 008B32 6162                 
+        bsr     blit_buffer_to_sheet               ; 008B32 6162                 
         rts                                        ; 008B34 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_008B36:
+copy_sheet1_to_buffer:
         movea.l v_tile_gfx_ptr, a0                 ; 008B36 20790001b5a4         
         movea.l a0, a2                             ; 008B3C 2448                 
         movea.l v_level_bitmap_ptr, a1             ; 008B3E 22790001b5e8         
@@ -675,21 +678,21 @@ sub_008B36:
         bra     L_008B62                           ; 008B48 6018                 
 
 ; ----------------------------------------------------------------------------
-sub_008B4A:
+copy_sheet2_to_buffer:
         movea.l v_tile_gfx_ptr, a0                 ; 008B4A 20790001b5a4         
         adda.l  #$9880, a0                         ; 008B50 d1fc00009880         
         movea.l a0, a2                             ; 008B56 2448                 
         movea.l v_level_bitmap_ptr, a1             ; 008B58 22790001b5e8         
         move.w  #$F3, d2                           ; 008B5E 343c00f3             
 L_008B62:
-        bsr     sub_008B72                         ; 008B62 610e                 
+        bsr     interleave_line                    ; 008B62 610e                 
         adda.l  #$28, a2                           ; 008B64 d5fc00000028         
         movea.l a2, a0                             ; 008B6A 204a                 
         dbf     d2, L_008B62                       ; 008B6C 51cafff4             
         rts                                        ; 008B70 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_008B72:
+interleave_line:
         moveq   #3, d0                             ; 008B72 7003                 
         moveq   #9, d1                             ; 008B74 7209                 
 L_008B76:
@@ -703,7 +706,7 @@ L_008B76:
         rts                                        ; 008B94 4e75                 
 
 ; ----------------------------------------------------------------------------
-sub_008B96:
+blit_buffer_to_sheet:
         bsr     wait_blitter                       ; 008B96 61006d10             
         move.l  a4, $50(a5)                        ; 008B9A 2b4c0050             
         move.l  a6, $54(a5)                        ; 008B9E 2b4e0054             

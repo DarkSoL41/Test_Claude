@@ -28,7 +28,7 @@ L_007E40:
     wr16(A5 + 0x96, 0x8040);  // 007E44  move.w #$8040, 150(a5)
     push32(0x7E4E); wait_blitter(); A7 += 4;  // 007E4A  bsr $f8a8
     wr32(A5 + 0x44, 0xFFFFFFFF);  // 007E4E  move.l #$ffffffff, 68(a5)
-    push32(0x7E5A); sub_008B02(); A7 += 4;  // 007E56  bsr $8b02
+    push32(0x7E5A); convert_tile_sheets(); A7 += 4;  // 007E56  bsr $8b02
     push32(0x7E5E); sub_0089CA(); A7 += 4;  // 007E5A  bsr $89ca
     push32(0x7E62); level_bytes_to_map(); A7 += 4;  // 007E5E  bsr $8bc8
     push32(0x7E66); init_scroll_position(); A7 += 4;  // 007E62  bsr $8d1c
@@ -584,52 +584,55 @@ L_008AFA:
     return;  // 008B00  rts 
 }
 
-void sub_008B02() {
+// Листы тайлов хранятся по плоскостям ($2620 байт на плоскость); здесь они
+// переводятся в interleaved (через буфер $52000 и блиттер), если ещё не
+// переведены ($1BD8E).
+void convert_tile_sheets() {
     logic<2>(rd16(0x1BD8E));  // 008B02  tst.w $1bd8e.l
     if (CC_EQ) goto L_008B0C;  // 008B08  beq $8b0c
     return;  // 008B0A  rts 
 L_008B0C:
-    push32(0x8B0E); sub_008B36(); A7 += 4;  // 008B0C  bsr $8b36
+    push32(0x8B0E); copy_sheet1_to_buffer(); A7 += 4;  // 008B0C  bsr $8b36
     A4 = rd32(v_level_bitmap_ptr);  // 008B0E  movea.l $1b5e8.l, a4
     A6 = rd32(v_tile_gfx_ptr);  // 008B14  movea.l $1b5a4.l, a6
-    push32(0x8B1E); sub_008B96(); A7 += 4;  // 008B1A  bsr $8b96
-    push32(0x8B20); sub_008B4A(); A7 += 4;  // 008B1E  bsr $8b4a
+    push32(0x8B1E); blit_buffer_to_sheet(); A7 += 4;  // 008B1A  bsr $8b96
+    push32(0x8B20); copy_sheet2_to_buffer(); A7 += 4;  // 008B1E  bsr $8b4a
     A4 = rd32(v_level_bitmap_ptr);  // 008B20  movea.l $1b5e8.l, a4
     A6 = rd32(v_tile_gfx_ptr);  // 008B26  movea.l $1b5a4.l, a6
     A6 += 0x9880;  // 008B2C  adda.l #$9880, a6
-    push32(0x8B34); sub_008B96(); A7 += 4;  // 008B32  bsr $8b96
+    push32(0x8B34); blit_buffer_to_sheet(); A7 += 4;  // 008B32  bsr $8b96
     return;  // 008B34  rts 
 }
 
-void sub_008B36() {
+void copy_sheet1_to_buffer() {
     A0 = rd32(v_tile_gfx_ptr);  // 008B36  movea.l $1b5a4.l, a0
     A2 = A0;  // 008B3C  movea.l a0, a2
     A1 = rd32(v_level_bitmap_ptr);  // 008B3E  movea.l $1b5e8.l, a1
     setW(D2, 0xF3);  // 008B44  move.w #$f3, d2
     goto L_008B62;  // 008B48  bra $8b62
 L_008B62:
-    push32(0x8B64); sub_008B72(); A7 += 4;  // 008B62  bsr $8b72
+    push32(0x8B64); interleave_line(); A7 += 4;  // 008B62  bsr $8b72
     A2 += 0x28;  // 008B64  adda.l #$28, a2
     A0 = A2;  // 008B6A  movea.l a2, a0
     setW(D2, D2 - 1); if ((D2 & 0xFFFF) != 0xFFFF) goto L_008B62;  // 008B6C  dbf.w d2, $8b62
     return;  // 008B70  rts 
 }
 
-void sub_008B4A() {
+void copy_sheet2_to_buffer() {
     A0 = rd32(v_tile_gfx_ptr);  // 008B4A  movea.l $1b5a4.l, a0
     A0 += 0x9880;  // 008B50  adda.l #$9880, a0
     A2 = A0;  // 008B56  movea.l a0, a2
     A1 = rd32(v_level_bitmap_ptr);  // 008B58  movea.l $1b5e8.l, a1
     setW(D2, 0xF3);  // 008B5E  move.w #$f3, d2
 L_008B62:
-    push32(0x8B64); sub_008B72(); A7 += 4;  // 008B62  bsr $8b72
+    push32(0x8B64); interleave_line(); A7 += 4;  // 008B62  bsr $8b72
     A2 += 0x28;  // 008B64  adda.l #$28, a2
     A0 = A2;  // 008B6A  movea.l a2, a0
     setW(D2, D2 - 1); if ((D2 & 0xFFFF) != 0xFFFF) goto L_008B62;  // 008B6C  dbf.w d2, $8b62
     return;  // 008B70  rts 
 }
 
-void sub_008B72() {
+void interleave_line() {
     D0 = 0x3;  // 008B72  moveq.l #$3, d0
     D1 = 0x9;  // 008B74  moveq.l #$9, d1
 L_008B76:
@@ -643,7 +646,7 @@ L_008B76:
     return;  // 008B94  rts 
 }
 
-void sub_008B96() {
+void blit_buffer_to_sheet() {
     push32(0x8B9A); wait_blitter(); A7 += 4;  // 008B96  bsr $f8a8
     wr32(A5 + 0x50, A4);  // 008B9A  move.l a4, 80(a5)
     wr32(A5 + 0x54, A6);  // 008B9E  move.l a6, 84(a5)

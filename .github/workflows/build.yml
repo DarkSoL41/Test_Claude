@@ -1,0 +1,57 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    name: Windows (MSVC)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: SDL2 (VC development package)
+        shell: pwsh
+        run: |
+          $v = "2.30.9"
+          Invoke-WebRequest "https://github.com/libsdl-org/SDL/releases/download/release-$v/SDL2-devel-$v-VC.zip" -OutFile sdl2.zip
+          Expand-Archive sdl2.zip -DestinationPath $env:RUNNER_TEMP
+          "SDL2_DIR=$env:RUNNER_TEMP\SDL2-$v\cmake" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "SDL2_DLL=$env:RUNNER_TEMP\SDL2-$v\lib\x64\SDL2.dll" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: Configure
+        run: cmake -S port -B build -A x64 -DSUPAPLEX_BUILD_TESTS=OFF -DSDL2_DIR="${{ env.SDL2_DIR }}"
+      - name: Build
+        run: cmake --build build --config Release
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory dist | Out-Null
+          Copy-Item build\Release\supaplex.exe dist\
+          Copy-Item "$env:SDL2_DLL" dist\
+          Copy-Item README.md dist\
+      - uses: actions/upload-artifact@v4
+        with:
+          name: supaplex-windows-x64
+          path: dist
+
+  linux-verify:
+    name: Linux build + accuracy check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencies
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
+      - name: Build
+        run: cmake -S port -B port/build -DCMAKE_BUILD_TYPE=Release && cmake --build port/build -j4
+      - name: Generated code is up to date
+        run: |
+          python3 tools/m68k2cpp.py tools/translate.json
+          git diff --exit-code -- port/src/game/generated
+      - name: Accuracy (original 68000 code vs port)
+        working-directory: port
+        run: |
+          ./build/difftest --adf "../Supaplex (1991).adf" --frames 6400 --input tests/data/menu_tour.txt
+          for l in 1 2 3 8 20 50 111; do
+            ./build/difftest --adf "../Supaplex (1991).adf" --frames 6000 --random $l --level $l
+          done

@@ -136,7 +136,6 @@ void RefEmu::hook(uint32_t pc) {
     ring[ringPos++ & 63] = pc;
     if (pcTrace) std::fprintf(pcTrace, "%06X\n", pc);
     executed[pc & 0x7FFFF] = 1;
-    if (pc == 0x10ABA && std::getenv("TRACE_IRQ")) std::fprintf(stderr, "ref irq frame %llu line %d\n", (unsigned long long)hw.frameCount(), hw.beamLine());
     switch (pc) {
     // PHIL_00 (intro) disk routines
     case 0x54264: loadFileCall(true); break;
