@@ -51,9 +51,11 @@ extern std::FILE* tracePcFile;
 #define TRACE_PC(x) (game::tracePc = (x), game::traceRing[game::traceRingPos++ & 63] = (x), \
                      game::tracePcFile ? (void)std::fprintf(game::tracePcFile, "%06X\n", unsigned(x)) : (void)0)
 #define TRACE_WRITE(a, v, n) do { if ((a) + (n) > game::watchLo && (a) < game::watchHi) game::traceWrite(a, v, n); } while (0)
+#define TRACE_HWREAD(a, n) do { if (game::tracePcFile) std::fprintf(game::tracePcFile, "R%d %06X line %d\n", n, unsigned(a), game::bus->beamLine()); } while (0)
 #else
 #define TRACE_PC(x) ((void)0)
 #define TRACE_WRITE(a, v, n) ((void)0)
+#define TRACE_HWREAD(a, n) ((void)0)
 #endif
 
 // ---- memory ----------------------------------------------------------------
@@ -66,6 +68,7 @@ void serviceInterrupts();
 inline uint32_t rd8(uint32_t a) {
     a &= 0xFFFFFF;
     if (a < amiga::kChipSize) return bus->chip()[a];
+    TRACE_HWREAD(a, 1);
     uint32_t v = bus->rd8(a);
     if (irqPending) serviceInterrupts();
     return v;
@@ -73,6 +76,7 @@ inline uint32_t rd8(uint32_t a) {
 inline uint32_t rd16(uint32_t a) {
     a &= 0xFFFFFF;
     if (a < amiga::kChipSize - 1) { const uint8_t* p = bus->chip() + a; return uint32_t(p[0] << 8 | p[1]); }
+    TRACE_HWREAD(a, 2);
     uint32_t v = bus->rd16(a);
     if (irqPending) serviceInterrupts();
     return v;
@@ -83,6 +87,7 @@ inline uint32_t rd32(uint32_t a) {
         const uint8_t* p = bus->chip() + a;
         return uint32_t(p[0]) << 24 | uint32_t(p[1]) << 16 | uint32_t(p[2]) << 8 | p[3];
     }
+    TRACE_HWREAD(a, 4);
     uint32_t v = bus->rd32(a);
     if (irqPending) serviceInterrupts();
     return v;

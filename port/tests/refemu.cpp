@@ -12,9 +12,12 @@ extern "C" {
 static RefEmu* g_ref = nullptr;
 
 extern "C" {
-unsigned int m68k_read_memory_8(unsigned int a) { return g_ref->hw.rd8(a); }
-unsigned int m68k_read_memory_16(unsigned int a) { return g_ref->hw.rd16(a); }
-unsigned int m68k_read_memory_32(unsigned int a) { return g_ref->hw.rd32(a); }
+static inline void logHw(unsigned a, int n) {
+    if (g_ref->pcTrace && (a & 0xFFFFFF) >= 0x80000) std::fprintf(g_ref->pcTrace, "R%d %06X line %d\n", n, a & 0xFFFFFF, g_ref->hw.beamLine());
+}
+unsigned int m68k_read_memory_8(unsigned int a) { logHw(a, 1); return g_ref->hw.rd8(a); }
+unsigned int m68k_read_memory_16(unsigned int a) { logHw(a, 2); return g_ref->hw.rd16(a); }
+unsigned int m68k_read_memory_32(unsigned int a) { logHw(a, 4); return g_ref->hw.rd32(a); }
 void m68k_write_memory_8(unsigned int a, unsigned int v) { g_ref->checkWatch(a, v & 0xFF, 1); g_ref->hw.wr8(a, uint8_t(v)); }
 void m68k_write_memory_16(unsigned int a, unsigned int v) { g_ref->checkWatch(a, v & 0xFFFF, 2); g_ref->hw.wr16(a, uint16_t(v)); }
 void m68k_write_memory_32(unsigned int a, unsigned int v) { g_ref->checkWatch(a, v, 4); g_ref->hw.wr32(a, v); }

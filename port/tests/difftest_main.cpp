@@ -163,6 +163,10 @@ int main(int argc, char** argv) {
         }
         if (!ref.runFrame()) { std::fprintf(stderr, "reference stuck at frame %ld\n", f); break; }
         if (!port.runFrame()) { std::fprintf(stderr, "port ended at frame %ld\n", f); break; }
+        if (ref.hw.pollClock() != port.hw.pollClock() && std::getenv("CHECK_CLOCK")) {
+            std::printf("frame %ld: poll clock differs ref %d port %d\n", f + 1, ref.hw.pollClock(), port.hw.pollClock());
+            break;
+        }
         const uint8_t* a = ref.hw.chip();
         const uint8_t* b = port.hw.chip();
         int diffs = 0;

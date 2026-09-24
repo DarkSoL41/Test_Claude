@@ -83,23 +83,24 @@ void Amiga::wr16(uint32_t a, uint16_t v) {
 // ---------------------------------------------------------------------------
 // custom chips
 
+// Reads return the state *before* time advances: a frame boundary (and the
+// input change that the host applies there) only affects later reads.
 uint16_t Amiga::customRead(uint32_t reg) {
+    uint16_t v;
     switch (reg) {
     case DMACONR: return uint16_t((dmacon_ & 0x03FF) | 0x2000);  // blitter never busy, BZERO set
-    case VPOSR:
-        advanceLines(1);
-        return uint16_t(((vpos_ >> 8) & 1));
-    case VHPOSR:
-        advanceLines(1);
-        return uint16_t((vpos_ & 0xFF) << 8 | (hclock_ & 0xFF));
-    case JOY0DAT: pollTick(); return uint16_t(joyY_ << 8 | joyX_);
-    case JOY1DAT: pollTick(); return joy1dat_;
-    case ADKCONR: pollTick(); return adkcon_;
-    case POTGOR: pollTick(); return uint16_t(0xFF00 & ~(rmb_ ? 0x0400 : 0));
-    case INTENAR: pollTick(); return intena_;
-    case INTREQR: pollTick(); return intreq_;
+    case VPOSR: v = uint16_t((vpos_ >> 8) & 1); advanceLines(1); return v;
+    case VHPOSR: v = uint16_t((vpos_ & 0xFF) << 8 | (hclock_ & 0xFF)); advanceLines(1); return v;
+    case JOY0DAT: v = uint16_t(joyY_ << 8 | joyX_); break;
+    case JOY1DAT: v = joy1dat_; break;
+    case ADKCONR: v = adkcon_; break;
+    case POTGOR: v = uint16_t(0xFF00 & ~(rmb_ ? 0x0400 : 0)); break;
+    case INTENAR: v = intena_; break;
+    case INTREQR: v = intreq_; break;
     default: return 0;
     }
+    pollTick();
+    return v;
 }
 
 void Amiga::customWrite(uint32_t reg, uint16_t v) {
@@ -518,7 +519,12 @@ void Amiga::pollTick() {
 }
 
 uint8_t Amiga::ciaRead(uint32_t a) {
+    uint8_t v = ciaReadValue(a);
     pollTick();
+    return v;
+}
+
+uint8_t Amiga::ciaReadValue(uint32_t a) {
     // timer A of CIA-A advances on every CIA access (deterministic time model)
     if (ciaaCra_ & 1) {
         if (ciaaTa_ <= 64) {

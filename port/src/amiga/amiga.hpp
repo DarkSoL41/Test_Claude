@@ -80,6 +80,7 @@ public:
     int beamLine() const { return vpos_; }
     const uint32_t* frameBuffer() const { return front_.data(); }  // kOutWidth x kOutHeight ARGB
     uint64_t frameCount() const { return frames_; }
+    int pollClock() const { return hclock_; }
 
     // advance the beam by n lines (used by the VPOSR/VHPOSR read model)
     void advanceLines(int n);
@@ -89,6 +90,7 @@ private:
     uint16_t customRead(uint32_t reg);
     void customWrite(uint32_t reg, uint16_t v);
     uint8_t ciaRead(uint32_t a);
+    uint8_t ciaReadValue(uint32_t a);
     void ciaWrite(uint32_t a, uint8_t v);
 
     void doBlit();
