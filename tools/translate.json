@@ -73,5 +73,6 @@
     "10A56": "native_diskDelay",
     "7000": "native_saveHiscores"
   },
-  "adf": "../Supaplex (1991).adf"
+  "adf": "../Supaplex (1991).adf",
+  "insn_list": "../port/tests/data/translated_insns.txt"
 }

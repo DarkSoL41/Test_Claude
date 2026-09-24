@@ -33,6 +33,17 @@ public:
     // called by the Musashi hook
     void hook(uint32_t pc);
 
+    // debugging: report writes to [watchLo, watchHi)
+    uint32_t watchLo = 0, watchHi = 0;
+    uint32_t ring[64] = {};
+    uint32_t ringPos = 0;
+    void checkWatch(uint32_t a, uint32_t v, int n);
+
+    std::FILE* pcTrace = nullptr;  // debugging: every executed PC
+
+    // code coverage: executed instruction addresses (chip RAM range)
+    std::vector<uint8_t> executed = std::vector<uint8_t>(0x80000, 0);
+
 private:
     void loadFileCall(bool phil00);
     void doRts();

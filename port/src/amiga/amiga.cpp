@@ -90,13 +90,13 @@ uint16_t Amiga::customRead(uint32_t reg) {
         return uint16_t(((vpos_ >> 8) & 1));
     case VHPOSR:
         advanceLines(1);
-        return uint16_t((vpos_ & 0xFF) << 8);
-    case JOY0DAT: return uint16_t(joyY_ << 8 | joyX_);
-    case JOY1DAT: return joy1dat_;
-    case ADKCONR: return adkcon_;
-    case POTGOR: return uint16_t(0xFF00 & ~(rmb_ ? 0x0400 : 0));
-    case INTENAR: return intena_;
-    case INTREQR: return intreq_;
+        return uint16_t((vpos_ & 0xFF) << 8 | (hclock_ & 0xFF));
+    case JOY0DAT: pollTick(); return uint16_t(joyY_ << 8 | joyX_);
+    case JOY1DAT: pollTick(); return joy1dat_;
+    case ADKCONR: pollTick(); return adkcon_;
+    case POTGOR: pollTick(); return uint16_t(0xFF00 & ~(rmb_ ? 0x0400 : 0));
+    case INTENAR: pollTick(); return intena_;
+    case INTREQR: pollTick(); return intreq_;
     default: return 0;
     }
 }
@@ -468,7 +468,18 @@ void Amiga::deliverKey() {
 // ---------------------------------------------------------------------------
 // CIA
 
+// Time model for polling loops that do not read the beam counter (fire
+// button, keyboard): every such hardware read lets a few colour clocks pass.
+void Amiga::pollTick() {
+    hclock_ += kPollClocks;
+    if (hclock_ >= kClocksPerLine) {
+        hclock_ -= kClocksPerLine;
+        advanceLines(1);
+    }
+}
+
 uint8_t Amiga::ciaRead(uint32_t a) {
+    pollTick();
     // timer A of CIA-A advances on every CIA access (deterministic time model)
     if (ciaaCra_ & 1) {
         if (ciaaTa_ <= 64) {

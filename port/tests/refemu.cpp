@@ -15,9 +15,9 @@ extern "C" {
 unsigned int m68k_read_memory_8(unsigned int a) { return g_ref->hw.rd8(a); }
 unsigned int m68k_read_memory_16(unsigned int a) { return g_ref->hw.rd16(a); }
 unsigned int m68k_read_memory_32(unsigned int a) { return g_ref->hw.rd32(a); }
-void m68k_write_memory_8(unsigned int a, unsigned int v) { g_ref->hw.wr8(a, uint8_t(v)); }
-void m68k_write_memory_16(unsigned int a, unsigned int v) { g_ref->hw.wr16(a, uint16_t(v)); }
-void m68k_write_memory_32(unsigned int a, unsigned int v) { g_ref->hw.wr32(a, v); }
+void m68k_write_memory_8(unsigned int a, unsigned int v) { g_ref->checkWatch(a, v & 0xFF, 1); g_ref->hw.wr8(a, uint8_t(v)); }
+void m68k_write_memory_16(unsigned int a, unsigned int v) { g_ref->checkWatch(a, v & 0xFFFF, 2); g_ref->hw.wr16(a, uint16_t(v)); }
+void m68k_write_memory_32(unsigned int a, unsigned int v) { g_ref->checkWatch(a, v, 4); g_ref->hw.wr32(a, v); }
 unsigned int m68k_read_disassembler_8(unsigned int a) { return g_ref->hw.chip()[a & 0x7FFFF]; }
 unsigned int m68k_read_disassembler_16(unsigned int a) { return g_ref->hw.chipW(a); }
 unsigned int m68k_read_disassembler_32(unsigned int a) { return (g_ref->hw.chipW(a) << 16) | g_ref->hw.chipW(a + 2); }
@@ -118,8 +118,21 @@ void RefEmu::loadFileCall(bool) {
     doRts();
 }
 
+void RefEmu::checkWatch(uint32_t a, uint32_t v, int n) {
+    a &= 0xFFFFFF;
+    if (!(a + uint32_t(n) > watchLo && a < watchHi)) return;
+    std::fprintf(stderr, "ref : frame %llu line %d  pc %06X  write.%d $%06X = %X\n", (unsigned long long)hw.frameCount(),
+                 hw.beamLine(), m68k_get_reg(nullptr, M68K_REG_PPC), n, a, v);
+    std::fprintf(stderr, "      trail:");
+    for (uint32_t i = 16; i > 0; i--) std::fprintf(stderr, " %06X", ring[(ringPos - i) & 63]);
+    std::fprintf(stderr, "\n");
+}
+
 void RefEmu::hook(uint32_t pc) {
     instrCount_++;
+    ring[ringPos++ & 63] = pc;
+    if (pcTrace) std::fprintf(pcTrace, "%06X\n", pc);
+    executed[pc & 0x7FFFF] = 1;
     if (pc == 0x10ABA && std::getenv("TRACE_IRQ")) std::fprintf(stderr, "ref irq frame %llu line %d\n", (unsigned long long)hw.frameCount(), hw.beamLine());
     switch (pc) {
     // PHIL_00 (intro) disk routines

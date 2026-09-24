@@ -15,6 +15,21 @@ Cpu cpu;
 amiga::Amiga* bus = nullptr;
 bool irqPending = false;
 
+#ifdef SUPAPLEX_TRACE
+uint32_t tracePc = 0;
+uint32_t traceRing[64] = {};
+uint32_t traceRingPos = 0;
+uint32_t watchLo = 0, watchHi = 0;
+std::FILE* tracePcFile = nullptr;
+void traceWrite(uint32_t addr, uint32_t value, int size) {
+    std::fprintf(stderr, "port: frame %llu line %d  pc %06X  write.%d $%06X = %X\n",
+                 (unsigned long long)bus->frameCount(), bus->beamLine(), tracePc, size, addr, value);
+    std::fprintf(stderr, "      trail:");
+    for (uint32_t i = 16; i > 0; i--) std::fprintf(stderr, " %06X", traceRing[(traceRingPos - i) & 63]);
+    std::fprintf(stderr, "\n");
+}
+#endif
+
 namespace {
 Environment g_env;
 int g_irqDepth = 0;

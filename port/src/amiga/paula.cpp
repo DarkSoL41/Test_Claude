@@ -8,7 +8,7 @@ namespace amiga {
 
 namespace {
 constexpr double kColourClock = 3546895.0;  // PAL
-constexpr double kClocksPerLine = 227.5;
+constexpr double kPaulaClocksPerLine = 227.5;
 }  // namespace
 
 Paula::Paula(Amiga& m, int outputRate) : m_(m), rate_(outputRate) {
@@ -73,7 +73,7 @@ void Paula::stepByte(Channel& c, int idx) {
 }
 
 void Paula::runLine() {
-    samplePhase_ += kClocksPerLine;
+    samplePhase_ += kPaulaClocksPerLine;
     while (samplePhase_ >= ccPerSample_) {
         samplePhase_ -= ccPerSample_;
         int v[4];

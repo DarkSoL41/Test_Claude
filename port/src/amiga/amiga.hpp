@@ -8,8 +8,10 @@
 //   * Paula audio DMA (4 channels, mixed to stereo),
 //   * CIA-A (fire buttons, keyboard, timer A) and joystick/mouse counters.
 //
-// Time model: the game synchronises exclusively by polling the beam position
-// (VPOSR/VHPOSR). Every such read advances the virtual beam by one scanline.
+// Time model: the game synchronises by polling the beam position
+// (VPOSR/VHPOSR). Every such read advances the virtual beam by one scanline;
+// other polling reads of hardware registers (fire buttons, keyboard, interrupt
+// state) advance it by kPollClocks colour clocks, so busy loops terminate.
 // When the beam wraps from line 312 to 0 a frame is complete; the display is
 // presented and the vertical blank interrupt is raised. The same model is used
 // by the reference emulator (Musashi) so both run in lockstep.
@@ -26,6 +28,8 @@ constexpr int kLinesPerFrame = 313;       // PAL
 constexpr int kOutWidth = 640;            // output in hires pixels
 constexpr int kOutHeight = 256;           // lines $2C..$12B
 constexpr int kFirstOutLine = 0x2C;
+constexpr int kClocksPerLine = 227;
+constexpr int kPollClocks = 16;         // time passing per polling read of a hardware register
 
 struct Paula;
 
@@ -95,6 +99,7 @@ private:
     void finishFrame();
     void deliverKey();
     void updateIrqLevel();
+    void pollTick();
 
     std::vector<uint8_t> chip_;
     Host* host_ = nullptr;
@@ -125,6 +130,7 @@ private:
 
     // beam
     int vpos_ = 0;
+    int hclock_ = 0;  // colour clocks consumed by polling reads within the current line
     int lastIrqLevel_ = 0;
     uint64_t frames_ = 0;
 

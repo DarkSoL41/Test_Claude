@@ -7,6 +7,7 @@
 // game variables live at their original addresses.
 #pragma once
 #include <cstdint>
+#include <cstdio>
 
 #include "amiga/amiga.hpp"
 
@@ -38,6 +39,22 @@ extern amiga::Amiga* bus;
 #define A5 game::cpu.a[5]
 #define A6 game::cpu.a[6]
 #define A7 game::cpu.a[7]
+
+// ---- debugging (test builds only) -------------------------------------------
+#ifdef SUPAPLEX_TRACE
+extern uint32_t tracePc;
+extern uint32_t traceRing[64];
+extern uint32_t traceRingPos;
+extern uint32_t watchLo, watchHi;
+void traceWrite(uint32_t addr, uint32_t value, int size);
+extern std::FILE* tracePcFile;
+#define TRACE_PC(x) (game::tracePc = (x), game::traceRing[game::traceRingPos++ & 63] = (x), \
+                     game::tracePcFile ? (void)std::fprintf(game::tracePcFile, "%06X\n", unsigned(x)) : (void)0)
+#define TRACE_WRITE(a, v, n) do { if ((a) + (n) > game::watchLo && (a) < game::watchHi) game::traceWrite(a, v, n); } while (0)
+#else
+#define TRACE_PC(x) ((void)0)
+#define TRACE_WRITE(a, v, n) ((void)0)
+#endif
 
 // ---- memory ----------------------------------------------------------------
 // Accesses to chip RAM are plain memory accesses. Accesses to the custom chips
@@ -72,18 +89,21 @@ inline uint32_t rd32(uint32_t a) {
 }
 inline void wr8(uint32_t a, uint32_t v) {
     a &= 0xFFFFFF;
+    TRACE_WRITE(a, v & 0xFF, 1);
     if (a < amiga::kChipSize) { bus->chip()[a] = uint8_t(v); return; }
     bus->wr8(a, uint8_t(v));
     if (irqPending) serviceInterrupts();
 }
 inline void wr16(uint32_t a, uint32_t v) {
     a &= 0xFFFFFF;
+    TRACE_WRITE(a, v & 0xFFFF, 2);
     if (a < amiga::kChipSize - 1) { uint8_t* p = bus->chip() + a; p[0] = uint8_t(v >> 8); p[1] = uint8_t(v); return; }
     bus->wr16(a, uint16_t(v));
     if (irqPending) serviceInterrupts();
 }
 inline void wr32(uint32_t a, uint32_t v) {
     a &= 0xFFFFFF;
+    TRACE_WRITE(a, v, 4);
     if (a < amiga::kChipSize - 3) {
         uint8_t* p = bus->chip() + a;
         p[0] = uint8_t(v >> 24); p[1] = uint8_t(v >> 16); p[2] = uint8_t(v >> 8); p[3] = uint8_t(v);
