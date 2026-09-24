@@ -1,0 +1,43 @@
+// Reference emulator: runs the ORIGINAL 68000 code of Supaplex on the Musashi
+// CPU core, on top of the same Amiga hardware layer the port uses. It is the
+// ground truth for the frame-by-frame comparison with the C++ port.
+#pragma once
+#include <cstdint>
+#include <functional>
+#include <string>
+#include <vector>
+
+#include "../src/amiga/adf.hpp"
+#include "../src/amiga/amiga.hpp"
+#include "../src/amiga/paula.hpp"
+
+class RefEmu : public amiga::Host {
+public:
+    explicit RefEmu(const amiga::Adf& adf);
+    // boot like the cracked disk does: PHIL_00 (intro) at $54000
+    void bootIntro();
+    // start directly at the main program (PHIL_01 at $7E00), skipping the intro
+    void bootMain();
+    // run until the next frame boundary; returns false if the CPU got stuck
+    bool runFrame();
+
+    amiga::Amiga hw;
+    amiga::Paula paula;
+    std::string savePath;  // where the hiscore file (PHIL_03) is written
+
+    // CPU state helpers
+    uint32_t pc() const;
+    void onFrame() override;
+    void onInterrupt(int level) override;
+
+    // called by the Musashi hook
+    void hook(uint32_t pc);
+
+private:
+    void loadFileCall(bool phil00);
+    void doRts();
+    const amiga::Adf& adf_;
+    bool frameDone_ = false;
+    bool irqDirty_ = false;
+    uint64_t instrCount_ = 0;
+};

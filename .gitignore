@@ -1,0 +1,5 @@
+port/build*/
+__pycache__/
+*.pyc
+*.ppm
+*.sav

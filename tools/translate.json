@@ -1,0 +1,77 @@
+{
+  "images": [
+    {
+      "name": "PHIL_00",
+      "base": "54000"
+    },
+    {
+      "name": "PHIL_01",
+      "base": "7E00"
+    }
+  ],
+  "code_ranges": [
+    [
+      "54000",
+      "54548"
+    ],
+    [
+      "7E00",
+      "10FE4"
+    ]
+  ],
+  "out_dir": "../port/src/game/generated",
+  "header": "generated.hpp",
+  "entries": [
+    "54000",
+    "7E00",
+    "10ABA",
+    "10214",
+    "8444",
+    "BC46",
+    "BC5A",
+    "BC6E",
+    "BC82",
+    "C654",
+    "C6E2",
+    "C76A",
+    "C7FA"
+  ],
+  "tables": [
+    {
+      "addr": "1B42A",
+      "count": 15,
+      "stride": 12
+    },
+    {
+      "addr": "11904",
+      "count": 8
+    },
+    {
+      "addr": "11210",
+      "count": 16,
+      "stride": 8
+    },
+    {
+      "addr": "10D24",
+      "count": 5
+    }
+  ],
+  "exclude": [
+    "84FC",
+    "896A",
+    "897A",
+    "10298",
+    "10296"
+  ],
+  "natives": {
+    "54264": "native_loadFile",
+    "541AE": "native_diskInit",
+    "54212": "native_diskMotorOff",
+    "10404": "native_loadFile",
+    "1035E": "native_diskInit",
+    "103C2": "native_diskMotorOff",
+    "10A56": "native_diskDelay",
+    "7000": "native_saveHiscores"
+  },
+  "adf": "../Supaplex (1991).adf"
+}
