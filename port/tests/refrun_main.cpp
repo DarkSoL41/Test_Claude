@@ -30,7 +30,9 @@ int main(int argc, char** argv) {
     if (mainOnly) ref.bootMain(); else ref.bootIntro();
     for (long f = 0; f < frames; f++) {
         in.apply(uint64_t(f), ref.hw);
+        uint64_t before = ref.instructions();
         if (!ref.runFrame()) return 2;
+        if (std::getenv("ICOUNT")) std::printf("frame %ld: %llu instructions\n", f + 1, (unsigned long long)(ref.instructions() - before));
         if (!dump.empty() && every > 0 && (f % every) == every - 1) {
             char name[512];
             std::snprintf(name, sizeof name, "%s/ref_%06ld.ppm", dump.c_str(), f + 1);

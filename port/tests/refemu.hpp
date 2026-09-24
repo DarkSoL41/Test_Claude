@@ -28,6 +28,7 @@ public:
 
     // CPU state helpers
     uint32_t pc() const;
+    uint64_t instructions() const { return instrCount_; }
     void onFrame() override;
     void onInterrupt(int level) override;
 
@@ -53,4 +54,7 @@ private:
     bool frameDone_ = false;
     bool irqDirty_ = false;
     uint64_t instrCount_ = 0;
+    // execution time of each basic block of the original code, by start
+    // address (same table the translated code uses)
+    std::vector<uint16_t> blockCost_ = std::vector<uint16_t>(0x80000, 0);
 };

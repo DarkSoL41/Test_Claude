@@ -270,104 +270,106 @@
 # zone 11: ok
 2209 mouse 0 0 1 0
 2213 mouse 0 0 0 0
-2273 mouse -90 -90 0 0
-2275 mouse -90 -90 0 0
-2277 mouse -90 -90 0 0
-2279 mouse -90 -90 0 0
-2281 mouse -90 -90 0 0
-2283 mouse -90 -90 0 0
-2285 mouse -90 -90 0 0
-2287 mouse -90 -90 0 0
-2289 mouse 100 100 0 0
-2291 mouse 15 22 0 0
+2363 mouse 0 0 1 0
+2367 mouse 0 0 0 0
+2617 mouse -90 -90 0 0
+2619 mouse -90 -90 0 0
+2621 mouse -90 -90 0 0
+2623 mouse -90 -90 0 0
+2625 mouse -90 -90 0 0
+2627 mouse -90 -90 0 0
+2629 mouse -90 -90 0 0
+2631 mouse -90 -90 0 0
+2633 mouse 100 100 0 0
+2635 mouse 15 22 0 0
 # zone 8: skip level
-2293 mouse 0 0 1 0
-2297 mouse 0 0 0 0
-2397 mouse 0 0 1 0
-2401 mouse 0 0 0 0
-2481 mouse -90 -90 0 0
-2483 mouse -90 -90 0 0
-2485 mouse -90 -90 0 0
-2487 mouse -90 -90 0 0
-2489 mouse -90 -90 0 0
-2491 mouse -90 -90 0 0
-2493 mouse -90 -90 0 0
-2495 mouse -90 -90 0 0
-2497 mouse 100 100 0 0
-2499 mouse 100 100 0 0
-2501 mouse 52 100 0 0
-2503 mouse 0 100 0 0
-2505 mouse 0 14 0 0
-# zone 14: 1/2 players
-2507 mouse 0 0 1 0
-2511 mouse 0 0 0 0
-2571 mouse -90 -90 0 0
-2573 mouse -90 -90 0 0
-2575 mouse -90 -90 0 0
-2577 mouse -90 -90 0 0
-2579 mouse -90 -90 0 0
-2581 mouse -90 -90 0 0
-2583 mouse -90 -90 0 0
-2585 mouse -90 -90 0 0
-2587 mouse 100 100 0 0
-2589 mouse 100 100 0 0
-2591 mouse 52 100 0 0
-2593 mouse 0 100 0 0
-2595 mouse 0 14 0 0
-# zone 14: 1/2 players
-2597 mouse 0 0 1 0
-2601 mouse 0 0 0 0
-2661 mouse -90 -90 0 0
-2663 mouse -90 -90 0 0
-2665 mouse -90 -90 0 0
-2667 mouse -90 -90 0 0
-2669 mouse -90 -90 0 0
-2671 mouse -90 -90 0 0
-2673 mouse -90 -90 0 0
-2675 mouse -90 -90 0 0
-2677 mouse 100 100 0 0
-2679 mouse 15 82 0 0
+2637 mouse 0 0 1 0
+2641 mouse 0 0 0 0
+2741 mouse 0 0 1 0
+2745 mouse 0 0 0 0
+2825 mouse -90 -90 0 0
+2827 mouse -90 -90 0 0
+2829 mouse -90 -90 0 0
+2831 mouse -90 -90 0 0
+2833 mouse -90 -90 0 0
+2835 mouse -90 -90 0 0
+2837 mouse -90 -90 0 0
+2839 mouse -90 -90 0 0
+2841 mouse 100 100 0 0
+2843 mouse 100 100 0 0
+2845 mouse 52 100 0 0
+2847 mouse 0 100 0 0
+2849 mouse 0 14 0 0
+# zone 14: data disc
+2851 mouse 0 0 1 0
+2855 mouse 0 0 0 0
+2915 mouse -90 -90 0 0
+2917 mouse -90 -90 0 0
+2919 mouse -90 -90 0 0
+2921 mouse -90 -90 0 0
+2923 mouse -90 -90 0 0
+2925 mouse -90 -90 0 0
+2927 mouse -90 -90 0 0
+2929 mouse -90 -90 0 0
+2931 mouse 100 100 0 0
+2933 mouse 100 100 0 0
+2935 mouse 52 100 0 0
+2937 mouse 0 100 0 0
+2939 mouse 0 14 0 0
+# zone 14: data disc
+2941 mouse 0 0 1 0
+2945 mouse 0 0 0 0
+3245 mouse -90 -90 0 0
+3247 mouse -90 -90 0 0
+3249 mouse -90 -90 0 0
+3251 mouse -90 -90 0 0
+3253 mouse -90 -90 0 0
+3255 mouse -90 -90 0 0
+3257 mouse -90 -90 0 0
+3259 mouse -90 -90 0 0
+3261 mouse 100 100 0 0
+3263 mouse 15 82 0 0
 # zone 13: demo
-2681 mouse 0 0 1 0
-2685 mouse 0 0 0 0
-5185 joy F
-5189 joy -
-5389 mouse 0 0 1 0
-5393 mouse 0 0 0 0
-5593 mouse -90 -90 0 0
-5595 mouse -90 -90 0 0
-5597 mouse -90 -90 0 0
-5599 mouse -90 -90 0 0
-5601 mouse -90 -90 0 0
-5603 mouse -90 -90 0 0
-5605 mouse -90 -90 0 0
-5607 mouse -90 -90 0 0
-5609 mouse 100 100 0 0
-5611 mouse 15 2 0 0
+3265 mouse 0 0 1 0
+3269 mouse 0 0 0 0
+5769 joy F
+5773 joy -
+5973 mouse 0 0 1 0
+5977 mouse 0 0 0 0
+6177 mouse -90 -90 0 0
+6179 mouse -90 -90 0 0
+6181 mouse -90 -90 0 0
+6183 mouse -90 -90 0 0
+6185 mouse -90 -90 0 0
+6187 mouse -90 -90 0 0
+6189 mouse -90 -90 0 0
+6191 mouse -90 -90 0 0
+6193 mouse 100 100 0 0
+6195 mouse 15 2 0 0
 # zone 7: delete player
-5613 mouse 0 0 1 0
-5617 mouse 0 0 0 0
-5717 mouse 0 0 1 0
-5721 mouse 0 0 0 0
-5821 mouse -90 -90 0 0
-5823 mouse -90 -90 0 0
-5825 mouse -90 -90 0 0
-5827 mouse -90 -90 0 0
-5829 mouse -90 -90 0 0
-5831 mouse -90 -90 0 0
-5833 mouse -90 -90 0 0
-5835 mouse -90 -90 0 0
-5837 mouse 100 100 0 0
-5839 mouse 100 100 0 0
-5841 mouse 100 96 0 0
-5843 mouse 100 0 0 0
-5845 mouse 100 0 0 0
-5847 mouse 43 0 0 0
+6197 mouse 0 0 1 0
+6201 mouse 0 0 0 0
+6301 mouse 0 0 1 0
+6305 mouse 0 0 0 0
+6405 mouse -90 -90 0 0
+6407 mouse -90 -90 0 0
+6409 mouse -90 -90 0 0
+6411 mouse -90 -90 0 0
+6413 mouse -90 -90 0 0
+6415 mouse -90 -90 0 0
+6417 mouse -90 -90 0 0
+6419 mouse -90 -90 0 0
+6421 mouse 100 100 0 0
+6423 mouse 100 100 0 0
+6425 mouse 100 96 0 0
+6427 mouse 100 0 0 0
+6429 mouse 100 0 0 0
+6431 mouse 43 0 0 0
 # zone 10: zone 10
-5849 mouse 0 0 1 0
-5853 mouse 0 0 0 0
-6453 mouse 0 0 1 0
-6457 mouse 0 0 0 0
-6657 joy F
-6661 joy -
-# end 7261
+6433 mouse 0 0 1 0
+6437 mouse 0 0 0 0
+7037 mouse 0 0 1 0
+7041 mouse 0 0 0 0
+7241 joy F
+7245 joy -
+# end 7845

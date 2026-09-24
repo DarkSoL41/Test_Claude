@@ -13,7 +13,7 @@ ZONES = [  # (x1, x2, y1, y2, name) from the table at $1B422
     (110, 121, 39, 44, 'new player'), (110, 121, 49, 54, 'delete player'),
     (110, 121, 59, 64, 'skip level'), (110, 121, 69, 74, 'statistics'),
     (538, 548, 146, 151, 'zone 10'), (240, 262, 173, 184, 'ok'),
-    (110, 121, 79, 84, 'gfx tutor'), (110, 121, 89, 94, 'demo'), (210, 295, 195, 219, '1/2 players'),
+    (110, 121, 79, 84, 'gfx tutor'), (110, 121, 89, 94, 'demo'), (210, 295, 195, 219, 'data disc'),
 ]
 # Amiga raw key codes for letters
 KEYS = {'A': 0x20, 'B': 0x35, 'C': 0x33, 'D': 0x22, 'E': 0x12, 'S': 0x21, 'T': 0x14, 'Z': 0x31, 'RETURN': 0x44, 'BS': 0x41}
@@ -86,11 +86,12 @@ def main():
         s.key(k)
     s.f += 60
     s.zone(2, after=30)
-    s.zone(11, after=60)        # ok
+    s.zone(11, after=150)       # ok: starts the level (after the disk load)
+    s.click(after=250)          # left button in a level: give up
     s.zone(8, after=100)        # skip level
     s.click(after=80)
-    s.zone(14, after=60)        # 1/2 players
-    s.zone(14, after=60)
+    s.zone(14, after=60)        # data disc exchange screen
+    s.zone(14, after=300)       # left button: reload from disk
     s.zone(13, after=2500)      # demo
     s.fire(after=200)
     s.click(after=200)

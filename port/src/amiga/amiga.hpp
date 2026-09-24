@@ -30,6 +30,15 @@ constexpr int kOutHeight = 256;           // lines $2C..$12B
 constexpr int kFirstOutLine = 0x2C;
 constexpr int kClocksPerLine = 227;
 constexpr int kPollClocks = 16;         // time passing per polling read of a hardware register
+constexpr uint64_t kCpuCyclesPerFrame = uint64_t(kClocksPerLine) * 313 * 2;  // 68000 at 7.09 MHz (PAL)
+
+// Time a file load from floppy takes on the real machine (motor spin-up,
+// seek, ~1 track per disk revolution). Used by the native loader replacement
+// on both the port and the reference, so menus do not jump instantly into a
+// level while a mouse button/key is still held.
+inline uint64_t diskLoadCycles(size_t bytes) {
+    return kCpuCyclesPerFrame * (25 + bytes / 4096);
+}
 
 struct Paula;
 
@@ -50,13 +59,14 @@ public:
     // ---- memory bus -----------------------------------------------------
     uint8_t rd8(uint32_t a);
     uint16_t rd16(uint32_t a);
-    uint32_t rd32(uint32_t a) { return (uint32_t(rd16(a)) << 16) | rd16(a + 2); }
+    uint32_t rd32(uint32_t a);
     void wr8(uint32_t a, uint8_t v);
     void wr16(uint32_t a, uint16_t v);
-    void wr32(uint32_t a, uint32_t v) { wr16(a, uint16_t(v >> 16)); wr16(a + 2, uint16_t(v)); }
+    void wr32(uint32_t a, uint32_t v);
 
     // raw chip RAM access (no side effects)
     uint8_t* chip() { return chip_.data(); }
+    uint32_t chipL(uint32_t a) const { return uint32_t(chipW(a)) << 16 | chipW(a + 2); }
     uint16_t chipW(uint32_t a) const { a &= kChipSize - 1; return uint16_t(chip_[a] << 8 | chip_[(a + 1) & (kChipSize - 1)]); }
     void load(uint32_t addr, const std::vector<uint8_t>& data);
 
@@ -85,6 +95,13 @@ public:
     // advance the beam by n lines (used by the VPOSR/VHPOSR read model)
     void advanceLines(int n);
 
+    // CPU time: cycles of executed code are accumulated and turned into beam
+    // time after the next hardware register access (so interrupts and frame
+    // boundaries happen at the same points on the port and the reference).
+    void addCpuCycles(uint64_t c) { cpuCycles_ += c; }
+    // audio DMA interrupt request (from Paula, no bus side effects)
+    void requestInterrupt(uint16_t bits);
+
 private:
     // custom chip registers
     uint16_t customRead(uint32_t reg);
@@ -103,6 +120,9 @@ private:
     void deliverKey();
     void updateIrqLevel();
     void pollTick();
+    void applyCpuTime(uint64_t accessFrame);
+    uint16_t hwRead16(uint32_t a);
+    void hwWrite16(uint32_t a, uint16_t v);
 
     std::vector<uint8_t> chip_;
     Host* host_ = nullptr;
@@ -135,6 +155,8 @@ private:
     int vpos_ = 0;
     int hclock_ = 0;  // colour clocks consumed by polling reads within the current line
     int lastIrqLevel_ = 0;
+    uint64_t cpuCycles_ = 0, pendingClocks_ = 0;
+    bool inTime_ = false;
     uint64_t frames_ = 0;
 
     // input

@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 *.ppm
 *.sav
+difftest_hiscores.*
+trace_*.txt

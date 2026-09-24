@@ -1,5 +1,10 @@
 #include "refemu.hpp"
 
+namespace game {
+extern const uint32_t kBlockCycles[][2];
+extern const size_t kBlockCycleCount;
+}
+
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -33,6 +38,7 @@ RefEmu::RefEmu(const amiga::Adf& adf) : paula(hw), adf_(adf) {
     hw.setPaula(&paula);
     m68k_init();
     m68k_set_cpu_type(M68K_CPU_TYPE_68000);
+    for (size_t i = 0; i < game::kBlockCycleCount; i++) blockCost_[game::kBlockCycles[i][0] & 0x7FFFF] = uint16_t(game::kBlockCycles[i][1]);
 }
 
 uint32_t RefEmu::pc() const { return m68k_get_reg(nullptr, M68K_REG_PC); }
@@ -68,6 +74,7 @@ void RefEmu::onInterrupt(int level) {
 
 bool RefEmu::runFrame() {
     frameDone_ = false;
+    const uint64_t startFrame = hw.frameCount();
     uint64_t guard = 0;
     while (!frameDone_) {
         m68k_set_irq(hw.pendingInterruptLevel());
@@ -78,6 +85,11 @@ bool RefEmu::runFrame() {
             return false;
         }
     }
+    if (hw.frameCount() != startFrame + 1) {
+        std::fprintf(stderr, "ref: %llu frame boundaries in one instruction, pc=%06X\n",
+                     (unsigned long long)(hw.frameCount() - startFrame), pc());
+        return false;
+    }
     return true;
 }
 
@@ -86,6 +98,9 @@ void RefEmu::doRts() {
     uint32_t ret = hw.rd32(sp);
     m68k_set_reg(M68K_REG_A7, sp + 4);
     m68k_set_reg(M68K_REG_PC, ret);
+    // Musashi fetches the next opcode from the new PC without calling the
+    // instruction hook again: account for the instruction at the return address here
+    hook(ret);
 }
 
 static std::string fileForCode(uint32_t d1) {
@@ -115,6 +130,7 @@ void RefEmu::loadFileCall(bool) {
     }
     if (data.empty()) data = adf_.read(name);
     hw.load(a0, data);
+    hw.addCpuCycles(amiga::diskLoadCycles(data.size()));
     m68k_set_reg(M68K_REG_D0, 0);
     uint32_t sr = m68k_get_reg(nullptr, M68K_REG_SR);
     m68k_set_reg(M68K_REG_SR, (sr & ~0x1F) | 0x04);  // Z set
@@ -156,6 +172,8 @@ void RefEmu::hook(uint32_t pc) {
         doRts();
         break;
     }
-    default: break;
+    default:
+        if (blockCost_[pc & 0x7FFFF]) hw.addCpuCycles(blockCost_[pc & 0x7FFFF]);
+        break;
     }
 }

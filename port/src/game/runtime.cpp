@@ -128,6 +128,7 @@ void native_loadFile() {
     }
     if (data.empty() && g_env.adf) data = g_env.adf->read(name);
     bus->load(A0, data);
+    bus->addCpuCycles(amiga::diskLoadCycles(data.size()));
     D0 = 0;
     cpu.x = cpu.n = cpu.v = cpu.c = false;
     cpu.z = true;

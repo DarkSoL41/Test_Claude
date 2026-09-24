@@ -6,10 +6,12 @@
 // the next PAL frame (50 Hz).
 //
 // Controls
-//   joystick : cursor keys / numeric keypad, fire = Space, Ctrl, Alt or Enter;
+//   joystick : cursor keys / numeric keypad, fire = Space, Ctrl or keypad 0;
 //              any game controller (d-pad / left stick, A B X Y = fire)
 //   mouse    : menu pointer, left / right button
-//   keyboard : typed keys go to the Amiga keyboard (player names)
+//   keyboard : while the game asks for a player name, keys go to the Amiga
+//              keyboard only (the game reads the keyboard nowhere else), and
+//              the keyboard does not act as a joystick
 //   F11 or Alt+Enter : fullscreen,  Pause : pause,  F12 : quit
 #include <SDL.h>
 
@@ -17,11 +19,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 #include <string>
 
 #include "amiga/adf.hpp"
 #include "amiga/amiga.hpp"
 #include "amiga/paula.hpp"
+#include "game/hiscores.hpp"
 #include "game/runtime.hpp"
 
 namespace {
@@ -193,14 +197,19 @@ private:
         }
     }
 
+    // The game installs its keyboard interrupt handler ($10214 in vector $68)
+    // only while a player name is typed in.
+    bool nameEntry() const { return hw_.chipL(0x68) == 0x10214; }
+
     void updateJoystick() {
         const Uint8* k = SDL_GetKeyboardState(nullptr);
-        bool up = k[SDL_SCANCODE_UP] || k[SDL_SCANCODE_KP_8];
-        bool down = k[SDL_SCANCODE_DOWN] || k[SDL_SCANCODE_KP_2] || k[SDL_SCANCODE_KP_5];
-        bool left = k[SDL_SCANCODE_LEFT] || k[SDL_SCANCODE_KP_4];
-        bool right = k[SDL_SCANCODE_RIGHT] || k[SDL_SCANCODE_KP_6];
-        bool fire = k[SDL_SCANCODE_SPACE] || k[SDL_SCANCODE_LCTRL] || k[SDL_SCANCODE_RCTRL] ||
-                    k[SDL_SCANCODE_LALT] || k[SDL_SCANCODE_KP_0] || k[SDL_SCANCODE_RETURN];
+        bool keys = !nameEntry();
+        bool up = keys && (k[SDL_SCANCODE_UP] || k[SDL_SCANCODE_KP_8]);
+        bool down = keys && (k[SDL_SCANCODE_DOWN] || k[SDL_SCANCODE_KP_2] || k[SDL_SCANCODE_KP_5]);
+        bool left = keys && (k[SDL_SCANCODE_LEFT] || k[SDL_SCANCODE_KP_4]);
+        bool right = keys && (k[SDL_SCANCODE_RIGHT] || k[SDL_SCANCODE_KP_6]);
+        bool fire = keys && (k[SDL_SCANCODE_SPACE] || k[SDL_SCANCODE_LCTRL] || k[SDL_SCANCODE_RCTRL] ||
+                             k[SDL_SCANCODE_KP_0]);
         if (pad_) {
             auto b = [&](SDL_GameControllerButton x) { return SDL_GameControllerGetButton(pad_, x) != 0; };
             const int dz = 12000;
@@ -234,6 +243,9 @@ private:
                 if (down && sc == SDL_SCANCODE_F12) throw game::QuitGame{};
                 if (down && sc == SDL_SCANCODE_PAUSE) { paused_ = !paused_; break; }
                 if (e.key.repeat) break;
+                // keys typed outside the name entry would stay queued in the
+                // CIA and pop up in the next name entry
+                if (!nameEntry()) break;
                 int code = amigaKey(sc);
                 if (code >= 0) hw_.keyEvent(uint8_t(code), down);
                 break;
@@ -296,7 +308,7 @@ private:
 int main(int argc, char** argv) {
     std::string adfPath, savePath;
     int scale = 3;
-    bool fullscreen = false;
+    bool fullscreen = false, originalHiscores = false, resetHiscores = false;
     long quitAfter = -1;
     std::string shot;
     for (int i = 1; i < argc; i++) {
@@ -306,10 +318,16 @@ int main(int argc, char** argv) {
         else if (a == "--save") savePath = next();
         else if (a == "--scale") scale = std::max(1, std::atoi(next().c_str()));
         else if (a == "--fullscreen") fullscreen = true;
+        else if (a == "--original-hiscores") originalHiscores = true;
+        else if (a == "--reset-hiscores") resetHiscores = true;
         else if (a == "--frames") quitAfter = std::atol(next().c_str());
         else if (a == "--shot") shot = next();
         else if (a == "--help" || a == "-h") {
-            std::printf("usage: supaplex [--adf image.adf] [--save hiscores.sav] [--scale N] [--fullscreen]\n");
+            std::printf("usage: supaplex [--adf image.adf] [--save hiscores.sav] [--scale N] [--fullscreen]\n"
+                        "                [--reset-hiscores] [--original-hiscores]\n"
+                        "  a new hiscore file starts without players and records;\n"
+                        "  --original-hiscores starts it with the data of the disk image instead\n"
+                        "  (CRYSTAL records, players ALLEN, ME, KIP); --reset-hiscores starts over\n");
             return 0;
         } else if (adfPath.empty()) adfPath = a;
     }
@@ -336,6 +354,17 @@ int main(int argc, char** argv) {
         char* pref = SDL_GetPrefPath("Supaplex", "SupaplexAmiga");
         savePath = std::string(pref ? pref : exeDir.c_str()) + "hiscores.sav";
         if (pref) SDL_free(pref);
+    }
+    // a new (or reset) hiscore file: clean, or the one from the disk image
+    bool haveSave = false;
+    {
+        std::ifstream f(savePath, std::ios::binary);
+        haveSave = bool(f);
+    }
+    if (!haveSave || resetHiscores) {
+        std::vector<uint8_t> data = originalHiscores ? adf.read("PHIL_03") : game::cleanHiscores();
+        std::ofstream f(savePath, std::ios::binary);
+        f.write(reinterpret_cast<const char*>(data.data()), std::streamsize(data.size()));
     }
 
     amiga::Amiga hw;

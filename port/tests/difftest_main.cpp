@@ -11,12 +11,16 @@
 // --poke F A V   : at frame F write word V to address A in both machines
 // --report A,B   : print when the reference executes these addresses
 // --autopilot F  : steer Murphy through the cells listed in F ("x y" per line,
-//                  "fire N" = hold fire N frames, "wait N"), starting at frame 760
+//                  "fire N" = hold fire N frames, "wait N"), starting when the level runs
+// --hiscores X   : hiscore file both machines load instead of PHIL_03 on the
+//                  disk ("clean" = the port's clean file without players);
+//                  saves go to X.ref / X.port
 #include <condition_variable>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <iterator>
 #include <map>
 #include <mutex>
 #include <random>
@@ -26,6 +30,7 @@
 #include <thread>
 
 #include "game/cpu.hpp"
+#include "game/hiscores.hpp"
 #include "game/runtime.hpp"
 #include "inputscript.hpp"
 #include "refemu.hpp"
@@ -51,11 +56,12 @@ struct PortRunner : amiga::Host {
         cv.wait(lk, [&] { return portTurn || stop; });
         if (stop) throw game::QuitGame{};
     }
-    void start(const amiga::Adf& adf) {
+    void start(const amiga::Adf& adf, const std::string& savePath) {
         hw.setHost(this);
         hw.setPaula(&paula);
         game::Environment env;
         env.adf = &adf;
+        env.savePath = savePath;
         game::attach(hw, env);
         th = std::thread([this] {
             {
@@ -97,7 +103,7 @@ int main(int argc, char** argv) {
     long frames = 1000, every = 0;
     bool keepGoing = false, clearSkips = false;
     long seed = -1, level = 0;
-    std::string coverage, autopilot;
+    std::string coverage, autopilot, hiscores;
     struct Poke { long frame; uint32_t addr; uint16_t value; };
     std::vector<Poke> pokes;
     std::vector<uint32_t> reportPcs;
@@ -116,6 +122,7 @@ int main(int argc, char** argv) {
         else if (a == "--level") level = std::atol(next().c_str());
         else if (a == "--coverage") coverage = next();
         else if (a == "--autopilot") autopilot = next();
+        else if (a == "--hiscores") hiscores = next();
         else if (a == "--clear-skips") clearSkips = true;
         else if (a == "--report") {
             std::string list = next();
@@ -142,11 +149,29 @@ int main(int argc, char** argv) {
     InputScript in;
     if (!script.empty() && !in.load(script)) { std::fprintf(stderr, "cannot read %s\n", script.c_str()); return 1; }
 
+    std::string refSave, portSave;
+    if (!hiscores.empty()) {
+        std::vector<uint8_t> data;
+        if (hiscores == "clean") {
+            data = game::cleanHiscores();
+            hiscores = "difftest_hiscores";
+        } else {
+            std::ifstream f(hiscores, std::ios::binary);
+            data.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+        }
+        refSave = hiscores + ".ref";
+        portSave = hiscores + ".port";
+        for (const std::string& p : {refSave, portSave}) {
+            std::ofstream o(p, std::ios::binary);
+            o.write(reinterpret_cast<const char*>(data.data()), std::streamsize(data.size()));
+        }
+    }
     RefEmu ref(adf);
+    ref.savePath = refSave;
     ref.bootIntro();
     for (uint32_t pc : reportPcs) ref.reportPcs.insert(pc);
     PortRunner port;
-    port.start(adf);
+    port.start(adf, portSave);
 
     const uint32_t kStackLo = 0x7F000;  // $7F000-$7FFFF: stack (interrupt frames), not compared; level bitmap ends at $7EFFF
     int mismatches = 0;
@@ -174,7 +199,16 @@ int main(int argc, char** argv) {
     }
     size_t pc = 0;
     int stepFrames = 0;
+    // the autopilot starts once the level runs: game_frame counts $11294
+    bool apRunning = false;
+    long apDelay = std::getenv("AP_DELAY") ? std::atol(std::getenv("AP_DELAY")) : 0;
+    uint8_t apLastTick = 0;
     for (long f = 0; f < frames; f++) {
+        if (!prog.empty() && !apRunning && f >= 700) {
+            uint8_t t = ref.hw.chip()[0x11294];
+            if (f > 700 && t != apLastTick && --apDelay < 0) apRunning = true;
+            apLastTick = t;
+        }
         if (std::getenv("AP_TRACE") && f >= 1040 && f < 1100) {
             uint32_t cell = ref.hw.rd32(0x1131E);
             int idx = int((cell - 0x11928) / 2);
@@ -182,7 +216,7 @@ int main(int argc, char** argv) {
                         ref.hw.chipW(0x11348), ref.hw.chipW(0x11388), ref.hw.chipW(0x118FE), ref.hw.chipW(0x11924),
                         ref.hw.chipW(0x1133C), ref.hw.chipW(0x1133E), ref.hw.chipW(0x11340), ref.hw.chipW(0x11342));
         }
-        if (!prog.empty() && f >= 760 && pc < prog.size()) {
+        if (!prog.empty() && apRunning && pc < prog.size()) {
             static bool u = false, d = false, l = false, r = false;
             bool fire = false;
             Step& st = prog[pc];
@@ -256,6 +290,7 @@ int main(int argc, char** argv) {
         if (!port.runFrame()) { std::fprintf(stderr, "port ended at frame %ld\n", f); break; }
         if (ref.hw.pollClock() != port.hw.pollClock() && std::getenv("CHECK_CLOCK")) {
             std::printf("frame %ld: poll clock differs ref %d port %d\n", f + 1, ref.hw.pollClock(), port.hw.pollClock());
+            mismatches++;
             break;
         }
         const uint8_t* a = ref.hw.chip();
@@ -314,6 +349,7 @@ int main(int argc, char** argv) {
         raw.write(reinterpret_cast<const char*>(ref.executed.data()), std::streamsize(ref.executed.size()));
         std::printf("coverage: %d of %d instructions (%.1f%%)\n", hit, total, total ? 100.0 * hit / total : 0.0);
     }
+    if (!prog.empty()) std::printf("autopilot: %zu of %zu steps done\n", pc, prog.size());
     if (mismatches == 0) std::printf("OK: %ld frames identical (memory and picture)\n", frames);
     return mismatches ? 3 : 0;
 }
