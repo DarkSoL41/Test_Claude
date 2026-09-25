@@ -39,15 +39,28 @@ def tiles():
 
     def tile(code, transparent0):
         x0, y0 = (code % 20) * 16, (code // 20) * 16
-        im = Image.new('RGBA', (16, 16))
+        idx = [[0] * 16 for _ in range(16)]
         for y in range(16):
             for x in range(16):
                 base = t + (y0 + y) * 40 + (x0 + x) // 8
-                c = 0
                 for p in range(4):
                     if gfx[base + p * plane] & (0x80 >> ((x0 + x) & 7)):
-                        c |= 1 << p
-                im.putpixel((x, y), (0, 0, 0, 0) if transparent0 and c == 0 else rgb[c] + (255,))
+                        idx[y][x] |= 1 << p
+        # the background: colour 0 reached from the tile's edges (Murphy's
+        # eyes are colour 0 too, but inside him: they stay black)
+        clear = set()
+        if transparent0:
+            todo = [(x, y) for x in range(16) for y in (0, 15)] + [(x, y) for x in (0, 15) for y in range(16)]
+            while todo:
+                x, y = todo.pop()
+                if not (0 <= x < 16 and 0 <= y < 16) or (x, y) in clear or idx[y][x] != 0:
+                    continue
+                clear.add((x, y))
+                todo += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+        im = Image.new('RGBA', (16, 16))
+        for y in range(16):
+            for x in range(16):
+                im.putpixel((x, y), (0, 0, 0, 0) if (x, y) in clear else rgb[idx[y][x]] + (255,))
         return im
     return tile
 
@@ -84,8 +97,8 @@ def main():
               '// 64x64 ARGB8888 (Murphy for the game, the terminal for the editor).',
               '#pragma once', '#include <cstdint>', '']
     for name, code in ICONS.items():
-        # Murphy has a black background in the tile: keep it round (colour 0
-        # transparent); the terminal is square and fills its tile
+        # Murphy has a black background in the tile: keep him round (the
+        # background transparent); the terminal is square and fills its tile
         im = tile(code, transparent0=(code == 3))
         write_ico('port/res/%s.ico' % name, im)
         big = scaled(im, 64)
