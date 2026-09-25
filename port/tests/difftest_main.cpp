@@ -15,6 +15,7 @@
 // --hiscores X   : hiscore file both machines load instead of PHIL_03 on the
 //                  disk ("clean" = the port's clean file without players);
 //                  saves go to X.ref / X.port
+// --trace-var A  : print the long word at A (reference) after every frame
 // --port-data DIR : the port reads the extracted data folder (the reference
 //                  keeps reading the ADF image)
 #include <condition_variable>
@@ -106,6 +107,7 @@ int main(int argc, char** argv) {
     bool keepGoing = false, clearSkips = false;
     long seed = -1, level = 0;
     std::string coverage, autopilot, hiscores, portDataDir;
+    std::vector<uint32_t> traceVars;
     struct Poke { long frame; uint32_t addr; uint16_t value; };
     std::vector<Poke> pokes;
     std::vector<uint32_t> reportPcs;
@@ -126,6 +128,7 @@ int main(int argc, char** argv) {
         else if (a == "--autopilot") autopilot = next();
         else if (a == "--hiscores") hiscores = next();
         else if (a == "--port-data") portDataDir = next();
+        else if (a == "--trace-var") traceVars.push_back(uint32_t(std::strtoul(next().c_str(), nullptr, 16)));
         else if (a == "--clear-skips") clearSkips = true;
         else if (a == "--report") {
             std::string list = next();
@@ -290,12 +293,17 @@ int main(int argc, char** argv) {
             ref.hw.setJoystick(ju, jd, jl, jr, jf);
             port.hw.setJoystick(ju, jd, jl, jr, jf);
         }
-        if (!ref.runFrame()) { std::fprintf(stderr, "reference stuck at frame %ld\n", f); break; }
-        if (!port.runFrame()) { std::fprintf(stderr, "port ended at frame %ld\n", f); break; }
+        if (!ref.runFrame()) { std::fprintf(stderr, "reference stuck at frame %ld\n", f); mismatches++; break; }
+        if (!port.runFrame()) { std::fprintf(stderr, "port ended at frame %ld\n", f); mismatches++; break; }
         if (ref.hw.pollClock() != port.hw.pollClock() && std::getenv("CHECK_CLOCK")) {
             std::printf("frame %ld: poll clock differs ref %d port %d\n", f + 1, ref.hw.pollClock(), port.hw.pollClock());
             mismatches++;
             break;
+        }
+        if (!traceVars.empty()) {
+            std::printf("f%ld", f + 1);
+            for (uint32_t v : traceVars) std::printf(" %X=%08X", v, ref.hw.chipL(v));
+            std::printf("\n");
         }
         const uint8_t* a = ref.hw.chip();
         const uint8_t* b = port.hw.chip();
