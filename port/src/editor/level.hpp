@@ -77,6 +77,7 @@ public:
     void setStoredCamera(Camera c);
     Camera recommendedCamera() const;          // centred on Murphy, clamped to the map
     Camera effectiveCamera(bool* valid) const; // what the game ends up showing
+    void fixCamera();                          // store the effective camera, or the recommended one if it is off the map
 
     // records 0..9 that are in use (non-zero cell offset), in file order
     std::vector<SpecialPort> specialPorts() const;

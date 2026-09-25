@@ -34,15 +34,34 @@ namespace editor {
 
 namespace {
 
+// byte 1469 / special port byte 3, "freeze zonks" (docs/06-formats.md, tried
+// in the game): 0 as usual; 1 zonks take the short branch of scan_zonks and
+// do not crush snik snaks and electrons they fall on (Amiga only); 2 zonks do
+// not move at all. Infotrons fall and roll in every mode; other values act as 0.
+const char* freezeName(int v) {
+    switch (v) {
+    case 1: return tr("no crush", "не давят");
+    case 2: return tr("frozen", "стоят");
+    default: return tr("normal", "обычно");
+    }
+}
+const char* freezeTip(int v) {
+    switch (v) {
+    case 1: return tr("1: zonks fall and roll but do not crush snik snaks and electrons (Amiga only, the PC version has no such mode)",
+                      "1: зонки падают и скатываются, но не давят сник-снаков и электронов (только Amiga, в PC-версии такого нет)");
+    case 2: return tr("2: zonks do not move at all (infotrons still fall)", "2: зонки совсем не двигаются (инфотроны падают)");
+    default: return tr("0: zonks fall, roll and crush enemies as usual", "0: зонки падают, скатываются и давят врагов как обычно");
+    }
+}
+
 constexpr int kToolbarH = 32, kStatusH = 22, kLeftW = 236, kBottomH = 176, kRowH = 18;
 constexpr int kPalCell = 34;  // tile buttons of the palette strip: 32 x 32 images
 const int kZooms[] = {8, 12, 16, 20, 24, 32, 40, 48, 64};
 constexpr int kZoomCount = int(sizeof kZooms / sizeof kZooms[0]);
 constexpr int kCamW = 20, kCamH = 13;  // cells visible in the game's play area (320 x 208)
 
-// special ports are covered with blue on the map and in the palette (red: a
-// special port without a record)
-constexpr Color kSportTint{20, 110, 255, 160}, kSportBadTint{255, 40, 40, 150};
+// special ports are drawn blue (TileGfx); one without a record gets a red frame
+constexpr Color kSportBad{255, 50, 40};
 
 enum class Tool { Pencil, Line, Rect, FillRect, Flood, Select };
 
@@ -113,7 +132,8 @@ private:
 
     // ---- layout ----
     int paletteCols() const { return std::max(1, (vw_ - kLeftW - 8) / kPalCell); }
-    int paletteH() const { return ((T_COUNT + paletteCols() - 1) / paletteCols()) * kPalCell + 10; }
+    // at least as high as the tiles on the mouse buttons left of the strip
+    int paletteH() const { return std::max(76, ((T_COUNT + paletteCols() - 1) / paletteCols()) * kPalCell + 10); }
     Rect mapRect() const {
         int y = kToolbarH + paletteH();
         return {kLeftW, y, vw_ - kLeftW, vh_ - y - kBottomH - kStatusH};
@@ -404,6 +424,7 @@ void App::endEdit(const char* what) {
     if (!editing_) return;
     editing_ = false;
     syncPorts(lvl());
+    if (autoCamera_) lvl().fixCamera();  // the camera follows Murphy at once, not only when saving
     if (lvl().b == before_.b) return;
     auto& u = undo_[size_t(cur_)];
     u.push_back(before_);
@@ -698,7 +719,7 @@ void App::exportPicture() {
     const auto& a = gfx_.atlas();
     for (int cy = 0; cy < kMapH; cy++)
         for (int cx = 0; cx < kMapW; cx++) {
-            int img = TileGfx::imageFor(lvl().tile(cx, cy));
+            int img = TileGfx::gameImageFor(lvl().tile(cx, cy));
             for (int y = 0; y < kTilePx; y++)
                 std::memcpy(static_cast<uint8_t*>(s->pixels) + (cy * kTilePx + y) * s->pitch + cx * kTilePx * 4,
                             &a[size_t(y * gfx_.atlasWidth() + img * kTilePx)], kTilePx * 4);
@@ -997,17 +1018,11 @@ void App::frame() {
     SDL_RenderPresent(ren_);
 }
 
-// a tile of the game graphics; special ports are shown blue
+// a tile of the game graphics; special ports are blue
 void App::drawTile(int code, SDL_Rect dst, bool badPort) {
     SDL_Rect src{TileGfx::imageFor(code) * kTilePx, 0, kTilePx, kTilePx};
     SDL_RenderCopy(ren_, tiles_, &src, &dst);
-    if (isSpecialPort(code)) {
-        Uint8 alpha;
-        SDL_GetTextureAlphaMod(tiles_, &alpha);
-        Color c = badPort ? kSportBadTint : kSportTint;
-        c.a = uint8_t(c.a * alpha / 255);
-        ui_.fill({dst.x, dst.y, dst.w, dst.h}, c);
-    }
+    if (badPort) ui_.frame({dst.x, dst.y, dst.w, dst.h}, kSportBad, std::max(1, dst.w / 8));
 }
 
 void App::drawToolbar() {
@@ -1229,11 +1244,12 @@ void App::drawBottomPanel(Rect r) {
 
 int App::drawProperties(Rect r) {
     Level& l = lvl();
-    const int W = 330;
+    const int W = 336;
     int x = r.x + 8, y = r.y + 6;
     ui_.text(x, y, fmt(tr("Level %03d", "Уровень %03d"), cur_ + 1), theme::dim);
     y += 20;
-    int lw = std::max(ui_.textWidth(tr("Title", "Название")), ui_.textWidth(tr("Collect", "Собрать"))) + 10;
+    int lw = std::max({ui_.textWidth(tr("Title", "Название")), ui_.textWidth(tr("Collect", "Собрать")),
+                       ui_.textWidth(tr("Zonks", "Зонки"))}) + 10;
     ui_.text(x, y + 3, tr("Title", "Название"));
     if (ui_.textField(2, {x + lw, y, W - 8 - lw, 22}, titleEdit_, kTitleLen, titleFilter,
                       tr("Level title (Latin letters, digits, signs; 23 characters)", "Название уровня (латиница, цифры, знаки; 23 символа)"))) {
@@ -1243,16 +1259,11 @@ int App::drawProperties(Rect r) {
     }
     y += 28;
     ui_.text(x, y + 3, tr("Zonks", "Зонки"));
-    const char* fz[] = {tr("normal", "обычно"), "1", tr("frozen", "стоят")};
-    const char* fzTip[] = {tr("Zonks and infotrons fall as usual (0)", "Зонки и инфотроны падают как обычно (0)"),
-                           tr("Value 1: zonks take the \"frozen\" branch, infotrons do not fall",
-                              "Значение 1: зонки по «замороженной» ветке, инфотроны не падают"),
-                           tr("Value 2: zonks and infotrons completely frozen", "Значение 2: зонки и инфотроны заморожены полностью")};
     int fzv = l.freezeZonks();
     int bw = (W - 8 - lw - 8) / 3;
     for (int i = 0; i < 3; i++) {
         Rect b{x + lw + i * (bw + 4), y, bw, 22};
-        if (ui_.button(b, fz[i], true, fzv == i, fzTip[i])) { beginEdit(); l.setFreezeZonks(i); endEdit(); }
+        if (ui_.button(b, freezeName(i), true, fzv == i, freezeTip(i))) { beginEdit(); l.setFreezeZonks(i); endEdit(); }
     }
     y += 28;
     int inf = l.count(T_INFOTRON), el = l.count(T_ELECTRON);
@@ -1297,8 +1308,14 @@ int App::drawCamera(Rect r) {
     if (ui_.checkbox({x, y, W - 16, 22}, tr("Automatic", "Автоматически"), autoCamera_,
                      tr("On: the editor stores the camera the game shows (on Murphy if it leaves the map). Off: set it below",
                         "Вкл.: редактор записывает камеру, которую покажет игра (на Murphy, если она за картой). Выкл.: задайте ниже")))
+    {
+        if (autoCamera_) {  // put the camera of this level right at once
+            beginEdit();
+            endEdit();
+        }
         message(autoCamera_ ? tr("Automatic start camera", "Стартовая камера — автоматически")
                             : tr("Start camera set by hand", "Стартовая камера — вручную"));
+    }
     y += 28;
     Camera st = l.storedCamera();
     bool valid = true;
@@ -1346,7 +1363,7 @@ int App::drawPorts(Rect r) {
     for (size_t i = 0; i < all.size(); i++)
         if (all[i].cell < kMapW * kMapH && isSpecialPort(l.b[size_t(all[i].cell)])) shown.push_back(int(i));
     int junk = int(all.size() - shown.size());
-    const int colW = 232, W = 2 * colW + 8;
+    const int colW = 236, W = 2 * colW + 8;
     int x = r.x + 8, y = r.y + 6;
     int tx = ui_.text(x, y, fmt(tr("Special ports %d / %d", "Особые порты %d / %d"), int(shown.size()), kMaxSpecialPorts), theme::dim);
     if (junk) {
@@ -1367,8 +1384,8 @@ int App::drawPorts(Rect r) {
         int cx = x + col * (colW + 8);
         ui_.text(cx, y, tr("cell", "клетка"), theme::dim);
         ui_.text(cx + 90, y, tr("Grav", "Грав"), theme::dim);
-        ui_.text(cx + 132, y, tr("Zonks", "Зонки"), theme::dim);
-        ui_.text(cx + 190, y, tr("Enem", "Враги"), theme::dim);
+        ui_.text(cx + 128, y, tr("Zonks", "Зонки"), theme::dim);
+        ui_.text(cx + 194, y, tr("Enem", "Враги"), theme::dim);
     }
     y += 18;
     int n = int(shown.size());
@@ -1389,14 +1406,14 @@ int App::drawPorts(Rect r) {
             p.gravity = gv ? 1 : 0;
             changed = true;
         }
-        const char* zl = p.freezeZonks == 2 ? tr("frozen", "стоят") : p.freezeZonks == 0 ? tr("normal", "обычн") : "1";
-        if (ui_.button({cx + 126, cy, 58, 22}, zl, true, p.freezeZonks == 2,
-                       tr("Zonks after passing: normal (0) / 1 / frozen (2); click to change",
-                          "Зонки после прохода: обычно (0) / 1 / стоят (2) — щелчок меняет"))) {
-            p.freezeZonks = uint8_t(p.freezeZonks == 0 ? 2 : p.freezeZonks == 2 ? 1 : 0);
+        int fv = p.freezeZonks <= 2 ? p.freezeZonks : 0;
+        if (ui_.button({cx + 126, cy, 68, 22}, freezeName(fv), true, fv != 0,
+                       std::string(tr("Zonks after passing, click to change. ", "Зонки после прохода, щелчок меняет. ")) +
+                           freezeTip(fv))) {
+            p.freezeZonks = uint8_t((fv + 1) % 3);
             changed = true;
         }
-        if (ui_.checkbox({cx + 196, cy, 30, 22}, "", ev, tr("Freeze the enemies after passing", "Заморозить врагов после прохода"))) {
+        if (ui_.checkbox({cx + 204, cy, 30, 22}, "", ev, tr("Freeze the enemies after passing", "Заморозить врагов после прохода"))) {
             p.freezeEnemies = ev ? 1 : 0;
             changed = true;
         }
@@ -1541,8 +1558,8 @@ void App::drawStatus(Rect r) {
         int k = lvl().findPort(hoverY_ * kMapW + hoverX_);
         if (k >= 0) {
             SpecialPort p = lvl().specialPorts()[size_t(k)];
-            left += fmt(tr("   port %d: gravity %s, zonks %d, enemies %s", "   порт %d: гравитация %s, зонки %d, враги %s"), k + 1,
-                        p.gravity ? tr("on", "вкл") : tr("off", "выкл"), p.freezeZonks,
+            left += fmt(tr("   port %d: gravity %s, zonks %s, enemies %s", "   порт %d: гравитация %s, зонки %s, враги %s"), k + 1,
+                        p.gravity ? tr("on", "вкл") : tr("off", "выкл"), freezeName(p.freezeZonks <= 2 ? p.freezeZonks : 0),
                         p.freezeEnemies ? tr("frozen", "стоят") : tr("move", "ходят"));
         }
     } else {

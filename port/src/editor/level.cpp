@@ -205,13 +205,15 @@ int Level::murphyCell() const {
     return -1;
 }
 
+void Level::fixCamera() {
+    bool valid = false;
+    Camera eff = effectiveCamera(&valid);
+    setStoredCamera(valid ? eff : recommendedCamera());
+}
+
 void Level::normalize(bool autoCamera) {
     // keep the camera the game would show; recentre only if it leaves the map
-    if (autoCamera) {
-        bool valid = false;
-        Camera eff = effectiveCamera(&valid);
-        setStoredCamera(valid ? eff : recommendedCamera());
-    }
+    if (autoCamera) fixCamera();
     std::vector<SpecialPort> keep;
     for (const SpecialPort& p : specialPorts())
         if (p.cell < kMapW * kMapH && isSpecialPort(b[size_t(p.cell)]) &&
@@ -298,9 +300,13 @@ std::vector<Issue> Level::validate() const {
     bool valid = true;
     Camera eff = effectiveCamera(&valid);
     if (!valid) {
-        std::snprintf(buf, sizeof buf, tr("Start camera leaves the map (%d, %d)", "Стартовая камера уходит за карту (%d, %d)"), eff.x,
-                      eff.y);
-        add(Issue::Warning, buf);
+        std::snprintf(buf, sizeof buf,
+                      tr("Start camera leaves the map (%d, %d): Murphy's step is limited by the screen, not by the map, so he can walk "
+                         "off the level",
+                         "Стартовая камера уходит за карту (%d, %d): шаг Murphy ограничен экраном, а не картой — он сможет уйти за "
+                         "уровень"),
+                      eff.x, eff.y);
+        add(Issue::Error, buf);
     }
 
     std::string t = title();

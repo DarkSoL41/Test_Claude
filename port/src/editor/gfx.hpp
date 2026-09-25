@@ -11,9 +11,11 @@
 namespace editor {
 
 constexpr int kTilePx = 16;
-// extra images after the 40 cell codes: the real look of objects that the
-// level picture shows as a placeholder or as something else
-enum ExtraImage { IMG_SNIKSNAK = 40, IMG_ELECTRON = 41, IMG_BUG = 42, IMG_COUNT = 43 };
+// extra images after the 40 cell codes: the
+// real look of objects that the level picture shows as a placeholder or as
+// something else, and the special ports recoloured blue (the game draws them
+// like plain ports)
+enum ExtraImage { IMG_SNIKSNAK = 40, IMG_ELECTRON = 41, IMG_BUG = 42, IMG_SPORT_FIRST = 43, IMG_COUNT = 47 };
 
 class TileGfx {
 public:
@@ -22,8 +24,10 @@ public:
     const std::vector<uint32_t>& atlas() const { return atlas_; }
     int atlasWidth() const { return IMG_COUNT * kTilePx; }
     uint32_t averageColor(int image) const { return avg_[size_t(image)]; }
-    // image to show in the editor for a cell code
+    // image to show in the editor for a cell code (special ports blue)
     static int imageFor(int code);
+    // the game's own picture of the cell (for the exported level picture)
+    static int gameImageFor(int code);
 
 private:
     std::vector<uint32_t> atlas_;

@@ -22,6 +22,11 @@ struct Src { int sheet, x, y; };
 }  // namespace
 
 int TileGfx::imageFor(int code) {
+    if (isSpecialPort(code)) return IMG_SPORT_FIRST + code - T_SPORT_RIGHT;
+    return gameImageFor(code);
+}
+
+int TileGfx::gameImageFor(int code) {
     switch (code) {
     case T_SNIKSNAK: return IMG_SNIKSNAK;
     case T_ELECTRON: return IMG_ELECTRON;
@@ -62,6 +67,7 @@ bool TileGfx::load(const amiga::GameFiles& files, std::string* err) {
     src.push_back({1, 192, 176});  // snik snak
     src.push_back({1, 224, 176});  // electron
     src.push_back({0, 272, 228});  // bug (base with a spark)
+    for (int code = T_SPORT_RIGHT; code <= T_SPORT_UP; code++) src.push_back({0, (code % 20) * 16, (code / 20) * 16});
     atlas_.assign(size_t(IMG_COUNT * kTilePx * kTilePx), 0);
     avg_.assign(IMG_COUNT, 0);
     for (int i = 0; i < IMG_COUNT; i++) {
@@ -69,6 +75,10 @@ bool TileGfx::load(const amiga::GameFiles& files, std::string* err) {
         for (int y = 0; y < kTilePx; y++)
             for (int x = 0; x < kTilePx; x++) {
                 uint32_t c = pixel(src[size_t(i)].sheet, src[size_t(i)].x + x, src[size_t(i)].y + y);
+                if (i >= IMG_SPORT_FIRST) {  // red parts of the port become blue
+                    uint32_t cr = (c >> 16) & 255, cg = (c >> 8) & 255, cb = c & 255;
+                    if (cr > cg + 24 && cr > cb + 24) c = 0xFF000000u | cb << 16 | cg << 8 | cr;
+                }
                 atlas_[size_t(y * atlasWidth() + i * kTilePx + x)] = c;
                 r += (c >> 16) & 255; g += (c >> 8) & 255; b += c & 255;
             }
