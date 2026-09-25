@@ -32,22 +32,36 @@ add_library(supaplexgame STATIC
 )
 target_link_libraries(supaplexgame PUBLIC amigahw)
 
-# the game executable (SDL2 front end)
+# the game executable (SDL2 front end) and the level editor
 find_package(SDL2 REQUIRED)
 add_executable(supaplex WIN32 src/platform/main_sdl.cpp)
 target_link_libraries(supaplex PRIVATE supaplexgame)
-if(TARGET SDL2::SDL2main)
-  target_link_libraries(supaplex PRIVATE SDL2::SDL2main)
-endif()
-if(TARGET SDL2::SDL2)
-  target_link_libraries(supaplex PRIVATE SDL2::SDL2)
-else()
-  target_include_directories(supaplex PRIVATE ${SDL2_INCLUDE_DIRS})
-  target_link_libraries(supaplex PRIVATE ${SDL2_LIBRARIES})
-endif()
+add_executable(supaplex_editor WIN32
+  src/editor/app.cpp
+  src/editor/level.cpp
+  src/editor/gfx.cpp
+  src/editor/ui.cpp
+  src/editor/process.cpp
+)
+target_link_libraries(supaplex_editor PRIVATE amigahw)
+foreach(t supaplex supaplex_editor)
+  if(TARGET SDL2::SDL2main)
+    target_link_libraries(${t} PRIVATE SDL2::SDL2main)
+  endif()
+  if(TARGET SDL2::SDL2)
+    target_link_libraries(${t} PRIVATE SDL2::SDL2)
+  else()
+    target_include_directories(${t} PRIVATE ${SDL2_INCLUDE_DIRS})
+    target_link_libraries(${t} PRIVATE ${SDL2_LIBRARIES})
+  endif()
+endforeach()
 if(MINGW)
   target_link_options(supaplex PRIVATE -static-libgcc -static-libstdc++)
+  target_link_options(supaplex_editor PRIVATE -static-libgcc -static-libstdc++)
 endif()
+
+# checks of the editor's level model against the original levels
+add_executable(level_test tests/level_test.cpp src/editor/level.cpp)
 
 if(SUPAPLEX_BUILD_TESTS)
   add_library(musashi STATIC

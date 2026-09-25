@@ -5,3 +5,8 @@ __pycache__/
 *.sav
 difftest_hiscores.*
 trace_*.txt
+editor_test/
+export/
+editor.ini
+level_test_out.dat
+*.bak

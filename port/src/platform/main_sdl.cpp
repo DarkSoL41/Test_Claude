@@ -92,7 +92,7 @@ public:
         }
         int w = 320 * scale, h = 256 * scale;
         window_ = SDL_CreateWindow("Supaplex (Amiga)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h,
-                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI |
+                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | (testLevel ? SDL_WINDOW_HIDDEN : 0) |
                                        (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
         if (!window_) { std::fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError()); return false; }
         renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
@@ -132,12 +132,23 @@ public:
     void onInterrupt(int level) override { game::requestInterrupt(level); }
 
     long quitAfter = -1;          // debugging: quit after this many frames
+    int testLevel = 0;            // level editor: play this level (1..111), then quit
     std::string shotPath;         // debugging: write the last frame here (PPM)
 
     void onFrame() override {
         if (quitAfter >= 0 && long(hw_.frameCount()) >= quitAfter) {
             if (!shotPath.empty()) writeShot();
             throw game::QuitGame{};
+        }
+        if (testLevel && testState_ < 3) {
+            // level test from the editor: run through the intro and the menu
+            // at full speed, without picture and sound
+            if (++testFrames_ % 25 == 0) { SDL_Event e; while (SDL_PollEvent(&e)) if (e.type == SDL_QUIT) throw game::QuitGame{}; }
+            trackLevel();
+            driveTest();
+            paula_.samples().clear();
+            nextFrame_ = SDL_GetPerformanceCounter();
+            return;
         }
         handleEvents();
         while (paused_) {
@@ -199,6 +210,43 @@ private:
             if (left > 2) SDL_Delay(Uint32(left - 1));
             now = SDL_GetPerformanceCounter();
         }
+    }
+
+    // Level test for the editor. The menu is driven like a player would:
+    // wait until it reads the mouse, select the level ($140DC; the test
+    // player may play all levels), press fire; quit when the level is over.
+    void driveTest() {
+        switch (testState_) {
+        case 0: {
+            hw_.moveMouse((testFrames_ & 1) ? 1 : -1, 0);  // the menu reads the mouse counters
+            uint8_t last = hw_.chip()[0x112EA];
+            if (testFrames_ > 2 && last != lastMouseRead_ && hw_.chipL(0x113D6) != 0) testState_ = 1;
+            lastMouseRead_ = last;
+            if (testFrames_ > 5000) fail("menu not reached");
+            break;
+        }
+        case 1:
+            hw_.chip()[0x140DC] = 0;
+            hw_.chip()[0x140DD] = uint8_t(testLevel - 1);
+            hw_.setJoystick(false, false, false, false, true);
+            if (++testFire_ > 4) { hw_.setJoystick(false, false, false, false, false); testState_ = 2; }
+            break;
+        case 2:
+            if (inLevel_) {
+                testState_ = 3;
+                SDL_ShowWindow(window_);
+                SDL_RaiseWindow(window_);
+            }
+            if (++testWait_ > 3000) fail("level did not start");
+            break;
+        default:
+            if (!inLevel_) throw game::QuitGame{};
+            break;
+        }
+    }
+    [[noreturn]] void fail(const char* why) {
+        std::fprintf(stderr, "level test: %s\n", why);
+        throw game::QuitGame{};
     }
 
     // The game installs its keyboard interrupt handler ($10214 in vector $68)
@@ -302,6 +350,7 @@ private:
                     break;
                 }
                 if (down && sc == SDL_SCANCODE_F12) throw game::QuitGame{};
+                if (down && sc == SDL_SCANCODE_ESCAPE && testLevel) throw game::QuitGame{};  // back to the editor
                 if (down && sc == SDL_SCANCODE_PAUSE) { paused_ = !paused_; break; }
                 if (e.key.repeat) break;
                 typeKey(sc, down);
@@ -331,6 +380,7 @@ private:
         }
         if (testMode_) applyTestInput();
         trackLevel();
+        if (testLevel) driveTest();
         updateJoystick();
         updateMouse();
     }
@@ -404,6 +454,9 @@ private:
     bool inLevel_ = false, holdLmb_ = false, holdRmb_ = false, holdFire_ = false;
     uint8_t lastTick_ = 0;
     int idle_ = 0;
+    int testState_ = 0, testFire_ = 0, testWait_ = 0;
+    long testFrames_ = 0;
+    uint8_t lastMouseRead_ = 0;
     bool testMode_ = false;
     std::vector<TestEvent> test_;
     bool testKeys_[SDL_NUM_SCANCODES] = {};
@@ -418,6 +471,7 @@ int main(int argc, char** argv) {
     bool fullscreen = false, originalHiscores = false, resetHiscores = false;
     long quitAfter = -1;
     std::string shot, testInput;
+    int testLevel = 0;
     for (int i = 1; i < argc; i++) {
         std::string a = argv[i];
         auto next = [&]() { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
@@ -432,6 +486,7 @@ int main(int argc, char** argv) {
         else if (a == "--frames") quitAfter = std::atol(next().c_str());
         else if (a == "--shot") shot = next();
         else if (a == "--test-input") testInput = next();
+        else if (a == "--test-level") testLevel = std::atoi(next().c_str());
         else if (a == "--help" || a == "-h") {
             std::printf(
                 "usage: supaplex [--scale N] [--fullscreen] [--reset-hiscores] [--original-hiscores]\n"
@@ -490,7 +545,18 @@ int main(int argc, char** argv) {
         std::ifstream f(fs::path(savePath), std::ios::binary);
         haveSave = bool(f);
     }
-    if (!haveSave || resetHiscores) {
+    if (testLevel >= 1 && testLevel <= 111) {
+        // a player who may play every level
+        std::vector<uint8_t> data = game::cleanHiscores();
+        uint8_t* rec = &data[0x280];
+        rec[0] = 1;
+        std::memcpy(rec + 8, "  EDITOR", 8);
+        rec[0x14] = 0;
+        rec[0x15] = 111;
+        std::memcpy(&data[0x1B8 + 2], "  EDITOR", 8);
+        std::ofstream f(fs::path(savePath), std::ios::binary);
+        f.write(reinterpret_cast<const char*>(data.data()), std::streamsize(data.size()));
+    } else if (!haveSave || resetHiscores) {
         std::vector<uint8_t> data = originalHiscores ? files.read("PHIL_03") : game::cleanHiscores();
         std::ofstream f(fs::path(savePath), std::ios::binary);
         f.write(reinterpret_cast<const char*>(data.data()), std::streamsize(data.size()));
@@ -500,6 +566,7 @@ int main(int argc, char** argv) {
     amiga::Paula paula(hw, kSampleRate);
     hw.setPaula(&paula);
     Frontend fe(hw, paula);
+    fe.testLevel = (testLevel >= 1 && testLevel <= 111) ? testLevel : 0;
     if (!fe.init(scale, fullscreen)) return 1;
     fe.quitAfter = quitAfter;
     fe.shotPath = shot;

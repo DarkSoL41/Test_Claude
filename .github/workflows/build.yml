@@ -28,6 +28,7 @@ jobs:
         run: |
           New-Item -ItemType Directory dist | Out-Null
           Copy-Item build\Release\supaplex.exe dist\
+          Copy-Item build\Release\supaplex_editor.exe dist\
           Copy-Item "$env:SDL2_DLL" dist\
           Copy-Item -Recurse data dist\data
           Copy-Item README.md dist\
@@ -53,6 +54,8 @@ jobs:
         run: |
           ./port/build/supaplex --adf "Supaplex (1991).adf" --extract /tmp/data
           diff -r data /tmp/data
+      - name: Level editor model (all 111 original levels)
+        run: ./port/build/level_test data/LEVELS.DAT
       - name: Accuracy (original 68000 code vs port)
         working-directory: port
         run: |
