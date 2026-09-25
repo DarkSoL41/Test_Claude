@@ -168,3 +168,11 @@ cd port
 | `port/src/platform/` | фронтенд SDL2 (окно, звук, ввод) |
 | `port/tests/` | эталонный эмулятор (Musashi), `difftest`, `refrun`, фаззинг |
 | `port/third_party/musashi/` | ядро 68000 Musashi (MIT), только для тестов |
+
+## Авторы порта
+
+Порт Amiga-версии для Windows и редактор уровней — **DarkSoL** (discord:
+`darksol41`), с помощью и поддержкой ИИ Claude (Anthropic). Строка об этом
+показана на экране авторов игры (маленькая красная кнопка справа от строки
+сообщений в меню), в справке редактора и в свойствах exe-файлов.
+Supaplex © 1991 Digital Integration / Think!ware.

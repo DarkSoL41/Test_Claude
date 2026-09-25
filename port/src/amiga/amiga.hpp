@@ -83,6 +83,7 @@ public:
     uint16_t intreq() const { return intreq_; }
     int pendingInterruptLevel() const;   // highest enabled & requested level, 0 if none
     int beamLine() const { return vpos_; }
+    uint32_t copperList() const { return cop1lc_; }  // COP1LC: tells the front end which screen is shown
     const uint32_t* frameBuffer() const { return front_.data(); }  // kOutWidth x kOutHeight ARGB
     uint64_t frameCount() const { return frames_; }
     int pollClock() const { return hclock_; }

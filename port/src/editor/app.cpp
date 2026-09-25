@@ -1727,6 +1727,8 @@ void App::drawHelp() {
          "  • рамка должна быть из «железа»: объект, ушедший за карту, вешает игру на Amiga"},
         {"  • levels that were not changed are saved byte for byte", "  • неизменённые уровни сохраняются байт в байт"},
         {"", ""},
+        {"Windows port and editor: DarkSoL (discord: darksol41), with the help and support of Claude AI",
+         "Порт для Windows и редактор: DarkSoL (discord: darksol41), с помощью и поддержкой ИИ Claude"},
         {"F1 or Esc: close the help", "F1 или Esc — закрыть справку"},
     };
     ui_.modal = false;

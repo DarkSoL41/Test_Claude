@@ -1,2 +1,30 @@
-// program icon (tools/make_icons.py); SDL uses the icon with ID 1
+// program icon (tools/make_icons.py; SDL uses the icon with ID 1) and version information
+#include <winver.h>
+
 1 ICON "supaplex_editor.ico"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "CompanyName", "DarkSoL (discord: darksol41)"
+      VALUE "FileDescription", "Supaplex (Amiga) level editor"
+      VALUE "FileVersion", "1.0.0.0"
+      VALUE "InternalName", "supaplex_editor"
+      VALUE "OriginalFilename", "supaplex_editor.exe"
+      VALUE "ProductName", "Supaplex (Amiga) for Windows"
+      VALUE "ProductVersion", "1.0.0.0"
+      VALUE "LegalCopyright", "Windows port: DarkSoL (discord: darksol41), with the help of Claude AI. Supaplex (C) 1991 Digital Integration / Think!ware"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END

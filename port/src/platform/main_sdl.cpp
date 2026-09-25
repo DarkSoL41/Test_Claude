@@ -230,7 +230,7 @@ private:
         std::FILE* f = std::fopen(shotPath.c_str(), "wb");
         if (!f) return;
         std::fprintf(f, "P6\n%d %d\n255\n", amiga::kOutWidth, amiga::kOutHeight);
-        const uint32_t* fb = hw_.frameBuffer();
+        const uint32_t* fb = shownPicture();
         for (int i = 0; i < amiga::kOutWidth * amiga::kOutHeight; i++) {
             unsigned char px[3] = {uint8_t(fb[i] >> 16), uint8_t(fb[i] >> 8), uint8_t(fb[i])};
             std::fwrite(px, 1, 3, f);
@@ -292,8 +292,68 @@ private:
                      lockToDisplay_ ? "frames on the vertical blank" : "50 Hz clock", gameRate_);
     }
 
+    // ---- the port's credit line on the game's credits screen ------------
+    // (the red button right of the message line): drawn with the game's own
+    // font into the picture that is shown, the game's memory is not touched
+
+    // font of draw_text ($B2A0): 8x7 glyphs, one bit plane, $3A bytes a row
+    // at the address in $1B5D8; the glyph table ($1B52A) pairs a character
+    // with its column, $FF ends it
+    int glyphColumn(char ch) const {
+        for (uint32_t a = 0x1B52A; a < 0x1B5A0; a += 2) {
+            uint8_t c = hw_.chip()[a];
+            if (c == 0xFF) return -1;
+            if (c == uint8_t(ch)) return hw_.chip()[a + 1];
+        }
+        return -1;
+    }
+    const uint8_t* fontRow(int column, int row) const {
+        return &hw_.chip()[(hw_.chipL(0x1B5D8) + uint32_t(column) + uint32_t(row) * 0x3A) & (amiga::kChipSize - 1)];
+    }
+    // the credits screen: its copper list ($1BB7E, shared with the statistics)
+    // and its first line of text in the bit plane (menu_info_screen, $A3BA)
+    bool creditsShown() const {
+        if (hw_.copperList() != 0x1BB7E) return false;
+        const char* first = "SUPAPLEX";  // "SUPAPLEX BY THINK!WARE ..." at x 180, y 16
+        uint32_t line = hw_.chipL(0x1B5E8) + 16 * 80 + 180 / 8;
+        for (int i = 0; first[i]; i++) {
+            int col = glyphColumn(first[i]);
+            if (col < 0) return false;
+            for (int r = 0; r < 7; r++)
+                if (hw_.chip()[(line + uint32_t(i + r * 80)) & (amiga::kChipSize - 1)] != *fontRow(col, r)) return false;
+        }
+        return true;
+    }
+    void drawCreditText(std::vector<uint32_t>& fb, int y, const char* text, uint32_t colour) const {
+        int x0 = (amiga::kOutWidth - int(std::strlen(text)) * 8) / 2;
+        for (int i = 0; text[i]; i++) {
+            int col = glyphColumn(text[i]);
+            if (col < 0) continue;
+            for (int r = 0; r < 7; r++) {
+                uint8_t bits = *fontRow(col, r);
+                for (int b = 0; b < 8; b++)
+                    if (bits & (0x80 >> b)) {
+                        int px = x0 + i * 8 + b, py = y + r;
+                        if (px >= 0 && px < amiga::kOutWidth && py >= 0 && py < amiga::kOutHeight)
+                            fb[size_t(py * amiga::kOutWidth + px)] = colour;
+                    }
+            }
+        }
+    }
+
+    // the picture as it is shown: the emulated display plus the credit line
+    const uint32_t* shownPicture() {
+        const uint32_t* picture = hw_.frameBuffer();
+        if (!creditsShown()) return picture;
+        credits_.assign(picture, picture + amiga::kOutWidth * amiga::kOutHeight);
+        drawCreditText(credits_, 234, "PORTED TO WINDOWS BY DARKSOL (DISCORD: DARKSOL41)", 0xFFFFFFFF);
+        drawCreditText(credits_, 244, "WITH THE HELP AND SUPPORT OF CLAUDE AI", 0xFFFFFFFF);
+        return credits_.data();
+    }
+
     void present() {
-        SDL_UpdateTexture(texture_, nullptr, hw_.frameBuffer(), amiga::kOutWidth * 4);
+        const uint32_t* picture = shownPicture();
+        SDL_UpdateTexture(texture_, nullptr, picture, amiga::kOutWidth * 4);
         int ww, wh;
         SDL_GetRendererOutputSize(renderer_, &ww, &wh);
         // 320x256 PAL lowres picture on a 4:3 display
@@ -619,6 +679,7 @@ private:
     SDL_GameController* pad_ = nullptr;
     SDL_Rect dst_{0, 0, 640, 512};
     Uint64 nextFrame_ = 0, lastPresent_ = 0;
+    std::vector<uint32_t> credits_;  // the picture with the port's credit line
     Settings set_;
     bool headless_ = false, vsync_ = false, lockToDisplay_ = false;
     int presentsPerFrame_ = 1;
