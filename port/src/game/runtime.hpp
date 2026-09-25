@@ -11,6 +11,10 @@ namespace game {
 struct Environment {
     const amiga::GameFiles* files = nullptr;  // files of the original disk (data folder or ADF)
     std::string savePath;              // hiscore file written instead of PHIL_03 on disk
+    // called when the game reads or writes the disk (instant here, a second or
+    // more on the Amiga): lets the front end treat buttons held since then as
+    // released until they are let go
+    std::function<void()> onDiskAccess;
 };
 
 // Thrown by the front end to leave the game loop (the original never exits).

@@ -120,6 +120,7 @@ std::string fileForCode(uint32_t d1) {
 }  // namespace
 
 void native_loadFile() {
+    if (g_env.onDiskAccess) g_env.onDiskAccess();
     std::string name = fileForCode(D1);
     std::vector<uint8_t> data;
     if (name == "PHIL_03" && !g_env.savePath.empty()) {
@@ -138,6 +139,7 @@ void native_diskMotorOff() {}
 void native_diskDelay() {}
 
 void native_saveHiscores() {
+    if (g_env.onDiskAccess) g_env.onDiskAccess();
     if (!g_env.savePath.empty()) {
         std::ofstream f(g_env.savePath, std::ios::binary);
         for (uint32_t i = 0; i < 0x800; i++) f.put(char(bus->chip()[(A0 + i) & (amiga::kChipSize - 1)]));

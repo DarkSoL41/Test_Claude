@@ -14,6 +14,17 @@
 //                     player name the keys go to the Amiga keyboard. Elsewhere
 //                     the keyboard does nothing, like in the original.
 //   F11 or Alt+Enter : fullscreen,  Pause : pause,  F12 or window close : quit
+//
+// Smooth picture: the game draws 50 frames a second (PAL) and moves the
+// picture evenly, 2 pixels a frame. A 60 Hz monitor cannot show 50 frames
+// evenly (every fifth one stays twice as long: judder). So the picture is
+// shown with vertical sync, and (supaplex.ini, see writeDefaultIni):
+//   * in fullscreen the monitor is switched to a 50 Hz (or 100 Hz) mode if it
+//     has one: perfectly smooth at the original speed;
+//   * speed=display runs one game frame per monitor refresh (or per 2, 3 ...
+//     refreshes, whatever is closest to 50 a second): smooth everywhere, but
+//     the game then runs at that rate (60 Hz: 20% faster), like a PAL game on
+//     an NTSC Amiga. The sound keeps its pitch. The game logic is the same.
 #include <SDL.h>
 
 #include <algorithm>
@@ -37,6 +48,15 @@ namespace {
 constexpr int kSampleRate = 48000;
 // PAL frame: 313 lines of 227.5 colour clocks at 3.546895 MHz
 constexpr double kFrameSeconds = 313.0 * 227.5 / 3546895.0;
+
+// Settings from supaplex.ini (next to the program) and the command line.
+struct Settings {
+    int scale = 3;
+    bool fullscreen = false;
+    bool vsync = true;          // show frames on the monitor's vertical blank
+    bool fullscreen50 = true;   // fullscreen: switch the monitor to 50 / 100 Hz if possible
+    bool speedDisplay = false;  // speed=display: one game frame per refresh (or per n refreshes)
+};
 
 int amigaKey(SDL_Scancode sc) {
     switch (sc) {
@@ -85,23 +105,31 @@ class Frontend : public amiga::Host {
 public:
     Frontend(amiga::Amiga& hw, amiga::Paula& paula) : hw_(hw), paula_(paula) {}
 
-    bool init(int scale, bool fullscreen) {
+    bool init(const Settings& set, bool headless) {
+        set_ = set;
+        headless_ = headless;
+        int scale = set.scale;
+        bool fullscreen = set.fullscreen;
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) != 0) {
             std::fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
             return false;
         }
         int w = 320 * scale, h = 256 * scale;
         window_ = SDL_CreateWindow("Supaplex (Amiga)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h,
-                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | (testLevel ? SDL_WINDOW_HIDDEN : 0) |
-                                       (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | (testLevel ? SDL_WINDOW_HIDDEN : 0));
         if (!window_) { std::fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError()); return false; }
-        renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
+        bool vsync = set.vsync && !headless;
+        renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | (vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
+        if (!renderer_ && vsync) renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
         if (!renderer_) renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_SOFTWARE);
         if (!renderer_) { std::fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError()); return false; }
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
         texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
                                      amiga::kOutWidth, amiga::kOutHeight);
-        fullscreen_ = fullscreen;
+        SDL_RendererInfo ri{};
+        vsync_ = vsync && SDL_GetRendererInfo(renderer_, &ri) == 0 && (ri.flags & SDL_RENDERER_PRESENTVSYNC);
+        if (fullscreen) setFullscreen(true);
+        else configureTiming();
 
         SDL_AudioSpec want{}, have{};
         want.freq = kSampleRate;
@@ -130,6 +158,20 @@ public:
     }
 
     void onInterrupt(int level) override { game::requestInterrupt(level); }
+
+    // The game read or wrote the disk. On the Amiga that took a second or
+    // more, and a click that started it (OK on "skip level", the click that
+    // leaves the results) was over long before the next screen looked at the
+    // buttons. Here it is instant, so buttons held now reach the game again
+    // only after they are released: otherwise the same click also presses
+    // whatever lies under the pointer on the next screen.
+    void diskAccess() {
+        holdLmb_ = lmb_;
+        holdRmb_ = rmb_;
+        holdFire_ = true;
+        hw_.setMouseButtons(false, false);
+        updateJoystick();
+    }
 
     long quitAfter = -1;          // debugging: quit after this many frames
     int testLevel = 0;            // level editor: play this level (1..111), then quit
@@ -175,6 +217,60 @@ private:
         std::fclose(f);
     }
 
+    // Fullscreen: with fullscreen50 the monitor goes to a 50 Hz (or 100 Hz)
+    // mode of the desktop size if it has one, else the desktop is used as is.
+    void setFullscreen(bool on) {
+        fullscreen_ = on;
+        if (!on) {
+            SDL_SetWindowFullscreen(window_, 0);
+        } else {
+            bool done = false;
+            if (set_.fullscreen50 && vsync_) {
+                int d = SDL_GetWindowDisplayIndex(window_);
+                SDL_DisplayMode desk{}, best{}, m{};
+                SDL_GetDesktopDisplayMode(d, &desk);
+                int bestScore = -1;
+                for (int i = 0; i < SDL_GetNumDisplayModes(d); i++) {
+                    if (SDL_GetDisplayMode(d, i, &m) != 0) continue;
+                    if (m.refresh_rate != 50 && m.refresh_rate != 100) continue;
+                    // the desktop size first, then the biggest; 50 Hz before 100 Hz
+                    int score = (m.w == desk.w && m.h == desk.h ? 1 << 30 : 0) + m.w * m.h / 16 + (m.refresh_rate == 50 ? 1 : 0);
+                    if (score > bestScore) { bestScore = score; best = m; }
+                }
+                if (bestScore >= 0 && SDL_SetWindowDisplayMode(window_, &best) == 0 &&
+                    SDL_SetWindowFullscreen(window_, SDL_WINDOW_FULLSCREEN) == 0)
+                    done = true;
+            }
+            if (!done) SDL_SetWindowFullscreen(window_, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        }
+        configureTiming();
+    }
+
+    // How frames reach the monitor. With vertical sync and a refresh of 50 or
+    // 100 Hz (or with speed=display) the game is driven by the refresh: n
+    // refreshes per game frame. Otherwise a 50 Hz clock drives it.
+    void configureTiming() {
+        lockToDisplay_ = false;
+        presentsPerFrame_ = 1;
+        gameRate_ = 1.0 / kFrameSeconds;
+        if (!vsync_ || headless_) return;
+        SDL_DisplayMode m{};
+        if (SDL_GetWindowDisplayMode(window_, &m) != 0 || m.refresh_rate <= 0) return;
+        if (!fullscreen_ || SDL_GetWindowFlags(window_) & SDL_WINDOW_FULLSCREEN_DESKTOP) {
+            SDL_DisplayMode cur{};
+            if (SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window_), &cur) == 0 && cur.refresh_rate > 0) m = cur;
+        }
+        int n = std::max(1, int(m.refresh_rate / 50.0 + 0.5));
+        double rate = double(m.refresh_rate) / n;
+        if (std::abs(rate - 50.0) < 0.6 || set_.speedDisplay) {
+            lockToDisplay_ = true;
+            presentsPerFrame_ = n;
+            gameRate_ = std::abs(rate - 50.0) < 0.6 ? 1.0 / kFrameSeconds : rate;
+        }
+        std::fprintf(stderr, "display %d Hz: %s, %.2f game frames a second\n", m.refresh_rate,
+                     lockToDisplay_ ? "frames on the vertical blank" : "50 Hz clock", gameRate_);
+    }
+
     void present() {
         SDL_UpdateTexture(texture_, nullptr, hw_.frameBuffer(), amiga::kOutWidth * 4);
         int ww, wh;
@@ -188,10 +284,37 @@ private:
         SDL_RenderClear(renderer_);
         SDL_RenderCopy(renderer_, texture_, nullptr, &dst_);
         SDL_RenderPresent(renderer_);
+        for (int i = 1; lockToDisplay_ && i < presentsPerFrame_; i++) {  // hold the frame for n refreshes
+            SDL_RenderClear(renderer_);
+            SDL_RenderCopy(renderer_, texture_, nullptr, &dst_);
+            SDL_RenderPresent(renderer_);
+        }
     }
 
     void queueAudio() {
         auto& s = paula_.samples();
+        // Paula makes 48000 samples per emulated second; when the game runs
+        // faster or slower than 50 frames a second, resample so that the
+        // pitch stays and the tempo follows the game
+        double step = gameRate_ * kFrameSeconds;  // input samples per output sample
+        if (std::abs(step - 1.0) > 0.001 && s.size() >= 2) {
+            resampled_.clear();
+            size_t frames = s.size() / 2;
+            while (resamplePos_ < double(frames)) {
+                size_t i = size_t(resamplePos_);
+                double f = resamplePos_ - double(i);
+                for (int c = 0; c < 2; c++) {
+                    int a = i == 0 ? resampleLast_[c] : s[(i - 1) * 2 + size_t(c)];
+                    int b = s[i * 2 + size_t(c)];
+                    resampled_.push_back(int16_t(a + (b - a) * f));
+                }
+                resamplePos_ += step;
+            }
+            resamplePos_ -= double(frames);
+            resampleLast_[0] = s[(frames - 1) * 2];
+            resampleLast_[1] = s[(frames - 1) * 2 + 1];
+            s.swap(resampled_);
+        }
         if (audio_ && !s.empty()) {
             const Uint32 maxQueued = Uint32(kSampleRate * 4 * 0.15);  // keep latency below 150 ms
             if (SDL_GetQueuedAudioSize(audio_) > maxQueued) SDL_ClearQueuedAudio(audio_);
@@ -202,6 +325,19 @@ private:
 
     void pace() {
         const Uint64 freq = SDL_GetPerformanceFrequency();
+        if (lockToDisplay_) {
+            // the vertical blank paces; the clock only guards against a
+            // driver that ignores vertical sync (then at most gameRate_)
+            Uint64 now = SDL_GetPerformanceCounter();
+            Uint64 minGap = Uint64(0.9 / gameRate_ * double(freq));
+            while (now < lastPresent_ + minGap) {
+                SDL_Delay(1);
+                now = SDL_GetPerformanceCounter();
+            }
+            lastPresent_ = now;
+            nextFrame_ = now;
+            return;
+        }
         nextFrame_ += Uint64(kFrameSeconds * double(freq));
         Uint64 now = SDL_GetPerformanceCounter();
         if (now > nextFrame_ + freq / 4) nextFrame_ = now;  // fell behind: resynchronise
@@ -345,8 +481,7 @@ private:
                 SDL_Scancode sc = e.key.keysym.scancode;
                 if (down && (sc == SDL_SCANCODE_F11 ||
                              (sc == SDL_SCANCODE_RETURN && (e.key.keysym.mod & KMOD_ALT)))) {
-                    fullscreen_ = !fullscreen_;
-                    SDL_SetWindowFullscreen(window_, fullscreen_ ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+                    setFullscreen(!fullscreen_);
                     break;
                 }
                 if (down && sc == SDL_SCANCODE_F12) throw game::QuitGame{};
@@ -365,6 +500,7 @@ private:
             }
             case SDL_WINDOWEVENT:
                 if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) lmb_ = rmb_ = false;
+                if (e.window.event == SDL_WINDOWEVENT_DISPLAY_CHANGED || e.window.event == SDL_WINDOWEVENT_MOVED) configureTiming();
                 break;
             case SDL_CONTROLLERDEVICEADDED:
                 if (!pad_) pad_ = SDL_GameControllerOpen(e.cdevice.which);
@@ -461,7 +597,14 @@ private:
     SDL_AudioDeviceID audio_ = 0;
     SDL_GameController* pad_ = nullptr;
     SDL_Rect dst_{0, 0, 640, 512};
-    Uint64 nextFrame_ = 0;
+    Uint64 nextFrame_ = 0, lastPresent_ = 0;
+    Settings set_;
+    bool headless_ = false, vsync_ = false, lockToDisplay_ = false;
+    int presentsPerFrame_ = 1;
+    double gameRate_ = 1.0 / kFrameSeconds;  // game frames per real second
+    std::vector<int16_t> resampled_;
+    double resamplePos_ = 0;
+    int resampleLast_[2] = {};
     bool fullscreen_ = false, paused_ = false, lmb_ = false, rmb_ = false;
     bool inLevel_ = false, holdLmb_ = false, holdRmb_ = false, holdFire_ = false;
     uint8_t lastTick_ = 0;
@@ -478,10 +621,51 @@ private:
 
 }  // namespace
 
+// supaplex.ini next to the program: written with the defaults on the first
+// start, so that the options can be found
+void writeDefaultIni(const std::filesystem::path& p) {
+    std::ofstream f(p);
+    f << "; Supaplex (Amiga) settings\n"
+         "; window size: the Amiga picture times this\n"
+         "scale=3\n"
+         "; start in fullscreen (F11 or Alt+Enter switch)\n"
+         "fullscreen=0\n"
+         "; show frames on the monitor's vertical blank (no tearing)\n"
+         "vsync=1\n"
+         "; fullscreen: switch the monitor to 50 Hz (or 100 Hz) if it can:\n"
+         "; the game's 50 frames a second then run perfectly smooth\n"
+         "fullscreen_50hz=1\n"
+         "; speed: amiga = 50 frames a second like a PAL Amiga (on a 60 Hz monitor\n"
+         ";   the picture judders a little, every fifth frame is shown twice);\n"
+         ";   display = one game frame per monitor refresh (per 2, 3 ... refreshes\n"
+         ";   on 100+ Hz monitors): perfectly smooth, but the game runs at that\n"
+         ";   rate (60 Hz: 20% faster). The game logic is the same either way.\n"
+         "speed=amiga\n";
+}
+
+void readIni(const std::filesystem::path& p, Settings& s) {
+    std::ifstream f(p);
+    std::string line;
+    while (std::getline(f, line)) {
+        if (line.empty() || line[0] == ';' || line[0] == '#') continue;
+        auto eq = line.find('=');
+        if (eq == std::string::npos) continue;
+        std::string k = line.substr(0, eq), v = line.substr(eq + 1);
+        while (!v.empty() && (v.back() == '\r' || v.back() == ' ')) v.pop_back();
+        int n = std::atoi(v.c_str());
+        if (k == "scale") s.scale = std::clamp(n, 1, 10);
+        else if (k == "fullscreen") s.fullscreen = n != 0;
+        else if (k == "vsync") s.vsync = n != 0;
+        else if (k == "fullscreen_50hz") s.fullscreen50 = n != 0;
+        else if (k == "speed") s.speedDisplay = v == "display";
+    }
+}
+
 int main(int argc, char** argv) {
     std::string adfPath, savePath, dataDir, extractDir;
-    int scale = 3;
+    int scale = 0;
     bool fullscreen = false, originalHiscores = false, resetHiscores = false;
+    bool noVsync = false, speedDisplay = false;
     long quitAfter = -1;
     std::string shot, testInput;
     int testLevel = 0;
@@ -494,6 +678,8 @@ int main(int argc, char** argv) {
         else if (a == "--save") savePath = next();
         else if (a == "--scale") scale = std::max(1, std::atoi(next().c_str()));
         else if (a == "--fullscreen") fullscreen = true;
+        else if (a == "--no-vsync") noVsync = true;
+        else if (a == "--speed-display") speedDisplay = true;
         else if (a == "--original-hiscores") originalHiscores = true;
         else if (a == "--reset-hiscores") resetHiscores = true;
         else if (a == "--frames") quitAfter = std::atol(next().c_str());
@@ -502,14 +688,16 @@ int main(int argc, char** argv) {
         else if (a == "--test-level") testLevel = std::atoi(next().c_str());
         else if (a == "--help" || a == "-h") {
             std::printf(
-                "usage: supaplex [--scale N] [--fullscreen] [--reset-hiscores] [--original-hiscores]\n"
+                "usage: supaplex [--scale N] [--fullscreen] [--no-vsync] [--speed-display]\n"
+                "                [--reset-hiscores] [--original-hiscores]\n"
                 "                [--data DIR] [--save FILE] [--adf IMAGE] [--extract DIR]\n"
                 "Everything lives in the program's folder: the game data in data\\ (LEVELS.DAT,\n"
                 "INTRO.BIN, MAIN.BIN, GRAPHICS.BIN, HISCORE.BIN) and the hiscores in hiscores.sav.\n"
                 "If data\\ is missing, it is extracted once from \"Supaplex (1991).adf\" found next\n"
                 "to the program (or given with --adf); --extract DIR only extracts and exits.\n"
                 "A new hiscore file starts without players and records; --original-hiscores\n"
-                "starts it with the disk's CRYSTAL records and players; --reset-hiscores starts over.\n");
+                "starts it with the disk's CRYSTAL records and players; --reset-hiscores starts over.\n"
+                "Display options: supaplex.ini next to the program (written on the first start).\n");
             return 0;
         } else if (adfPath.empty()) adfPath = a;
     }
@@ -580,7 +768,17 @@ int main(int argc, char** argv) {
     hw.setPaula(&paula);
     Frontend fe(hw, paula);
     fe.testLevel = (testLevel >= 1 && testLevel <= 111) ? testLevel : 0;
-    if (!fe.init(scale, fullscreen)) return 1;
+    bool headless = quitAfter >= 0 || fe.testLevel || !testInput.empty();
+    Settings settings;
+    const fs::path ini = gameDir / "supaplex.ini";
+    if (!headless && !fs::exists(ini)) writeDefaultIni(ini);
+    readIni(ini, settings);
+    if (scale > 0) settings.scale = scale;
+    if (fullscreen) settings.fullscreen = true;
+    if (noVsync) settings.vsync = false;
+    if (speedDisplay) settings.speedDisplay = true;
+    if (headless) settings.fullscreen = false;
+    if (!fe.init(settings, headless)) return 1;
     fe.quitAfter = quitAfter;
     fe.shotPath = shot;
     if (!testInput.empty() && !fe.loadTestInput(testInput)) return fail("cannot read " + testInput);
@@ -589,6 +787,7 @@ int main(int argc, char** argv) {
     game::Environment env;
     env.files = &files;
     env.savePath = savePath;
+    env.onDiskAccess = [&fe] { fe.diskAccess(); };
     game::attach(hw, env);
     try {
         game::run();
