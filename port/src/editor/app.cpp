@@ -136,12 +136,19 @@ private:
     void updateLayout();
 
     // ---- layout ----
-    int paletteCols() const { return std::max(1, (vw_ - kLeftW - 8) / kPalCell); }
+    // compact mode (Tab): no level list and no panel under the map, the
+    // palette without the mouse-button block: the whole level fits at 32 px
+    // on a 1920 x 1080 screen
+    int leftW() const { return compact_ ? 0 : kLeftW; }
+    int bottomH() const { return compact_ ? 0 : kBottomH; }
+    int paletteCols() const { return std::max(1, (vw_ - leftW() - 8) / kPalCell); }
     // at least as high as the tiles on the mouse buttons left of the strip
-    int paletteH() const { return std::max(76, ((T_COUNT + paletteCols() - 1) / paletteCols()) * kPalCell + 10); }
+    int paletteH() const {
+        return std::max(compact_ ? 0 : 76, ((T_COUNT + paletteCols() - 1) / paletteCols()) * kPalCell + 10);
+    }
     Rect mapRect() const {
         int y = kToolbarH + paletteH();
-        return {kLeftW, y, vw_ - kLeftW, vh_ - y - kBottomH - kStatusH};
+        return {leftW(), y, vw_ - leftW(), vh_ - y - bottomH() - kStatusH};
     }
 
     // ---- frame ----
@@ -201,6 +208,7 @@ private:
     void centreOn(int cx, int cy);
     bool cellAt(int px, int py, int& cx, int& cy) const;
     void setLanguage(bool russian);
+    void toggleCompact() { compact_ = !compact_; fitPending_ = true; keepZoom_ = false; }
     void setTheme(bool light);
 
     void message(const std::string& s, Color c = theme::text) { status_ = s; statusColor_ = c; statusTime_ = SDL_GetTicks(); }
@@ -239,6 +247,7 @@ private:
     int zoomIdx_ = 3;
     int panX_ = 0, panY_ = 0;
     bool grid_ = true, showCamera_ = true, fitPending_ = true, keepZoom_ = false;
+    bool compact_ = false;  // Tab: only the toolbar, the palette, the map and the status line
 
     // mouse on the map
     bool stroking_ = false, panning_ = false;
@@ -387,6 +396,7 @@ void App::loadSettings() {
         else if (k == "primary") primary_ = std::clamp(v, 0, T_COUNT - 1);
         else if (k == "secondary") secondary_ = std::clamp(v, 0, T_COUNT - 1);
         else if (k == "light") light_ = v != 0;
+        else if (k == "compact") compact_ = v != 0;
         else if (k == "russian") g_russian = v != 0;
     }
 }
@@ -395,7 +405,7 @@ void App::saveSettings() {
     std::ofstream f(gameDir_ / "editor.ini");
     f << "level=" << cur_ << "\nzoom=" << zoomIdx_ << "\ngrid=" << grid_ << "\ncamera=" << showCamera_
       << "\nautocamera=" << autoCamera_ << "\nscale=" << uiScale_ << "\nprimary=" << primary_ << "\nsecondary=" << secondary_
-      << "\nlight=" << light_ << "\nrussian=" << g_russian << "\n";
+      << "\nlight=" << light_ << "\nrussian=" << g_russian << "\ncompact=" << compact_ << "\n";
 }
 
 void App::updateLayout() {
@@ -941,7 +951,7 @@ void App::fitMap(bool keepZoom) {
     Rect m = mapRect();
     int best = 0;
     for (int i = 0; i < kZoomCount; i++)
-        if (kZooms[i] * kMapW <= m.w - 8 && kZooms[i] * kMapH <= m.h - 8) best = i;
+        if (kZooms[i] * kMapW <= m.w - (compact_ ? 0 : 8) && kZooms[i] * kMapH <= m.h - (compact_ ? 0 : 8)) best = i;
     if (!keepZoom) zoomIdx_ = best;
     int z = kZooms[zoomIdx_];
     panX_ = -(m.w - z * kMapW) / 2;
@@ -971,7 +981,11 @@ int App::run(int argc, char** argv) {
         bool gotEvent = SDL_WaitEventTimeout(&e, testing_ ? 100 : 16);
         while (gotEvent) {
             if (e.type == SDL_QUIT) requestQuit();
-            else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) updateLayout();
+            else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                updateLayout();
+                fitPending_ = true;  // a new window size: show the whole level again
+                keepZoom_ = false;
+            }
             else if (e.type == SDL_DROPFILE) {
                 dropFile(e.drop.file);
                 SDL_free(e.drop.file);
@@ -1013,8 +1027,10 @@ void App::frame() {
     drawMap(mapR);
     drawToolbar();
     drawPalette({0, kToolbarH, vw_, paletteH()});
-    drawLevelList({0, mapR.y, kLeftW, vh_ - mapR.y - kStatusH});
-    drawBottomPanel({kLeftW, mapR.y + mapR.h, vw_ - kLeftW, kBottomH});
+    if (!compact_) {
+        drawLevelList({0, mapR.y, kLeftW, vh_ - mapR.y - kStatusH});
+        drawBottomPanel({kLeftW, mapR.y + mapR.h, vw_ - kLeftW, kBottomH});
+    }
     drawStatus({0, vh_ - kStatusH, vw_, kStatusH});
     if (!ui_.modal) {
         handleMapInput(mapR);
@@ -1071,6 +1087,10 @@ void App::drawToolbar() {
     if (btn("+", 26, zoomIdx_ < kZoomCount - 1, false, tr("Zoom in (Ctrl+wheel, Ctrl+=)", "Увеличить (Ctrl+колесо, Ctrl+=)")))
         zoomAt(zoomIdx_ + 1, m.w / 2, m.h / 2);
     if (btn(tr("Fit", "Весь"), 0, true, false, tr("Show the whole level (Ctrl+0)", "Показать весь уровень (Ctrl+0)"))) fitMap();
+    if (btn(tr("Compact", "Компакт"), 0, true, compact_,
+            tr("Hide the level list and the panel under the map: the whole level at 32 px on Full HD (Tab)",
+               "Скрыть список уровней и панель под картой: весь уровень при 32 px на Full HD (Tab)")))
+        toggleCompact();
     gap();
     if (btn(testing_ ? tr("Testing…", "Идёт тест…") : tr("▶ Play", "▶ Играть"), 0, !testing_, false,
             tr("Play this level in the game (F5)", "Сыграть этот уровень в игре (F5)")))
@@ -1112,8 +1132,9 @@ void App::drawToolbar() {
 void App::drawPalette(Rect r) {
     ui_.fill(r, theme::panel);
     ui_.line(0, r.y + r.h - 1, r.w, r.y + r.h - 1, theme::line);
-    ui_.line(kLeftW - 1, r.y, kLeftW - 1, r.y + r.h - 1, theme::line);
     int y = r.y + 6;
+    if (!compact_) {
+    ui_.line(kLeftW - 1, r.y, kLeftW - 1, r.y + r.h - 1, theme::line);
     ui_.text(8, y, tr("Tiles", "Тайлы"), theme::dim);
     y += 22;
     auto show = [&](int code, Color c, const char* who, const char* tip) {
@@ -1126,6 +1147,7 @@ void App::drawPalette(Rect r) {
     };
     show(primary_, theme::accent, tr("LMB", "ЛКМ"), tr("Left mouse button: main tile", "Левая кнопка мыши: основной тайл"));
     show(secondary_, theme::warning, tr("RMB", "ПКМ"), tr("Right mouse button: second tile", "Правая кнопка мыши: второй тайл"));
+    }
 
     // order: main objects first, decorative variants last
     static const int order[] = {0, 2, 1, 4, 3, 7, 6, 5, 8, 18, 20, 19, 17, 24, 25, 9, 10, 11, 12, 21, 22, 23, 13, 14, 15, 16,
@@ -1133,7 +1155,7 @@ void App::drawPalette(Rect r) {
     int cols = paletteCols();
     for (int k = 0; k < T_COUNT; k++) {
         int code = order[k];
-        Rect c{kLeftW + 4 + (k % cols) * kPalCell, r.y + 5 + (k / cols) * kPalCell, kPalCell - 2, kPalCell - 2};
+        Rect c{leftW() + 4 + (k % cols) * kPalCell, r.y + 5 + (k / cols) * kPalCell, kPalCell - 2, kPalCell - 2};
         drawTile(code, {c.x + (c.w - 32) / 2, c.y + (c.h - 32) / 2, 32, 32});
         if (code == primary_) ui_.frame(c, theme::accent, 2);
         else if (code == secondary_) ui_.frame(c, theme::warning, 2);
@@ -1716,6 +1738,10 @@ void App::drawHelp() {
         {"  Ctrl+G: grid, C: start screen of the game, Ctrl+0: whole level, arrows: scroll",
          "  Ctrl+G — сетка, C — стартовый экран игры, Ctrl+0 — весь уровень, стрелки — прокрутка"},
         {"  ☀ / ☾: light / dark theme, EN / RU: interface language", "  ☀ / ☾ — светлая / тёмная тема, EN / RU — язык интерфейса"},
+        {"  Tab: compact mode without the level list and the lower panel (whole level at 32 px on Full HD)",
+         "  Tab — компактный режим без списка уровней и нижней панели (весь уровень при 32 px на Full HD)"},
+        {"  Title field: click puts the caret, double click selects all; arrows, Home / End, Delete",
+         "  Поле названия: щелчок ставит курсор, двойной щелчок выделяет всё; стрелки, Home / End, Delete"},
         {"Amiga rules the editor keeps by itself", "Правила Amiga, которые редактор соблюдает сам"},
         {"  • the start camera goes to Murphy (PC editors write zeros: the camera leaves the map);",
          "  • камера старта ставится на Murphy (PC-редакторы пишут нули — камера уезжает за карту);"},
@@ -1918,6 +1944,7 @@ void App::handleKeys() {
         case SDLK_F1: help_ = true; helpOpened_ = true; break;
         case SDLK_F5: startTest(); break;
         case SDLK_F7: check_ = true; checkOpened_ = true; break;
+        case SDLK_TAB: toggleCompact(); break;
         case SDLK_ESCAPE: pasting_ = false; hasSel_ = false; selecting_ = false; break;
         case SDLK_DELETE: case SDLK_BACKSPACE: deleteSelection(); break;
         case SDLK_PAGEUP: selectLevel(cur_ - 1); break;

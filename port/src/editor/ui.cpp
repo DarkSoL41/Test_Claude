@@ -237,35 +237,77 @@ bool Ui::checkbox(Rect rc, const std::string& label, bool& v, const std::string&
     return false;
 }
 
+// byte offset of code point n in s
+static size_t utf8Offset(const std::string& s, size_t n) {
+    size_t i = 0;
+    while (n > 0 && i < s.size()) { utf8Next(s, i); n--; }
+    return i;
+}
+
+// A one-line text field with a caret: a click puts the caret under the
+// pointer, a double click selects all; arrows, Home / End, Backspace and
+// Delete work at the caret; Enter, Esc or Tab leave the field.
 bool Ui::textField(int id, Rect rc, std::string& v, size_t maxChars, const std::function<uint32_t(uint32_t)>& filter,
                    const std::string& tip) {
     bool h = hover(rc);
     bool changed = false;
+    Rect inner{rc.x + 4, rc.y, rc.w - 8, rc.h};
+    size_t len = utf8Length(v);
     if (h && pressed[0]) {
-        if (focus != id) selectAll_ = true;  // the first key replaces the whole text
-        focus = id; captured = true; SDL_StartTextInput(); caretTime_ = SDL_GetTicks();
+        if (focus != id) SDL_StartTextInput();
+        focus = id;
+        captured = true;
+        caretTime_ = SDL_GetTicks();
+        selectAll_ = doubleClick && !v.empty();
+        caret_ = size_t(std::clamp((mx - inner.x + kGlyphW / 2) / kGlyphW, 0, int(len)));
+    } else if (pressed[0] && focus == id && !modal) {
+        focus = 0;
     }
-    else if (pressed[0] && focus == id && !modal) { focus = 0; }
     bool f = focus == id;
-    fill(rc, f ? theme::field : theme::panel2);
-    frame(rc, f ? theme::accent : theme::line);
     if (f) {
+        caret_ = std::min(caret_, len);
+        auto erase = [&](size_t at) {  // remove the code point at position at
+            size_t a = utf8Offset(v, at), b = utf8Offset(v, at + 1);
+            v.erase(a, b - a);
+            changed = true;
+        };
         for (size_t i = 0; i < typed.size();) {
             uint32_t cp = filter(utf8Next(typed, i));
-            if (cp && selectAll_) { v.clear(); selectAll_ = false; }
-            if (cp && utf8Length(v) < maxChars) { v += utf8Encode(cp); changed = true; }
+            if (!cp) continue;
+            if (selectAll_) { v.clear(); caret_ = 0; selectAll_ = false; changed = true; }
+            if (utf8Length(v) >= maxChars) continue;
+            v.insert(utf8Offset(v, caret_), utf8Encode(cp));
+            caret_++;
+            changed = true;
         }
         for (const SDL_Keysym& k : keys) {
-            if (k.sym == SDLK_BACKSPACE && selectAll_) { v.clear(); selectAll_ = false; changed = true; continue; }
-            if (k.sym == SDLK_BACKSPACE && !v.empty()) { v = utf8PopBack(v); changed = true; }
-            if (k.sym == SDLK_LEFT || k.sym == SDLK_RIGHT || k.sym == SDLK_END || k.sym == SDLK_HOME) selectAll_ = false;
-            if (k.sym == SDLK_RETURN || k.sym == SDLK_KP_ENTER || k.sym == SDLK_ESCAPE || k.sym == SDLK_TAB) focus = 0;
+            len = utf8Length(v);
+            switch (k.sym) {
+            case SDLK_BACKSPACE:
+                if (selectAll_) { v.clear(); caret_ = 0; changed = true; }
+                else if (caret_ > 0) { erase(caret_ - 1); caret_--; }
+                break;
+            case SDLK_DELETE:
+                if (selectAll_) { v.clear(); caret_ = 0; changed = true; }
+                else if (caret_ < len) erase(caret_);
+                break;
+            case SDLK_LEFT: if (caret_ > 0) caret_--; break;
+            case SDLK_RIGHT: if (caret_ < len) caret_++; break;
+            case SDLK_HOME: caret_ = 0; break;
+            case SDLK_END: caret_ = len; break;
+            case SDLK_RETURN: case SDLK_KP_ENTER: case SDLK_ESCAPE: case SDLK_TAB: focus = 0; break;
+            default: continue;  // other keys keep the selection
+            }
+            selectAll_ = false;
+            caretTime_ = SDL_GetTicks();
         }
     }
-    Rect inner{rc.x + 4, rc.y, rc.w - 8, rc.h};
+    fill(rc, f ? theme::field : theme::panel2);
+    frame(rc, f ? theme::accent : theme::line);
     if (f && selectAll_ && !v.empty()) fill({inner.x - 1, rc.y + 3, textWidth(v) + 2, rc.h - 6}, theme::accentDim);
-    int end = text(inner.x, rc.y + (rc.h - 16) / 2, v);
-    if (f && ((SDL_GetTicks() - caretTime_) / 500) % 2 == 0) fill({end, rc.y + 3, 1, rc.h - 6}, theme::accent);
+    text(inner.x, rc.y + (rc.h - 16) / 2, v);
+    if (f && !selectAll_ && ((SDL_GetTicks() - caretTime_) / 500) % 2 == 0)
+        fill({inner.x + int(caret_) * kGlyphW, rc.y + 3, 1, rc.h - 6}, theme::accent);
     if (h && !tip.empty()) tooltip(tip);
     return changed;
 }

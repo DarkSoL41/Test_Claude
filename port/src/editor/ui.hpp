@@ -81,7 +81,8 @@ private:
     Uint32 lastClick_ = 0;
     int lastClickX_ = 0, lastClickY_ = 0;
     Uint32 caretTime_ = 0;
-    bool selectAll_ = false;
+    bool selectAll_ = false;   // double click: the next key replaces the whole text
+    size_t caret_ = 0;         // caret position in the focused field (code points)
 };
 
 // decode one code point, advance i
