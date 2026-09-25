@@ -34,10 +34,10 @@ namespace editor {
 
 namespace {
 
-// byte 1469 / special port byte 3, "freeze zonks" (docs/06-formats.md, tried
-// in the game): 0 as usual; 1 zonks take the short branch of scan_zonks and
-// do not crush snik snaks and electrons they fall on (Amiga only); 2 zonks do
-// not move at all. Infotrons fall and roll in every mode; other values act as 0.
+// byte 1469 / special port byte 3, "freeze zonks" (tried in the game, see
+// docs/10-freeze-zonks.md): 0 as usual; 1 zonks do not crush enemies and
+// survive the explosion of what they fall on (Amiga only); 2 zonks hang still.
+// With 1 and 2 infotrons do not crush enemies. Other values act as 0.
 const char* freezeName(int v) {
     switch (v) {
     case 1: return tr("no crush", "не давят");
@@ -47,10 +47,14 @@ const char* freezeName(int v) {
 }
 const char* freezeTip(int v) {
     switch (v) {
-    case 1: return tr("1: zonks fall and roll but do not crush snik snaks and electrons (Amiga only, the PC version has no such mode)",
-                      "1: зонки падают и скатываются, но не давят сник-снаков и электронов (только Amiga, в PC-версии такого нет)");
-    case 2: return tr("2: zonks do not move at all (infotrons still fall)", "2: зонки совсем не двигаются (инфотроны падают)");
-    default: return tr("0: zonks fall, roll and crush enemies as usual", "0: зонки падают, скатываются и давят врагов как обычно");
+    case 1: return tr("1: zonks fall but do not crush enemies and survive the explosion of what they fall on; infotrons do not crush "
+                      "enemies (Amiga only)",
+                      "1: зонки падают, но не давят врагов и переживают взрыв того, на что упали; инфотроны не давят врагов "
+                      "(только Amiga)");
+    case 2: return tr("2: zonks hang still; the cell under a hanging zonk kills Murphy; infotrons fall but do not crush enemies",
+                      "2: зонки висят; клетка под висящим зонком убивает Murphy; инфотроны падают, но не давят врагов");
+    default: return tr("0: zonks and infotrons fall, roll and crush enemies as usual",
+                       "0: зонки и инфотроны падают, скатываются и давят врагов как обычно");
     }
 }
 
