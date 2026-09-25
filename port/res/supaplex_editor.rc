@@ -13,14 +13,14 @@ BEGIN
   BEGIN
     BLOCK "040904B0"
     BEGIN
-      VALUE "CompanyName", "DarkSoL (discord: darksol41)"
+      VALUE "CompanyName", "DarkSoL (aka Kufterin, discord: darksol41)"
       VALUE "FileDescription", "Supaplex (Amiga) level editor"
       VALUE "FileVersion", "1.0.0.0"
       VALUE "InternalName", "supaplex_editor"
       VALUE "OriginalFilename", "supaplex_editor.exe"
       VALUE "ProductName", "Supaplex (Amiga) for Windows"
       VALUE "ProductVersion", "1.0.0.0"
-      VALUE "LegalCopyright", "Windows port: DarkSoL (discord: darksol41), with the help of Claude AI. Supaplex (C) 1991 Digital Integration / Think!ware"
+      VALUE "LegalCopyright", "Windows port: DarkSoL (aka Kufterin, discord: darksol41), with the help of Claude AI. Supaplex (C) 1991 Digital Integration / Think!ware"
     END
   END
   BLOCK "VarFileInfo"

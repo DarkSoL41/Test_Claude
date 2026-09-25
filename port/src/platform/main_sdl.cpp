@@ -346,7 +346,7 @@ private:
         const uint32_t* picture = hw_.frameBuffer();
         if (!creditsShown()) return picture;
         credits_.assign(picture, picture + amiga::kOutWidth * amiga::kOutHeight);
-        drawCreditText(credits_, 234, "PORTED TO WINDOWS BY DARKSOL (DISCORD: DARKSOL41)", 0xFFFFFFFF);
+        drawCreditText(credits_, 234, "PORTED TO WINDOWS BY DARKSOL (AKA KUFTERIN) - DISCORD: DARKSOL41", 0xFFFFFFFF);
         drawCreditText(credits_, 244, "WITH THE HELP AND SUPPORT OF CLAUDE AI", 0xFFFFFFFF);
         return credits_.data();
     }
