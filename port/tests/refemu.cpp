@@ -143,7 +143,7 @@ void RefEmu::checkWatch(uint32_t a, uint32_t v, int n) {
 void RefEmu::hook(uint32_t pc) {
     instrCount_++;
     if (!reportPcs.empty() && reportPcs.count(pc))
-        std::fprintf(stderr, "ref: frame %llu reached $%06X\n", (unsigned long long)hw.frameCount(), pc);
+        std::fprintf(stderr, "ref: frame %llu line %d reached $%06X\n", (unsigned long long)hw.frameCount(), hw.beamLine(), pc);
     ring[ringPos++ & 63] = pc;
     if (pcTrace) std::fprintf(pcTrace, "%06X\n", pc);
     executed[pc & 0x7FFFF] = 1;

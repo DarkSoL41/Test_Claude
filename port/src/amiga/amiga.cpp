@@ -89,8 +89,11 @@ uint16_t Amiga::customRead(uint32_t reg) {
     uint16_t v;
     switch (reg) {
     case DMACONR: return uint16_t((dmacon_ & 0x03FF) | 0x2000);  // blitter never busy, BZERO set
-    case VPOSR: v = uint16_t((vpos_ >> 8) & 1); advanceLines(1); return v;
-    case VHPOSR: v = uint16_t((vpos_ & 0xFF) << 8 | (hclock_ & 0xFF)); advanceLines(1); return v;
+    // a beam read lets as little time pass as any other polling read: a
+    // whole line per read made the game miss the line it waits for now and
+    // then (it waits for line 256 right after line 255), losing a frame
+    case VPOSR: v = uint16_t((vpos_ >> 8) & 1); pollTick(); return v;
+    case VHPOSR: v = uint16_t((vpos_ & 0xFF) << 8 | (hclock_ & 0xFF)); pollTick(); return v;
     case JOY0DAT: v = uint16_t(joyY_ << 8 | joyX_); break;
     case JOY1DAT: v = joy1dat_; break;
     case ADKCONR: v = adkcon_; break;

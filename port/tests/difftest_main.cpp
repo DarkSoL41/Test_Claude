@@ -1,6 +1,6 @@
 // difftest: run the original code (reference emulator) and the C++ port side by
 // side with the same input and compare the complete chip RAM after every frame.
-//   difftest --adf <image> [--frames N] [--input SCRIPT] [--dump DIR] [--every K]
+//   difftest --adf <image> [--frames N] [--input SCRIPT] [--dump DIR] [--every K] [--dump-from F]
 //            [--random SEED] [--level L] [--coverage FILE] [--keep-going]
 //
 // --random SEED  : random joystick (and fire) input from frame 700 on; fire is
@@ -103,7 +103,7 @@ struct PortRunner : amiga::Host {
 
 int main(int argc, char** argv) {
     std::string adfPath = "Supaplex (1991).adf", script, dump;
-    long frames = 1000, every = 0;
+    long frames = 1000, every = 0, dumpFrom = 0;
     bool keepGoing = false, clearSkips = false;
     long seed = -1, level = 0;
     std::string coverage, autopilot, hiscores, portDataDir;
@@ -121,6 +121,7 @@ int main(int argc, char** argv) {
         else if (a == "--input") script = next();
         else if (a == "--dump") dump = next();
         else if (a == "--every") every = std::atol(next().c_str());
+        else if (a == "--dump-from") dumpFrom = std::atol(next().c_str());
         else if (a == "--keep-going") keepGoing = true;
         else if (a == "--random") seed = std::atol(next().c_str());
         else if (a == "--level") level = std::atol(next().c_str());
@@ -329,7 +330,7 @@ int main(int argc, char** argv) {
             }
             if (!keepGoing) break;
         }
-        if (!dump.empty() && every > 0 && (f + 1) % every == 0) {
+        if (!dump.empty() && every > 0 && f + 1 >= dumpFrom && (f + 1) % every == 0) {
             char name[512];
             std::snprintf(name, sizeof name, "%s/port_%06ld.ppm", dump.c_str(), f + 1);
             writePPM(name, port.hw.frameBuffer(), amiga::kOutWidth, amiga::kOutHeight);
