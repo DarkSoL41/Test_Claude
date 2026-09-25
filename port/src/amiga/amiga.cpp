@@ -97,7 +97,10 @@ uint16_t Amiga::customRead(uint32_t reg) {
     case JOY0DAT: v = uint16_t(joyY_ << 8 | joyX_); break;
     case JOY1DAT: v = joy1dat_; break;
     case ADKCONR: v = adkcon_; break;
-    case POTGOR: v = uint16_t(0xFF00 & ~(rmb_ ? 0x0400 : 0)); break;
+    case POTGOR:
+        if (host_) host_->onButtonRead();
+        v = uint16_t(0xFF00 & ~(rmb_ ? 0x0400 : 0));
+        break;
     case INTENAR: v = intena_; break;
     case INTREQR: v = intreq_; break;
     default: return 0;
@@ -523,6 +526,7 @@ void Amiga::pollTick() {
 }
 
 uint8_t Amiga::ciaRead(uint32_t a) {
+    if (host_ && (a & 0xFF00) == 0xE000 && (a & 1)) host_->onButtonRead();  // CIA-A port A: fire buttons
     uint8_t v = ciaReadValue(a);
     pollTick();
     return v;

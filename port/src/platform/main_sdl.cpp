@@ -171,6 +171,21 @@ public:
     // buttons. Here it is instant, so buttons held now reach the game again
     // only after they are released: otherwise the same click also presses
     // whatever lies under the pointer on the next screen.
+    // A level or the demo can start and look at the buttons within one
+    // frame (the demo level comes from memory, not from the disk): as soon
+    // as game_frame has started counting, buttons held since before the
+    // level count as released until they are let go. Called before every
+    // read of the button registers, so it is in time whatever the timing.
+    void onButtonRead() override {
+        if (inLevel_ || (testLevel && testState_ < 3)) return;
+        if (hw_.chip()[0x11294] == lastTick_) return;
+        holdLmb_ = lmb_;
+        holdRmb_ = rmb_;
+        holdFire_ = true;
+        hw_.setMouseButtons(false, false);
+        updateJoystick();
+    }
+
     void diskAccess() {
         holdLmb_ = lmb_;
         holdRmb_ = rmb_;

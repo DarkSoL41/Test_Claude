@@ -40,6 +40,7 @@ struct Host {
     virtual ~Host() = default;
     virtual void onFrame() {}                   // a frame is complete (beam wrapped)
     virtual void onInterrupt(int /*level*/) {}  // an interrupt became pending
+    virtual void onButtonRead() {}              // the game is about to read the fire / mouse buttons
 };
 
 class Amiga {
