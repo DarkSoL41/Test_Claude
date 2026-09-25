@@ -159,4 +159,4 @@ cmake --build port/build-win
   (`analysis/`), покрытие кода (`coverage/`), итоги фаззинга (`fuzz/`),
   тестовые сценарии редактора и фронтенда (`scripts/`), снимки экрана
   (`screenshots/`), пакет SDL2 для mingw (`sdl2mingw.tgz`);
-* `session/transcript.jsonl.gz` — полная стенограмма этой сессии.
+* `session/transcript.jsonl.xz` — полная стенограмма этой сессии.
