@@ -1,0 +1,2 @@
+// program icon (tools/make_icons.py); SDL uses the icon with ID 1
+1 ICON "supaplex_editor.ico"

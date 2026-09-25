@@ -42,6 +42,7 @@
 #include "amiga/paula.hpp"
 #include "game/hiscores.hpp"
 #include "game/runtime.hpp"
+#include "icon_data.hpp"
 
 namespace {
 
@@ -118,6 +119,11 @@ public:
         window_ = SDL_CreateWindow("Supaplex (Amiga)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h,
                                    SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | (testLevel ? SDL_WINDOW_HIDDEN : 0));
         if (!window_) { std::fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError()); return false; }
+        if (SDL_Surface* icon = SDL_CreateRGBSurfaceWithFormatFrom(const_cast<uint32_t*>(kIcon_supaplex), 64, 64, 32, 64 * 4,
+                                                                   SDL_PIXELFORMAT_ARGB8888)) {
+            SDL_SetWindowIcon(window_, icon);
+            SDL_FreeSurface(icon);
+        }
         bool vsync = set.vsync && !headless;
         renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | (vsync ? SDL_RENDERER_PRESENTVSYNC : 0));
         if (!renderer_ && vsync) renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);

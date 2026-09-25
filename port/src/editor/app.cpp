@@ -23,6 +23,7 @@
 
 #include "amiga/gamefiles.hpp"
 #include "gfx.hpp"
+#include "icon_data.hpp"
 #include "i18n.hpp"
 #include "level.hpp"
 #include "process.hpp"
@@ -350,6 +351,11 @@ bool App::init(int argc, char** argv) {
     win_ = SDL_CreateWindow(tr("Supaplex level editor (Amiga)", "Редактор уровней Supaplex (Amiga)"), SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, 1400, 860, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (!win_) return fail(SDL_GetError());
+    if (SDL_Surface* icon = SDL_CreateRGBSurfaceWithFormatFrom(const_cast<uint32_t*>(kIcon_supaplex_editor), 64, 64, 32, 64 * 4,
+                                                               SDL_PIXELFORMAT_ARGB8888)) {
+        SDL_SetWindowIcon(win_, icon);
+        SDL_FreeSurface(icon);
+    }
     SDL_SetWindowMinimumSize(win_, 1280, 680);
     ren_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!ren_) ren_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_SOFTWARE);

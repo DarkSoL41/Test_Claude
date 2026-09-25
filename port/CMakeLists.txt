@@ -34,7 +34,12 @@ target_link_libraries(supaplexgame PUBLIC amigahw)
 
 # the game executable (SDL2 front end) and the level editor
 find_package(SDL2 REQUIRED)
-add_executable(supaplex WIN32 src/platform/main_sdl.cpp)
+# program icons (tools/make_icons.py): Windows resources
+if(WIN32)
+  set(GAME_RC res/supaplex.rc)
+  set(EDITOR_RC res/supaplex_editor.rc)
+endif()
+add_executable(supaplex WIN32 src/platform/main_sdl.cpp ${GAME_RC})
 target_link_libraries(supaplex PRIVATE supaplexgame)
 add_executable(supaplex_editor WIN32
   src/editor/app.cpp
@@ -42,8 +47,10 @@ add_executable(supaplex_editor WIN32
   src/editor/gfx.cpp
   src/editor/ui.cpp
   src/editor/process.cpp
+  ${EDITOR_RC}
 )
 target_link_libraries(supaplex_editor PRIVATE amigahw)
+target_include_directories(supaplex_editor PRIVATE src/platform)
 foreach(t supaplex supaplex_editor)
   if(TARGET SDL2::SDL2main)
     target_link_libraries(${t} PRIVATE SDL2::SDL2main)
