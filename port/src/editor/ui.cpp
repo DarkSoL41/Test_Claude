@@ -7,6 +7,24 @@
 
 namespace editor {
 
+void theme::applyTheme(bool light) {
+    if (!light) {
+        bg = {30, 32, 38}; panel = {40, 43, 51}; panel2 = {50, 54, 64}; line = {70, 75, 88};
+        text = {220, 223, 230}; dim = {140, 146, 160}; accent = {86, 156, 255}; accentDim = {50, 90, 150};
+        button = {58, 62, 74}; buttonHot = {72, 78, 94}; buttonDown = {44, 48, 58};
+        error = {235, 80, 70}; warning = {240, 190, 60}; info = {120, 170, 230}; ok = {110, 200, 120};
+        field = {24, 26, 31}; tooltip = {20, 22, 27, 240}; mapBg = {16, 17, 20}; minimapBg = {20, 21, 25};
+        shade = {0, 0, 0, 140};
+    } else {
+        bg = {232, 234, 238}; panel = {246, 247, 249}; panel2 = {226, 229, 235}; line = {190, 195, 205};
+        text = {30, 33, 40}; dim = {105, 112, 125}; accent = {30, 110, 220}; accentDim = {190, 212, 245};
+        button = {236, 238, 242}; buttonHot = {222, 228, 238}; buttonDown = {205, 211, 222};
+        error = {200, 40, 35}; warning = {190, 120, 0}; info = {40, 110, 190}; ok = {30, 140, 60};
+        field = {255, 255, 255}; tooltip = {255, 255, 240, 245}; mapBg = {200, 204, 212}; minimapBg = {215, 218, 225};
+        shade = {40, 45, 60, 110};
+    }
+}
+
 uint32_t utf8Next(const std::string& s, size_t& i) {
     uint8_t c = uint8_t(s[i++]);
     if (c < 0x80) return c;
@@ -129,7 +147,7 @@ void Ui::endFrame() {
     }
     if (x + w > vw) x = std::max(0, vw - w);
     if (y + h > vh) y = my - h - 4;
-    fill({x, y, w, h}, {20, 22, 27, 240});
+    fill({x, y, w, h}, theme::tooltip);
     frame({x, y, w, h}, theme::line);
     text(x + 6, y + 3, tip_);
 }
@@ -229,7 +247,7 @@ bool Ui::textField(int id, Rect rc, std::string& v, size_t maxChars, const std::
     }
     else if (pressed[0] && focus == id && !modal) { focus = 0; }
     bool f = focus == id;
-    fill(rc, f ? Color{24, 26, 31} : theme::panel2);
+    fill(rc, f ? theme::field : theme::panel2);
     frame(rc, f ? theme::accent : theme::line);
     if (f) {
         for (size_t i = 0; i < typed.size();) {

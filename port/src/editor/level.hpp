@@ -27,8 +27,12 @@ enum Tile : uint8_t {
 };
 
 struct TileInfo {
-    const char* name;      // Russian name for the UI
-    const char* hint;      // one-line description
+    const char* nameEn;
+    const char* hintEn;    // one-line description
+    const char* nameRu;
+    const char* hintRu;
+    const char* name() const;  // in the interface language
+    const char* hint() const;
 };
 const TileInfo& tileInfo(int code);
 bool isHardware(int code);      // indestructible wall: 6 and its variants 28..37
@@ -83,9 +87,10 @@ public:
     int murphyCell() const;                    // first Murphy, -1 if none
 
     // make the record safe for the Amiga (done for every level edited in the
-    // editor): camera, special port records only for special port cells,
+    // editor): camera (unless autoCamera is off: then the stored camera is
+    // kept as set by hand), special port records only for special port cells,
     // unused records and bytes 1532..1535 zero, count byte right
-    void normalize();
+    void normalize(bool autoCamera = true);
 
     std::vector<Issue> validate() const;
 };
@@ -96,7 +101,7 @@ public:
     std::array<bool, kLevelCount> edited{};
 
     bool load(const std::string& path, std::string* err);
-    bool save(const std::string& path, std::string* err);  // normalizes the edited levels
+    bool save(const std::string& path, std::string* err, bool autoCamera = true);  // normalizes the edited levels
     static bool readFile(const std::string& path, std::vector<uint8_t>& out);
     static bool writeFile(const std::string& path, const std::vector<uint8_t>& data);
 };

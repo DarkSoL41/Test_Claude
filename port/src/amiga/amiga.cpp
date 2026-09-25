@@ -584,6 +584,8 @@ void Amiga::ciaWrite(uint32_t a, uint8_t v) {
         case 0xC: ciaaSdr_ = v; break;
         case 0xD:
             if (v & 0x80) ciaaIcrMask_ |= (v & 0x7F); else ciaaIcrMask_ &= ~v;
+            // an event that is already flagged interrupts as soon as it is enabled
+            if ((v & 0x80) && (ciaaIcr_ & v & 0x7F)) { intreq_ |= 0x0008; updateIrqLevel(); }
             break;
         case 0xE:
             if (v & 0x10) ciaaTa_ = ciaaTaLatch_;  // force load

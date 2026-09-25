@@ -1,5 +1,6 @@
 #include "gfx.hpp"
 
+#include "i18n.hpp"
 #include "level.hpp"
 
 namespace editor {
@@ -39,7 +40,7 @@ bool TileGfx::load(const amiga::GameFiles& files, std::string* err) {
     (void)p0;
     if (tilesAddr < kGfxBase || palAddr < kGfxBase || palAddr + 32 > kGfxBase + gfx.size() ||
         tilesAddr + 8 * kPlaneSize > kGfxBase + gfx.size()) {
-        if (err) *err = "не удалось найти графику тайлов в GRAPHICS.BIN";
+        if (err) *err = tr("Tile graphics not found in GRAPHICS.BIN", "Не удалось найти графику тайлов в GRAPHICS.BIN");
         return false;
     }
     uint32_t tiles = tilesAddr - kGfxBase, pal = palAddr - kGfxBase;
@@ -57,8 +58,9 @@ bool TileGfx::load(const amiga::GameFiles& files, std::string* err) {
     };
     std::vector<Src> src;
     for (int code = 0; code < T_COUNT; code++) src.push_back({0, (code % 20) * 16, (code / 20) * 16});
-    src.push_back({1, 0, 224});    // snik snak
-    src.push_back({1, 48, 208});   // electron
+    // the first turning frame the game draws (tables $1183E / $1189E -> $1180E / $1186E)
+    src.push_back({1, 192, 176});  // snik snak
+    src.push_back({1, 224, 176});  // electron
     src.push_back({0, 272, 228});  // bug (base with a spark)
     atlas_.assign(size_t(IMG_COUNT * kTilePx * kTilePx), 0);
     avg_.assign(IMG_COUNT, 0);

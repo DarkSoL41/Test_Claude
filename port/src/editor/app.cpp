@@ -23,6 +23,7 @@
 
 #include "amiga/gamefiles.hpp"
 #include "gfx.hpp"
+#include "i18n.hpp"
 #include "level.hpp"
 #include "process.hpp"
 #include "ui.hpp"
@@ -33,21 +34,34 @@ namespace editor {
 
 namespace {
 
-constexpr int kToolbarH = 32, kStatusH = 22, kLeftW = 236, kRightW = 272, kIssuesH = 112, kRowH = 18;
+constexpr int kToolbarH = 32, kStatusH = 22, kLeftW = 236, kBottomH = 176, kRowH = 18;
+constexpr int kPalCell = 34;  // tile buttons of the palette strip: 32 x 32 images
 const int kZooms[] = {8, 12, 16, 20, 24, 32, 40, 48, 64};
 constexpr int kZoomCount = int(sizeof kZooms / sizeof kZooms[0]);
 constexpr int kCamW = 20, kCamH = 13;  // cells visible in the game's play area (320 x 208)
 
+// special ports are covered with blue on the map and in the palette (red: a
+// special port without a record)
+constexpr Color kSportTint{20, 110, 255, 160}, kSportBadTint{255, 40, 40, 150};
+
 enum class Tool { Pencil, Line, Rect, FillRect, Flood, Select };
 
-struct ToolInfo { Tool t; const char* name; const char* key; const char* tip; SDL_Keycode sym; };
+struct ToolInfo {
+    Tool t;
+    const char *nameEn, *nameRu, *key, *tipEn, *tipRu;
+    SDL_Keycode sym;
+    const char* name() const { return tr(nameEn, nameRu); }
+    const char* tip() const { return tr(tipEn, tipRu); }
+};
 const ToolInfo kTools[] = {
-    {Tool::Pencil, "Карандаш", "P", "Рисовать по клеткам (ЛКМ — основной тайл, ПКМ — второй)", SDLK_p},
-    {Tool::Line, "Линия", "L", "Прямая линия", SDLK_l},
-    {Tool::Rect, "Рамка", "R", "Контур прямоугольника", SDLK_r},
-    {Tool::FillRect, "Прямоуг.", "F", "Залитый прямоугольник", SDLK_f},
-    {Tool::Flood, "Заливка", "G", "Залить область одинаковых клеток", SDLK_g},
-    {Tool::Select, "Выделение", "S", "Выделить область: Ctrl+C/X/V, Del, Shift+H/V — отразить", SDLK_s},
+    {Tool::Pencil, "Pencil", "Карандаш", "P", "Draw cells (left button: main tile, right button: second tile)",
+     "Рисовать по клеткам (ЛКМ — основной тайл, ПКМ — второй)", SDLK_p},
+    {Tool::Line, "Line", "Линия", "L", "Straight line", "Прямая линия", SDLK_l},
+    {Tool::Rect, "Frame", "Рамка", "R", "Rectangle outline", "Контур прямоугольника", SDLK_r},
+    {Tool::FillRect, "Box", "Прямоуг.", "F", "Filled rectangle", "Залитый прямоугольник", SDLK_f},
+    {Tool::Flood, "Fill", "Заливка", "G", "Fill an area of equal cells", "Залить область одинаковых клеток", SDLK_g},
+    {Tool::Select, "Select", "Выделение", "S", "Select an area: Ctrl+C/X/V, Del, Shift+H/V to mirror",
+     "Выделить область: Ctrl+C/X/V, Del, Shift+H/V — отразить", SDLK_s},
 };
 
 struct Clip {
@@ -97,20 +111,30 @@ private:
     void saveSettings();
     void updateLayout();
 
+    // ---- layout ----
+    int paletteCols() const { return std::max(1, (vw_ - kLeftW - 8) / kPalCell); }
+    int paletteH() const { return ((T_COUNT + paletteCols() - 1) / paletteCols()) * kPalCell + 10; }
+    Rect mapRect() const {
+        int y = kToolbarH + paletteH();
+        return {kLeftW, y, vw_ - kLeftW, vh_ - y - kBottomH - kStatusH};
+    }
+
     // ---- frame ----
     void frame();
     void drawToolbar();
+    void drawPalette(Rect r);
     void drawLevelList(Rect r);
-    void drawRightPanel(Rect r);
-    void drawPalette(Rect r, int& y);
-    void drawProperties(Rect r, int& y);
-    void drawPorts(Rect r, int& y);
+    void drawBottomPanel(Rect r);
+    int drawProperties(Rect r);   // return the width used
+    int drawCamera(Rect r);
+    int drawPorts(Rect r);
     void drawMinimap(Rect r);
     void drawMap(Rect r);
-    void drawIssues(Rect r);
+    void drawTile(int code, SDL_Rect dst, bool badPort = false);
     void drawStatus(Rect r);
     void drawModal();
     void drawHelp();
+    void drawCheck();
     void handleKeys();
     void handleMapInput(Rect r);
 
@@ -133,6 +157,9 @@ private:
     void deleteSelection();
     void swapLevels(int a, int b);
     void replaceLevel(int i, const Level& l, const char* what);
+    void copyLevel();
+    void pasteLevel();
+    Camera shownCamera(bool* valid);  // the start screen as it will be in the game
 
     // ---- files ----
     bool save();
@@ -148,6 +175,8 @@ private:
     void fitMap(bool keepZoom = false);
     void centreOn(int cx, int cy);
     bool cellAt(int px, int py, int& cx, int& cy) const;
+    void setLanguage(bool russian);
+    void setTheme(bool light);
 
     void message(const std::string& s, Color c = theme::text) { status_ = s; statusColor_ = c; statusTime_ = SDL_GetTicks(); }
     void ask(const std::string& title, const std::string& text, std::vector<std::string> buttons,
@@ -171,6 +200,8 @@ private:
     float scale_ = 1;  // window pixels per logical pixel
     int vw_ = 1280, vh_ = 800;
     bool running_ = true;
+    bool light_ = false;       // light colour theme
+    bool autoCamera_ = true;   // the editor sets the start camera when saving
 
     int cur_ = 0;
     std::array<std::vector<Level>, kLevelCount> undo_, redo_;
@@ -206,6 +237,7 @@ private:
     struct Modal { std::string title, text; std::vector<std::string> buttons; std::function<void(int)> done; } modal_;
     bool modalOn_ = false;
     bool help_ = false, helpOpened_ = false;
+    bool check_ = false, checkOpened_ = false;
 
     std::string filter_;
     int listScroll_ = 0, portScroll_ = 0;
@@ -214,7 +246,6 @@ private:
     int titleFor_ = -1;
 
     std::vector<Issue> issues_;
-    std::vector<uint64_t> issueStamp_;
     uint64_t changeCounter_ = 1, issuesAt_ = 0;
     int issuesLevel_ = -1;
     int issueScroll_ = 0;
@@ -274,25 +305,28 @@ bool App::init(int argc, char** argv) {
     if (base) SDL_free(base);
     dataDir_ = dataArg.empty() ? gameDir_ / "data" : fs::u8path(dataArg);
     levelsPath_ = dataDir_ / "LEVELS.DAT";
+    loadSettings();
+    theme::applyTheme(light_);
 
     auto fail = [&](const std::string& m) {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Редактор уровней Supaplex", m.c_str(), nullptr);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, tr("Supaplex level editor", "Редактор уровней Supaplex"), m.c_str(), nullptr);
         std::fprintf(stderr, "%s\n", m.c_str());
         return false;
     };
     if (!files_.openDir(dataDir_.u8string()))
-        return fail("Не найдены данные игры в папке\n" + dataDir_.u8string() + "\n\n" + files_.error() +
-                    "\n\nЗапустите один раз игру (supaplex) — она создаст папку data из образа дискеты.");
+        return fail(tr("Game data not found in the folder\n", "Не найдены данные игры в папке\n") + dataDir_.u8string() + "\n\n" +
+                    files_.error() +
+                    tr("\n\nRun the game (supaplex) once: it creates the data folder from the disk image.",
+                       "\n\nЗапустите один раз игру (supaplex) — она создаст папку data из образа дискеты."));
     std::string err;
     if (!set_.load(levelsPath_.u8string(), &err)) return fail(err);
     if (!gfx_.load(files_, &err)) return fail(err);
 
-    loadSettings();
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-    win_ = SDL_CreateWindow("Редактор уровней Supaplex (Amiga)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1400, 860,
-                            SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    win_ = SDL_CreateWindow(tr("Supaplex level editor (Amiga)", "Редактор уровней Supaplex (Amiga)"), SDL_WINDOWPOS_CENTERED,
+                            SDL_WINDOWPOS_CENTERED, 1400, 860, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (!win_) return fail(SDL_GetError());
-    SDL_SetWindowMinimumSize(win_, 1000, 640);
+    SDL_SetWindowMinimumSize(win_, 1280, 680);
     ren_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!ren_) ren_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_SOFTWARE);
     if (!ren_) return fail(SDL_GetError());
@@ -302,7 +336,7 @@ bool App::init(int argc, char** argv) {
     SDL_SetTextureBlendMode(tiles_, SDL_BLENDMODE_BLEND);
     SDL_StopTextInput();
     updateLayout();
-    message("Загружено: " + levelsPath_.u8string(), theme::ok);
+    message(tr("Loaded: ", "Загружено: ") + levelsPath_.u8string(), theme::ok);
     return true;
 }
 
@@ -318,16 +352,20 @@ void App::loadSettings() {
         else if (k == "zoom") { zoomIdx_ = std::clamp(v, 0, kZoomCount - 1); keepZoom_ = true; }
         else if (k == "grid") grid_ = v != 0;
         else if (k == "camera") showCamera_ = v != 0;
+        else if (k == "autocamera") autoCamera_ = v != 0;
         else if (k == "scale" && uiScale_ == 0) uiScale_ = std::clamp(v, 0, 3);
         else if (k == "primary") primary_ = std::clamp(v, 0, T_COUNT - 1);
         else if (k == "secondary") secondary_ = std::clamp(v, 0, T_COUNT - 1);
+        else if (k == "light") light_ = v != 0;
+        else if (k == "russian") g_russian = v != 0;
     }
 }
 
 void App::saveSettings() {
     std::ofstream f(gameDir_ / "editor.ini");
     f << "level=" << cur_ << "\nzoom=" << zoomIdx_ << "\ngrid=" << grid_ << "\ncamera=" << showCamera_
-      << "\nscale=" << uiScale_ << "\nprimary=" << primary_ << "\nsecondary=" << secondary_ << "\n";
+      << "\nautocamera=" << autoCamera_ << "\nscale=" << uiScale_ << "\nprimary=" << primary_ << "\nsecondary=" << secondary_
+      << "\nlight=" << light_ << "\nrussian=" << g_russian << "\n";
 }
 
 void App::updateLayout() {
@@ -340,6 +378,18 @@ void App::updateLayout() {
     SDL_RenderSetScale(ren_, pixelRatio * float(s), pixelRatio * float(s));
     vw_ = int(ww / scale_);
     vh_ = int(wh / scale_);
+}
+
+void App::setLanguage(bool russian) {
+    g_russian = russian;
+    changeCounter_++;  // the check texts are made in the language
+    message(tr("Interface language: English", "Язык интерфейса: русский"));
+}
+
+void App::setTheme(bool light) {
+    light_ = light;
+    theme::applyTheme(light_);
+    statusColor_ = theme::text;
 }
 
 // ---------------------------------------------------------------------------
@@ -390,7 +440,7 @@ bool App::paint(int x, int y, int code) {
     if (isSpecialPort(code) && !isSpecialPort(l.tile(x, y)) && l.count(T_SPORT_RIGHT) + l.count(T_SPORT_DOWN) +
                                                                           l.count(T_SPORT_LEFT) + l.count(T_SPORT_UP) >=
                                                                       kMaxSpecialPorts) {
-        message("Больше 10 особых портов в формате уровня не помещается", theme::error);
+        message(tr("More than 10 special ports do not fit into the level format", "Больше 10 особых портов в формате уровня не помещается"), theme::error);
         return false;
     }
     l.setTile(x, y, code);
@@ -435,26 +485,26 @@ void App::flood(int x, int y, int code) {
 
 void App::undo() {
     auto& u = undo_[size_t(cur_)];
-    if (u.empty()) { message("Нечего отменять"); return; }
+    if (u.empty()) { message(tr("Nothing to undo", "Нечего отменять")); return; }
     redo_[size_t(cur_)].push_back(lvl());
     lvl() = u.back();
     u.pop_back();
     set_.edited[size_t(cur_)] = true;
     unsaved_[size_t(cur_)] = true;
     changeCounter_++;
-    message("Отменено");
+    message(tr("Undone", "Отменено"));
 }
 
 void App::redo() {
     auto& r = redo_[size_t(cur_)];
-    if (r.empty()) { message("Нечего возвращать"); return; }
+    if (r.empty()) { message(tr("Nothing to redo", "Нечего возвращать")); return; }
     undo_[size_t(cur_)].push_back(lvl());
     lvl() = r.back();
     r.pop_back();
     set_.edited[size_t(cur_)] = true;
     unsaved_[size_t(cur_)] = true;
     changeCounter_++;
-    message("Возвращено");
+    message(tr("Redone", "Возвращено"));
 }
 
 void App::selectLevel(int i) {
@@ -468,7 +518,7 @@ void App::selectLevel(int i) {
 }
 
 void App::copySelection(bool cut) {
-    if (!hasSel_) { message("Сначала выделите область (инструмент «Выделение», S)"); return; }
+    if (!hasSel_) { message(tr("Select an area first (Select tool, S)", "Сначала выделите область (инструмент «Выделение», S)")); return; }
     int x0 = std::min(selX0_, selX1_), x1 = std::max(selX0_, selX1_), y0 = std::min(selY0_, selY1_), y1 = std::max(selY0_, selY1_);
     clip_.w = x1 - x0 + 1;
     clip_.h = y1 - y0 + 1;
@@ -487,9 +537,9 @@ void App::copySelection(bool cut) {
     if (cut) {
         beginEdit();
         paintRect(x0, y0, x1, y1, secondary_, true);
-        endEdit("Вырезано");
+        endEdit(tr("Cut", "Вырезано"));
     } else {
-        message(fmt("Скопировано %d × %d", clip_.w, clip_.h));
+        message(fmt(tr("Copied %d × %d", "Скопировано %d × %d"), clip_.w, clip_.h));
     }
 }
 
@@ -507,7 +557,7 @@ void App::pasteAt(int x, int y) {
             if (p.cell == cell) { p.gravity = cp.gravity; p.freezeZonks = cp.freezeZonks; p.freezeEnemies = cp.freezeEnemies; }
     }
     lvl().setSpecialPorts(ports);
-    endEdit("Вставлено");
+    endEdit(tr("Pasted", "Вставлено"));
 }
 
 void App::mirrorClip(bool horizontal) {
@@ -528,18 +578,18 @@ void App::mirrorClip(bool horizontal) {
 }
 
 void App::mirrorSelection(bool horizontal) {
-    if (!hasSel_) { message("Сначала выделите область"); return; }
+    if (!hasSel_) { message(tr("Select an area first", "Сначала выделите область")); return; }
     copySelection(false);
     mirrorClip(horizontal);
     pasteAt(std::min(selX0_, selX1_), std::min(selY0_, selY1_));
-    message(horizontal ? "Отражено слева направо" : "Отражено сверху вниз");
+    message(horizontal ? tr("Mirrored left to right", "Отражено слева направо") : tr("Mirrored top to bottom", "Отражено сверху вниз"));
 }
 
 void App::deleteSelection() {
     if (!hasSel_) return;
     beginEdit();
     paintRect(selX0_, selY0_, selX1_, selY1_, secondary_, true);
-    endEdit("Очищено");
+    endEdit(tr("Cleared", "Очищено"));
 }
 
 void App::swapLevels(int a, int b) {
@@ -552,7 +602,7 @@ void App::swapLevels(int a, int b) {
     changeCounter_++;
     cur_ = b;
     listFollow_ = true;
-    message(fmt("Уровень перемещён: %03d → %03d", a + 1, b + 1));
+    message(fmt(tr("Level moved: %03d → %03d", "Уровень перемещён: %03d → %03d"), a + 1, b + 1));
 }
 
 void App::replaceLevel(int i, const Level& l, const char* what) {
@@ -564,6 +614,28 @@ void App::replaceLevel(int i, const Level& l, const char* what) {
     set_.edited[size_t(i)] = true;
     unsaved_[size_t(i)] = true;
     cur_ = old;
+}
+
+void App::copyLevel() {
+    levelClip_ = lvl();
+    haveLevelClip_ = true;
+    message(fmt(tr("Level %03d copied", "Уровень %03d скопирован"), cur_ + 1));
+}
+
+void App::pasteLevel() {
+    if (haveLevelClip_) replaceLevel(cur_, levelClip_, tr("Level pasted (Ctrl+Z to undo)", "Уровень вставлен (Ctrl+Z — отменить)"));
+}
+
+// With the automatic camera the editor stores what the game would show, or
+// the camera centred on Murphy when that leaves the map (Level::normalize);
+// set by hand, the stored values go to the game as they are.
+Camera App::shownCamera(bool* valid) {
+    Camera c = lvl().effectiveCamera(valid);
+    if (autoCamera_ && !*valid) {
+        c = lvl().recommendedCamera();
+        *valid = true;
+    }
+    return c;
 }
 
 const std::vector<Issue>& App::issues() {
@@ -585,10 +657,10 @@ bool App::save() {
         backupDone_ = true;
     }
     std::string err;
-    if (!set_.save(levelsPath_.u8string(), &err)) { message("Ошибка сохранения: " + err, theme::error); return false; }
+    if (!set_.save(levelsPath_.u8string(), &err, autoCamera_)) { message(tr("Save failed: ", "Ошибка сохранения: ") + err, theme::error); return false; }
     unsaved_.fill(false);
     changeCounter_++;
-    message("Сохранено: " + levelsPath_.u8string() + " (копия прежнего файла — LEVELS.DAT.bak)", theme::ok);
+    message(tr("Saved: ", "Сохранено: ") + levelsPath_.u8string() + tr(" (the previous file is LEVELS.DAT.bak)", " (копия прежнего файла — LEVELS.DAT.bak)"), theme::ok);
     return true;
 }
 
@@ -601,7 +673,7 @@ void App::reload() {
     for (auto& r : redo_) r.clear();
     unsaved_.fill(false);
     changeCounter_++;
-    message("Уровни перечитаны с диска", theme::ok);
+    message(tr("Levels reloaded from disk", "Уровни перечитаны с диска"), theme::ok);
 }
 
 void App::exportLevel() {
@@ -609,12 +681,12 @@ void App::exportLevel() {
     std::error_code ec;
     fs::create_directories(dir, ec);
     Level l = lvl();
-    l.normalize();
+    l.normalize(autoCamera_);
     fs::path p = dir / fmt("LEVEL%03d.SP", cur_ + 1);
     if (LevelSet::writeFile(p.u8string(), std::vector<uint8_t>(l.b.begin(), l.b.end())))
-        message("Уровень сохранён в " + p.u8string(), theme::ok);
+        message(tr("Level written to ", "Уровень сохранён в ") + p.u8string(), theme::ok);
     else
-        message("Не удалось записать " + p.u8string(), theme::error);
+        message(tr("Cannot write ", "Не удалось записать ") + p.u8string(), theme::error);
 }
 
 void App::exportPicture() {
@@ -632,36 +704,40 @@ void App::exportPicture() {
                             &a[size_t(y * gfx_.atlasWidth() + img * kTilePx)], kTilePx * 4);
         }
     fs::path p = dir / fmt("LEVEL%03d.bmp", cur_ + 1);
-    if (SDL_SaveBMP(s, p.u8string().c_str()) == 0) message("Картинка уровня: " + p.u8string(), theme::ok);
-    else message("Не удалось записать " + p.u8string(), theme::error);
+    if (SDL_SaveBMP(s, p.u8string().c_str()) == 0) message(tr("Level picture: ", "Картинка уровня: ") + p.u8string(), theme::ok);
+    else message(tr("Cannot write ", "Не удалось записать ") + p.u8string(), theme::error);
     SDL_FreeSurface(s);
 }
 
 void App::dropFile(const std::string& path) {
     std::vector<uint8_t> d;
-    if (!LevelSet::readFile(path, d)) { message("Не удалось прочитать " + path, theme::error); return; }
+    if (!LevelSet::readFile(path, d)) { message(tr("Cannot read ", "Не удалось прочитать ") + path, theme::error); return; }
     std::string name = fs::u8path(path).filename().u8string();
     if (d.size() == size_t(kLevelCount * kLevelSize)) {
-        ask("Импорт набора уровней", "Заменить все 111 уровней уровнями из файла\n" + name +
-            "?\n\nКамера и особые порты будут приведены к правилам Amiga при сохранении.\nОтменить можно по каждому уровню (Ctrl+Z).",
-            {"Заменить все", "Отмена"}, [this, d](int b) {
+        ask(tr("Import a level set", "Импорт набора уровней"),
+            tr("Replace all 111 levels with the levels from the file\n", "Заменить все 111 уровней уровнями из файла\n") + name +
+                tr("?\n\nThe camera and the special ports follow the Amiga rules when saved.\nEvery level can be undone (Ctrl+Z).",
+                   "?\n\nКамера и особые порты будут приведены к правилам Amiga при сохранении.\nОтменить можно по каждому уровню (Ctrl+Z)."),
+            {tr("Replace all", "Заменить все"), tr("Cancel", "Отмена")}, [this, d](int b) {
                 if (b != 0) return;
                 for (int i = 0; i < kLevelCount; i++) {
                     Level l;
                     std::copy_n(d.begin() + std::ptrdiff_t(i * kLevelSize), kLevelSize, l.b.begin());
                     replaceLevel(i, l, nullptr);
                 }
-                message("Импортированы 111 уровней (не забудьте сохранить)", theme::ok);
+                message(tr("111 levels imported (remember to save)", "Импортированы 111 уровней (не забудьте сохранить)"), theme::ok);
             });
     } else if (d.size() >= size_t(kLevelSize)) {
         Level l;
         std::copy_n(d.begin(), kLevelSize, l.b.begin());
-        ask("Импорт уровня", "Загрузить уровень из файла\n" + name + "\nна место уровня " + fmt("%03d", cur_ + 1) + "?",
-            {"Загрузить", "Отмена"}, [this, l](int b) {
-                if (b == 0) replaceLevel(cur_, l, "Уровень импортирован (Ctrl+Z — отменить)");
+        ask(tr("Import a level", "Импорт уровня"),
+            tr("Load the level from the file\n", "Загрузить уровень из файла\n") + name +
+                tr("\nin place of level ", "\nна место уровня ") + fmt("%03d", cur_ + 1) + "?",
+            {tr("Load", "Загрузить"), tr("Cancel", "Отмена")}, [this, l](int b) {
+                if (b == 0) replaceLevel(cur_, l, tr("Level imported (Ctrl+Z to undo)", "Уровень импортирован (Ctrl+Z — отменить)"));
             });
     } else {
-        message("Это не файл уровня: " + name, theme::error);
+        message(tr("Not a level file: ", "Это не файл уровня: ") + name, theme::error);
     }
 }
 
@@ -669,14 +745,14 @@ void App::startTest() {
     if (testing_) return;
     const auto& is = issues();
     for (const Issue& i : is)
-        if (i.level == Issue::Error && lvl().count(T_MURPHY) == 0) { message("Без Murphy уровень не запустить", theme::error); return; }
+        if (i.level == Issue::Error && lvl().count(T_MURPHY) == 0) { message(tr("A level without Murphy cannot be started", "Без Murphy уровень не запустить"), theme::error); return; }
 #ifdef _WIN32
     fs::path exe = gameDir_ / "supaplex.exe";
 #else
     fs::path exe = gameDir_ / "supaplex";
 #endif
     std::error_code ec;
-    if (!fs::exists(exe, ec)) { message("Не найдена игра: " + exe.u8string(), theme::error); return; }
+    if (!fs::exists(exe, ec)) { message(tr("Game not found: ", "Не найдена игра: ") + exe.u8string(), theme::error); return; }
     // a copy of the data folder with the levels as they are now
     fs::path dir = gameDir_ / "editor_test";
     fs::create_directories(dir, ec);
@@ -685,19 +761,20 @@ void App::startTest() {
     std::vector<uint8_t> all;
     for (int i = 0; i < kLevelCount; i++) {
         Level l = set_.levels[size_t(i)];
-        if (set_.edited[size_t(i)]) l.normalize();
+        if (set_.edited[size_t(i)]) l.normalize(autoCamera_);
         all.insert(all.end(), l.b.begin(), l.b.end());
     }
-    if (!LevelSet::writeFile((dir / "LEVELS.DAT").u8string(), all)) { message("Не удалось подготовить тест", theme::error); return; }
+    if (!LevelSet::writeFile((dir / "LEVELS.DAT").u8string(), all)) { message(tr("Cannot prepare the test", "Не удалось подготовить тест"), theme::error); return; }
     fs::remove(dir / "hiscores.sav", ec);
     int level = cur_ + 1;
     testExe_ = exe.u8string();
     testArgs_ = {"--data", dir.u8string(), "--save", (dir / "hiscores.sav").u8string(), "--test-level", std::to_string(level)};
     SDL_AtomicSet(&testDone_, 0);
     testThread_ = SDL_CreateThread(testThreadMain, "level test", this);
-    if (!testThread_) { message("Не удалось запустить игру", theme::error); return; }
+    if (!testThread_) { message(tr("Cannot start the game", "Не удалось запустить игру"), theme::error); return; }
     testing_ = true;
-    message(fmt("Игра запущена на уровне %03d — после уровня она закроется сама (Esc — выйти сразу)", level), theme::info);
+    message(fmt(tr("Game started on level %03d: it closes when the level is over (Esc quits at once)",
+                   "Игра запущена на уровне %03d — после уровня она закроется сама (Esc — выйти сразу)"), level), theme::info);
 }
 
 int App::testThreadMain(void* self) {
@@ -713,15 +790,17 @@ void App::finishTest() {
     testThread_ = nullptr;
     testing_ = false;
     int rc = testExit_;
-    message(rc == 0 ? "Тест окончен" : rc < 0 ? "Не удалось запустить игру" : fmt("Игра завершилась с кодом %d", rc),
+    message(rc == 0 ? std::string(tr("Test over", "Тест окончен")) : rc < 0 ? std::string(tr("Cannot start the game", "Не удалось запустить игру"))
+                    : fmt(tr("The game ended with code %d", "Игра завершилась с кодом %d"), rc),
             rc == 0 ? theme::ok : theme::error);
     SDL_RaiseWindow(win_);
 }
 
 void App::requestQuit() {
     if (!anyUnsaved()) { running_ = false; return; }
-    ask("Есть несохранённые изменения", "Сохранить изменения в LEVELS.DAT перед выходом?",
-        {"Сохранить", "Не сохранять", "Отмена"}, [this](int b) {
+    ask(tr("Unsaved changes", "Есть несохранённые изменения"),
+        tr("Save the changes to LEVELS.DAT before quitting?", "Сохранить изменения в LEVELS.DAT перед выходом?"),
+        {tr("Save", "Сохранить"), tr("Don't save", "Не сохранять"), tr("Cancel", "Отмена")}, [this](int b) {
             if (b == 0 && save()) running_ = false;
             if (b == 1) running_ = false;
         });
@@ -729,7 +808,8 @@ void App::requestQuit() {
 
 // Script lines: "FRAME move X Y", "FRAME down X Y [l|m|r]", "FRAME up X Y [l|m|r]",
 // "FRAME click X Y [l|m|r]", "FRAME key NAME [ctrl] [shift] [alt]", "FRAME text STRING",
-// "FRAME wheel N [ctrl]", "FRAME shot FILE.bmp", "FRAME quit". Coordinates are logical.
+// "FRAME wheel N [ctrl]", "FRAME drop FILE", "FRAME size W H" (window size), "FRAME save",
+// "FRAME shot FILE.bmp", "FRAME close" (close button), "FRAME quit". Coordinates are logical.
 void App::runScript() {
     for (const ScriptLine& l : script_) {
         if (l.frame != frameNo_) continue;
@@ -780,8 +860,14 @@ void App::runScript() {
             e.type = SDL_DROPFILE;
             e.drop.file = SDL_strdup(l.a.empty() ? "" : l.a[0].c_str());
             SDL_PushEvent(&e);
+        } else if (l.cmd == "size") {
+            SDL_SetWindowSize(win_, num(0), num(1));
+            updateLayout();
         } else if (l.cmd == "save") {
             save();
+        } else if (l.cmd == "close") {  // the window's close button
+            e.type = SDL_QUIT;
+            SDL_PushEvent(&e);
         } else if (l.cmd == "quit") {
             running_ = false;
         }
@@ -821,21 +907,21 @@ void App::zoomAt(int idx, int px, int py) {
 }
 
 void App::fitMap(bool keepZoom) {
-    int mapW = vw_ - kLeftW - kRightW, mapH = vh_ - kToolbarH - kStatusH - kIssuesH;
+    Rect m = mapRect();
     int best = 0;
     for (int i = 0; i < kZoomCount; i++)
-        if (kZooms[i] * kMapW <= mapW - 8 && kZooms[i] * kMapH <= mapH - 8) best = i;
+        if (kZooms[i] * kMapW <= m.w - 8 && kZooms[i] * kMapH <= m.h - 8) best = i;
     if (!keepZoom) zoomIdx_ = best;
     int z = kZooms[zoomIdx_];
-    panX_ = -(mapW - z * kMapW) / 2;
-    panY_ = -(mapH - z * kMapH) / 2;
+    panX_ = -(m.w - z * kMapW) / 2;
+    panY_ = -(m.h - z * kMapH) / 2;
 }
 
 void App::centreOn(int cx, int cy) {
-    int mapW = vw_ - kLeftW - kRightW, mapH = vh_ - kToolbarH - kStatusH - kIssuesH;
+    Rect m = mapRect();
     int z = kZooms[zoomIdx_];
-    panX_ = cx * z + z / 2 - mapW / 2;
-    panY_ = cy * z + z / 2 - mapH / 2;
+    panX_ = cx * z + z / 2 - m.w / 2;
+    panY_ = cy * z + z / 2 - m.h / 2;
     flashX_ = cx;
     flashY_ = cy;
     flashTime_ = SDL_GetTicks();
@@ -879,35 +965,49 @@ int App::run(int argc, char** argv) {
 
 void App::frame() {
     if (fitPending_) { fitMap(keepZoom_); fitPending_ = false; }
-    ui_.modal = modalOn_ || help_;
+    ui_.modal = modalOn_ || help_ || check_;
     if (ui_.focus != 2) {  // the title field shows the level unless it is being edited
         titleEdit_ = lvl().title();
         titleEdit_.erase(titleEdit_.find_last_not_of(' ') + 1);
     }
 
-    std::string t = fmt("Редактор уровней Supaplex (Amiga) — %03d %s%s", cur_ + 1, trimTitle(lvl().title()).c_str(),
-                        anyUnsaved() ? " *" : "");
+    std::string t = fmt(tr("Supaplex level editor (Amiga) — %03d %s%s", "Редактор уровней Supaplex (Amiga) — %03d %s%s"), cur_ + 1,
+                        trimTitle(lvl().title()).c_str(), anyUnsaved() ? " *" : "");
     SDL_SetWindowTitle(win_, t.c_str());
 
     SDL_SetRenderDrawColor(ren_, theme::bg.r, theme::bg.g, theme::bg.b, 255);
     SDL_RenderClear(ren_);
 
-    Rect mapR{kLeftW, kToolbarH, vw_ - kLeftW - kRightW, vh_ - kToolbarH - kStatusH - kIssuesH};
+    Rect mapR = mapRect();
     drawMap(mapR);
     drawToolbar();
-    drawLevelList({0, kToolbarH, kLeftW, vh_ - kToolbarH - kStatusH});
-    drawRightPanel({vw_ - kRightW, kToolbarH, kRightW, vh_ - kToolbarH - kStatusH});
-    drawIssues({kLeftW, vh_ - kStatusH - kIssuesH, vw_ - kLeftW - kRightW, kIssuesH});
+    drawPalette({0, kToolbarH, vw_, paletteH()});
+    drawLevelList({0, mapR.y, kLeftW, vh_ - mapR.y - kStatusH});
+    drawBottomPanel({kLeftW, mapR.y + mapR.h, vw_ - kLeftW, kBottomH});
     drawStatus({0, vh_ - kStatusH, vw_, kStatusH});
     if (!ui_.modal) {
         handleMapInput(mapR);
         handleKeys();
     }
     if (help_) drawHelp();
+    if (check_) drawCheck();
     if (modalOn_) drawModal();
     ui_.endFrame();
     if (!pendingShot_.empty()) { screenshot(pendingShot_); pendingShot_.clear(); }
     SDL_RenderPresent(ren_);
+}
+
+// a tile of the game graphics; special ports are shown blue
+void App::drawTile(int code, SDL_Rect dst, bool badPort) {
+    SDL_Rect src{TileGfx::imageFor(code) * kTilePx, 0, kTilePx, kTilePx};
+    SDL_RenderCopy(ren_, tiles_, &src, &dst);
+    if (isSpecialPort(code)) {
+        Uint8 alpha;
+        SDL_GetTextureAlphaMod(tiles_, &alpha);
+        Color c = badPort ? kSportBadTint : kSportTint;
+        c.a = uint8_t(c.a * alpha / 255);
+        ui_.fill({dst.x, dst.y, dst.w, dst.h}, c);
+    }
 }
 
 void App::drawToolbar() {
@@ -916,47 +1016,119 @@ void App::drawToolbar() {
     ui_.line(0, kToolbarH - 1, vw_, kToolbarH - 1, theme::line);
     int x = 6, y = 4, h = kToolbarH - 8;
     auto btn = [&](const std::string& label, int w, bool enabled, bool sel, const std::string& tip) {
+        if (w <= 0) w = ui_.textWidth(label) + 12;
         bool r = ui_.button({x, y, w, h}, label, enabled, sel, tip);
         x += w + 4;
         return r;
     };
-    auto gap = [&] { x += 8; };
-    if (btn("Сохранить", 92, anyUnsaved(), false, "Записать data\\LEVELS.DAT (Ctrl+S)")) save();
-    if (btn("↶", 28, !undo_[size_t(cur_)].empty(), false, "Отменить (Ctrl+Z)")) undo();
-    if (btn("↷", 28, !redo_[size_t(cur_)].empty(), false, "Вернуть (Ctrl+Y)")) redo();
+    auto gap = [&] { x += 6; };
+    Rect m = mapRect();
+    if (btn(tr("Save", "Сохранить"), 0, anyUnsaved(), false, tr("Write data\\LEVELS.DAT (Ctrl+S)", "Записать data\\LEVELS.DAT (Ctrl+S)"))) save();
+    if (btn("↶", 28, !undo_[size_t(cur_)].empty(), false, tr("Undo (Ctrl+Z)", "Отменить (Ctrl+Z)"))) undo();
+    if (btn("↷", 28, !redo_[size_t(cur_)].empty(), false, tr("Redo (Ctrl+Y)", "Вернуть (Ctrl+Y)"))) redo();
     gap();
-    for (const ToolInfo& t : kTools) {
-        std::string label = std::string(t.name);
-        if (btn(label, ui_.textWidth(label) + 16, true, tool_ == t.t, std::string(t.tip) + " (" + t.key + ")")) {
-            tool_ = t.t;
+    for (const ToolInfo& ti : kTools) {
+        if (btn(ti.name(), 0, true, tool_ == ti.t, std::string(ti.tip()) + " (" + ti.key + ")")) {
+            tool_ = ti.t;
             pasting_ = false;
         }
     }
     gap();
-    if (btn("Сетка", 60, true, grid_, "Показать сетку (Ctrl+G)")) grid_ = !grid_;
-    if (btn("Камера", 68, true, showCamera_, "Показать стартовый экран игры (C)")) showCamera_ = !showCamera_;
+    if (btn(tr("Grid", "Сетка"), 0, true, grid_, tr("Show the grid (Ctrl+G)", "Показать сетку (Ctrl+G)"))) grid_ = !grid_;
+    if (btn(tr("Camera", "Камера"), 0, true, showCamera_, tr("Show the start screen of the game (C)", "Показать стартовый экран игры (C)")))
+        showCamera_ = !showCamera_;
     gap();
-    if (btn("−", 26, zoomIdx_ > 0, false, "Уменьшить (Ctrl+колесо, Ctrl+−)")) zoomAt(zoomIdx_ - 1, (vw_ - kLeftW - kRightW) / 2, 200);
+    if (btn("−", 26, zoomIdx_ > 0, false, tr("Zoom out (Ctrl+wheel, Ctrl+−)", "Уменьшить (Ctrl+колесо, Ctrl+−)")))
+        zoomAt(zoomIdx_ - 1, m.w / 2, m.h / 2);
     ui_.fill({x, y, 50, h}, theme::panel2);
     ui_.textCentered({x, y, 50, h}, fmt("%d px", kZooms[zoomIdx_]));
     x += 54;
-    if (btn("+", 26, zoomIdx_ < kZoomCount - 1, false, "Увеличить (Ctrl+колесо, Ctrl+=)"))
-        zoomAt(zoomIdx_ + 1, (vw_ - kLeftW - kRightW) / 2, 200);
-    if (btn("Весь", 50, true, false, "Показать весь уровень (Ctrl+0)")) fitMap();
+    if (btn("+", 26, zoomIdx_ < kZoomCount - 1, false, tr("Zoom in (Ctrl+wheel, Ctrl+=)", "Увеличить (Ctrl+колесо, Ctrl+=)")))
+        zoomAt(zoomIdx_ + 1, m.w / 2, m.h / 2);
+    if (btn(tr("Fit", "Весь"), 0, true, false, tr("Show the whole level (Ctrl+0)", "Показать весь уровень (Ctrl+0)"))) fitMap();
     gap();
-    if (btn(testing_ ? "Идёт тест…" : "▶ Играть", 100, !testing_, false, "Сыграть этот уровень в игре (F5)")) startTest();
+    if (btn(testing_ ? tr("Testing…", "Идёт тест…") : tr("▶ Play", "▶ Играть"), 0, !testing_, false,
+            tr("Play this level in the game (F5)", "Сыграть этот уровень в игре (F5)")))
+        startTest();
+
+    // level check: the button shows the result, the window the details
+    const auto& is = issues();
+    int errs = 0, warns = 0;
+    for (const Issue& i : is) { errs += i.level == Issue::Error; warns += i.level == Issue::Warning; }
+    std::string label = tr("Check", "Проверка");
+    std::string badge = errs ? fmt("● %d", errs) : warns ? fmt("▲ %d", warns) : std::string("✓");
+    Color bc = errs ? theme::error : warns ? theme::warning : theme::ok;
+    int w = ui_.textWidth(label) + ui_.textWidth(badge) + 28;
+    Rect cr{x, y, w, h};
+    if (ui_.button(cr, "", true, check_,
+                   tr("Check the level for the Amiga: errors and warnings (F7)", "Проверить уровень для Amiga: ошибки и предупреждения (F7)"))) {
+        check_ = true;
+        checkOpened_ = true;
+    }
+    int tx = ui_.text(cr.x + 10, cr.y + (h - 16) / 2, badge, bc);
+    ui_.text(tx + 8, cr.y + (h - 16) / 2, label);
+    x += w + 4;
+
+    // right side: theme, language, help
     int right = vw_ - 6;
-    if (ui_.button({right - 32, y, 32, h}, "?", true, help_, "Справка (F1)")) { help_ = true; helpOpened_ = true; }
+    auto rbtn = [&](const std::string& lab, int bw, bool sel, const std::string& tip) {
+        right -= bw;
+        bool r = ui_.button({right, y, bw, h}, lab, true, sel, tip);
+        right -= 4;
+        return r;
+    };
+    if (rbtn("?", 32, help_, tr("Help (F1)", "Справка (F1)"))) { help_ = true; helpOpened_ = true; }
+    if (rbtn(g_russian ? "RU" : "EN", 40, false, tr("Language: English / Russian", "Язык: английский / русский"))) setLanguage(!g_russian);
+    if (rbtn(light_ ? "☾" : "☀", 32, false, light_ ? tr("Dark theme", "Тёмная тема") : tr("Light theme", "Светлая тема"))) setTheme(!light_);
+}
+
+// the tiles in one horizontal strip under the toolbar; left of it the tiles
+// on the mouse buttons
+void App::drawPalette(Rect r) {
+    ui_.fill(r, theme::panel);
+    ui_.line(0, r.y + r.h - 1, r.w, r.y + r.h - 1, theme::line);
+    ui_.line(kLeftW - 1, r.y, kLeftW - 1, r.y + r.h - 1, theme::line);
+    int y = r.y + 6;
+    ui_.text(8, y, tr("Tiles", "Тайлы"), theme::dim);
+    y += 22;
+    auto show = [&](int code, Color c, const char* who, const char* tip) {
+        Rect row{8, y, kLeftW - 16, 20};
+        drawTile(code, {row.x, y + 2, 16, 16});
+        ui_.text(row.x + 22, y + 2, who, c);
+        ui_.textClipped({row.x + 22 + ui_.textWidth(who) + 8, y + 2, row.w - 30 - ui_.textWidth(who), 16}, tileInfo(code).name());
+        if (ui_.hover(row)) ui_.tooltip(tip);
+        y += 22;
+    };
+    show(primary_, theme::accent, tr("LMB", "ЛКМ"), tr("Left mouse button: main tile", "Левая кнопка мыши: основной тайл"));
+    show(secondary_, theme::warning, tr("RMB", "ПКМ"), tr("Right mouse button: second tile", "Правая кнопка мыши: второй тайл"));
+
+    // order: main objects first, decorative variants last
+    static const int order[] = {0, 2, 1, 4, 3, 7, 6, 5, 8, 18, 20, 19, 17, 24, 25, 9, 10, 11, 12, 21, 22, 23, 13, 14, 15, 16,
+                                26, 27, 38, 39, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37};
+    int cols = paletteCols();
+    for (int k = 0; k < T_COUNT; k++) {
+        int code = order[k];
+        Rect c{kLeftW + 4 + (k % cols) * kPalCell, r.y + 5 + (k / cols) * kPalCell, kPalCell - 2, kPalCell - 2};
+        drawTile(code, {c.x + (c.w - 32) / 2, c.y + (c.h - 32) / 2, 32, 32});
+        if (code == primary_) ui_.frame(c, theme::accent, 2);
+        else if (code == secondary_) ui_.frame(c, theme::warning, 2);
+        if (ui_.hover(c)) {
+            ui_.frame(c, theme::text);
+            ui_.tooltip(fmt(tr("%s — %s (code %d)", "%s — %s (код %d)"), tileInfo(code).name(), tileInfo(code).hint(), code));
+            if (ui_.pressed[0]) { primary_ = code; ui_.captured = true; }
+            if (ui_.pressed[2]) { secondary_ = code; ui_.captured = true; }
+        }
+    }
 }
 
 void App::drawLevelList(Rect r) {
     ui_.fill(r, theme::panel);
     ui_.line(r.x + r.w - 1, r.y, r.x + r.w - 1, r.y + r.h, theme::line);
     int y = r.y + 6;
-    ui_.text(r.x + 8, y, "Уровни", theme::dim);
+    ui_.text(r.x + 8, y, tr("Levels", "Уровни"), theme::dim);
     y += 20;
-    ui_.textField(1, {r.x + 8, y, r.w - 16, 22}, filter_, 23, upperAny, "Поиск по номеру или названию");
-    if (filter_.empty() && ui_.focus != 1) ui_.text(r.x + 14, y + 3, "поиск…", theme::dim);
+    ui_.textField(1, {r.x + 8, y, r.w - 16, 22}, filter_, 23, upperAny, tr("Search by number or title", "Поиск по номеру или названию"));
+    if (filter_.empty() && ui_.focus != 1) ui_.text(r.x + 14, y + 3, tr("search…", "поиск…"), theme::dim);
     y += 28;
     int btnH = 24;
     Rect list{r.x + 4, y, r.w - 8, r.h - (y - r.y) - 2 * (btnH + 6) - 8};
@@ -969,7 +1141,7 @@ void App::drawLevelList(Rect r) {
         }
         idx.push_back(i);
     }
-    int visible = list.h / kRowH;
+    int visible = std::max(1, list.h / kRowH);
     int maxScroll = std::max(0, int(idx.size()) - visible);
     if (listFollow_) {
         auto it = std::find(idx.begin(), idx.end(), cur_);
@@ -989,7 +1161,6 @@ void App::drawLevelList(Rect r) {
         bool sel = i == cur_;
         if (sel) ui_.fill(row, theme::accentDim);
         else if (ui_.hover(row)) ui_.fill(row, theme::panel2);
-        // markers: unsaved, errors
         const Level& l = set_.levels[size_t(i)];
         std::string num = fmt("%03d", i + 1);
         ui_.text(row.x + 4, row.y + 1, num, sel ? theme::text : theme::dim);
@@ -1007,124 +1178,167 @@ void App::drawLevelList(Rect r) {
     int by = r.y + r.h - 2 * (btnH + 6) - 2;
     int bw = (r.w - 8 * 2 - 4 * 2) / 3;
     int bx = r.x + 8;
-    if (ui_.button({bx, by, bw, btnH}, "Новый", true, false, "Заменить уровень чистым: рамка, Murphy, выход")) {
-        ask("Новый уровень", fmt("Заменить уровень %03d чистым уровнем?\n(Ctrl+Z — отменить)", cur_ + 1), {"Заменить", "Отмена"},
-            [this](int b) { if (b == 0) replaceLevel(cur_, Level::blank(), "Создан чистый уровень"); });
+    if (ui_.button({bx, by, bw, btnH}, tr("New", "Новый"), true, false,
+                   tr("Replace the level with a blank one: border, Murphy, exit", "Заменить уровень чистым: рамка, Murphy, выход"))) {
+        ask(tr("New level", "Новый уровень"),
+            fmt(tr("Replace level %03d with a blank level?\n(Ctrl+Z to undo)", "Заменить уровень %03d чистым уровнем?\n(Ctrl+Z — отменить)"),
+                cur_ + 1),
+            {tr("Replace", "Заменить"), tr("Cancel", "Отмена")},
+            [this](int b) { if (b == 0) replaceLevel(cur_, Level::blank(), tr("Blank level created", "Создан чистый уровень")); });
     }
-    if (ui_.button({bx + bw + 4, by, bw, btnH}, "Копия", true, false, "Запомнить весь уровень (Ctrl+Shift+C)")) {
-        levelClip_ = lvl(); haveLevelClip_ = true; message(fmt("Уровень %03d скопирован", cur_ + 1));
-    }
-    if (ui_.button({bx + 2 * (bw + 4), by, bw, btnH}, "Вставка", haveLevelClip_, false,
-                   "Заменить уровень скопированным (Ctrl+Shift+V)"))
-        replaceLevel(cur_, levelClip_, "Уровень вставлен (Ctrl+Z — отменить)");
+    if (ui_.button({bx + bw + 4, by, bw, btnH}, tr("Copy", "Копия"), true, false,
+                   tr("Remember the whole level (Ctrl+Shift+C)", "Запомнить весь уровень (Ctrl+Shift+C)")))
+        copyLevel();
+    if (ui_.button({bx + 2 * (bw + 4), by, bw, btnH}, tr("Paste", "Вставка"), haveLevelClip_, false,
+                   tr("Replace the level with the copied one (Ctrl+Shift+V)", "Заменить уровень скопированным (Ctrl+Shift+V)")))
+        pasteLevel();
     by += btnH + 6;
-    if (ui_.button({bx, by, bw, btnH}, "▲ Выше", cur_ > 0, false, "Поменять местами с предыдущим (Alt+↑)")) swapLevels(cur_, cur_ - 1);
-    if (ui_.button({bx + bw + 4, by, bw, btnH}, "▼ Ниже", cur_ < kLevelCount - 1, false, "Поменять местами со следующим (Alt+↓)"))
+    if (ui_.button({bx, by, bw, btnH}, tr("▲ Up", "▲ Выше"), cur_ > 0, false,
+                   tr("Swap with the previous level (Alt+↑)", "Поменять местами с предыдущим (Alt+↑)")))
+        swapLevels(cur_, cur_ - 1);
+    if (ui_.button({bx + bw + 4, by, bw, btnH}, tr("▼ Down", "▼ Ниже"), cur_ < kLevelCount - 1, false,
+                   tr("Swap with the next level (Alt+↓)", "Поменять местами со следующим (Alt+↓)")))
         swapLevels(cur_, cur_ + 1);
-    if (ui_.button({bx + 2 * (bw + 4), by, bw, btnH}, "Экспорт", true, false,
-                   "Записать уровень в export\\LEVELnnn.SP (Ctrl+E); картинка — Ctrl+P"))
+    if (ui_.button({bx + 2 * (bw + 4), by, bw, btnH}, tr("Export", "Экспорт"), true, false,
+                   tr("Write the level to export\\LEVELnnn.SP (Ctrl+E); picture: Ctrl+P",
+                      "Записать уровень в export\\LEVELnnn.SP (Ctrl+E); картинка — Ctrl+P")))
         exportLevel();
 }
 
-void App::drawRightPanel(Rect r) {
+// under the map: level properties, start camera, special ports and, if there
+// is room left, the minimap
+void App::drawBottomPanel(Rect r) {
     ui_.fill(r, theme::panel);
-    ui_.line(r.x, r.y, r.x, r.y + r.h, theme::line);
-    int y = r.y + 6;
-    drawPalette(r, y);
-    drawProperties(r, y);
-    drawPorts({r.x, y, r.w, r.y + r.h - y - 118}, y);
-    drawMinimap({r.x + 8, r.y + r.h - 110, r.w - 16, 104});
-}
-
-void App::drawPalette(Rect r, int& y) {
-    ui_.text(r.x + 8, y, "Тайлы", theme::dim);
-    ui_.text(r.x + 70, y, "ЛКМ", theme::accent);
-    ui_.text(r.x + 150, y, "ПКМ", theme::warning);
-    y += 20;
-    // order: main objects first, decorative variants last
-    static const int order[] = {0, 2, 1, 4, 3, 7, 6, 5, 8, 18, 20, 19, 17, 24, 25, 9, 10, 11, 12, 21, 22, 23, 13, 14, 15, 16,
-                                26, 27, 38, 39, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37};
-    int cell = 36, cols = (r.w - 12) / cell;
-    for (int k = 0; k < T_COUNT; k++) {
-        int code = order[k];
-        Rect c{r.x + 8 + (k % cols) * cell, y + (k / cols) * cell, cell - 2, cell - 2};
-        SDL_Rect src{TileGfx::imageFor(code) * kTilePx, 0, kTilePx, kTilePx}, dst{c.x + 1, c.y + 1, 32, 32};
-        SDL_RenderCopy(ren_, tiles_, &src, &dst);
-        if (isSpecialPort(code)) ui_.text(c.x + 22, c.y + 18, "S", theme::warning);
-        if (code == primary_) ui_.frame(c, theme::accent, 2);
-        else if (code == secondary_) ui_.frame(c, theme::warning, 2);
-        if (ui_.hover(c)) {
-            ui_.frame(c, theme::text);
-            ui_.tooltip(fmt("%s — %s (код %d)", tileInfo(code).name, tileInfo(code).hint, code));
-            if (ui_.pressed[0]) { primary_ = code; ui_.captured = true; }
-            if (ui_.pressed[2]) { secondary_ = code; ui_.captured = true; }
-        }
-    }
-    y += ((T_COUNT + cols - 1) / cols) * cell + 4;
-    auto show = [&](int code, Color c, const char* who) {
-        SDL_Rect src{TileGfx::imageFor(code) * kTilePx, 0, kTilePx, kTilePx}, dst{r.x + 8, y, 16, 16};
-        SDL_RenderCopy(ren_, tiles_, &src, &dst);
-        ui_.text(r.x + 28, y, who, c);
-        ui_.textClipped({r.x + 68, y, r.w - 76, 16}, tileInfo(code).name);
-        y += 18;
+    ui_.line(r.x, r.y, r.x + r.w, r.y, theme::line);
+    int x = r.x;
+    auto sep = [&](int w) {
+        x += w;
+        ui_.line(x + 6, r.y + 8, x + 6, r.y + r.h - 8, theme::line);
+        x += 12;
     };
-    show(primary_, theme::accent, "ЛКМ");
-    show(secondary_, theme::warning, "ПКМ");
-    y += 6;
-    ui_.line(r.x + 8, y, r.x + r.w - 8, y, theme::line);
-    y += 6;
+    sep(drawProperties({x, r.y, 0, r.h}));
+    sep(drawCamera({x, r.y, 0, r.h}));
+    int used = drawPorts({x, r.y, 0, r.h});
+    x += used + 12;
+    Rect mm{x, r.y + 8, r.x + r.w - x - 8, r.h - 16};
+    if (mm.w >= kMapW * 2 && mm.h >= kMapH * 2) {
+        ui_.line(x - 6, r.y + 8, x - 6, r.y + r.h - 8, theme::line);
+        drawMinimap(mm);
+    }
 }
 
-void App::drawProperties(Rect r, int& y) {
+int App::drawProperties(Rect r) {
     Level& l = lvl();
-    ui_.text(r.x + 8, y, fmt("Уровень %03d", cur_ + 1), theme::dim);
+    const int W = 330;
+    int x = r.x + 8, y = r.y + 6;
+    ui_.text(x, y, fmt(tr("Level %03d", "Уровень %03d"), cur_ + 1), theme::dim);
     y += 20;
-    ui_.text(r.x + 8, y + 3, "Название");
-    if (ui_.textField(2, {r.x + 80, y, r.w - 88, 22}, titleEdit_, kTitleLen, titleFilter,
-                      "Название уровня (латиница, цифры, знаки; 23 символа)")) {
+    int lw = std::max(ui_.textWidth(tr("Title", "Название")), ui_.textWidth(tr("Collect", "Собрать"))) + 10;
+    ui_.text(x, y + 3, tr("Title", "Название"));
+    if (ui_.textField(2, {x + lw, y, W - 8 - lw, 22}, titleEdit_, kTitleLen, titleFilter,
+                      tr("Level title (Latin letters, digits, signs; 23 characters)", "Название уровня (латиница, цифры, знаки; 23 символа)"))) {
         beginEdit();
         l.setTitle(titleEdit_);
         endEdit();
     }
     y += 28;
-    bool g = l.gravity();
-    if (ui_.checkbox({r.x + 8, y, 120, 20}, "Гравитация", g, "Murphy падает вниз, если под ним пусто")) {
-        beginEdit(); l.setGravity(g); endEdit(g ? "Гравитация включена" : "Гравитация выключена");
-    }
-    y += 24;
-    ui_.text(r.x + 8, y + 2, "Зонки");
-    static const char* fz[] = {"обычно", "1", "стоят"};
-    static const char* fzTip[] = {"Зонки и инфотроны падают как обычно (0)",
-                                  "Значение 1: зонки по «замороженной» ветке, инфотроны не падают",
-                                  "Значение 2: зонки и инфотроны заморожены полностью"};
+    ui_.text(x, y + 3, tr("Zonks", "Зонки"));
+    const char* fz[] = {tr("normal", "обычно"), "1", tr("frozen", "стоят")};
+    const char* fzTip[] = {tr("Zonks and infotrons fall as usual (0)", "Зонки и инфотроны падают как обычно (0)"),
+                           tr("Value 1: zonks take the \"frozen\" branch, infotrons do not fall",
+                              "Значение 1: зонки по «замороженной» ветке, инфотроны не падают"),
+                           tr("Value 2: zonks and infotrons completely frozen", "Значение 2: зонки и инфотроны заморожены полностью")};
     int fzv = l.freezeZonks();
+    int bw = (W - 8 - lw - 8) / 3;
     for (int i = 0; i < 3; i++) {
-        Rect b{r.x + 64 + i * 66, y, 62, 22};
+        Rect b{x + lw + i * (bw + 4), y, bw, 22};
         if (ui_.button(b, fz[i], true, fzv == i, fzTip[i])) { beginEdit(); l.setFreezeZonks(i); endEdit(); }
     }
-    if (fzv > 2) ui_.text(r.x + 64, y + 24, fmt("(в файле %d — действует как 0)", fzv), theme::dim), y += 16;
     y += 28;
     int inf = l.count(T_INFOTRON), el = l.count(T_ELECTRON);
-    ui_.text(r.x + 8, y + 3, "Собрать");
+    ui_.text(x, y + 3, tr("Collect", "Собрать"));
     int need = l.infotronsNeeded();
-    if (ui_.button({r.x + 80, y, 24, 22}, "−", need > 0)) { beginEdit(); l.setInfotronsNeeded(need - 1); endEdit(); }
-    ui_.fill({r.x + 106, y, 70, 22}, theme::panel2);
-    ui_.textCentered({r.x + 106, y, 70, 22}, need ? fmt("%d", need) : fmt("все %d", inf));
-    if (ui_.button({r.x + 178, y, 24, 22}, "+", need < 255)) {
+    int cx = x + lw;
+    if (ui_.button({cx, y, 24, 22}, "−", need > 0)) { beginEdit(); l.setInfotronsNeeded(need - 1); endEdit(); }
+    ui_.fill({cx + 26, y, 70, 22}, theme::panel2);
+    ui_.textCentered({cx + 26, y, 70, 22}, need ? fmt("%d", need) : fmt(tr("all %d", "все %d"), inf));
+    if (ui_.button({cx + 98, y, 24, 22}, "+", need < 255)) {
         beginEdit(); l.setInfotronsNeeded(need == 0 ? std::min(255, inf) : need + 1); endEdit();
     }
-    if (ui_.hover({r.x + 8, y, 200, 22})) ui_.tooltip("Сколько инфотронов нужно собрать (0 — все, что есть на уровне)");
-    y += 26;
-    ui_.text(r.x + 8, y, fmt("Инфотронов %d, электронов %d", inf, el), theme::dim);
+    if (ui_.hover({x, y, cx + 122 - x, 22}))
+        ui_.tooltip(tr("How many infotrons must be collected (0: all there are on the level)",
+                       "Сколько инфотронов нужно собрать (0 — все, что есть на уровне)"));
+    bool g = l.gravity();
+    if (ui_.checkbox({cx + 136, y, W - 8 - (cx + 136 - x), 22}, tr("Gravity", "Гравитация"), g,
+                     tr("Murphy falls down when there is nothing under him", "Murphy падает вниз, если под ним пусто"))) {
+        beginEdit(); l.setGravity(g); endEdit(g ? tr("Gravity on", "Гравитация включена") : tr("Gravity off", "Гравитация выключена"));
+    }
+    y += 30;
+    ui_.text(x, y, fmt(tr("Infotrons %d, electrons %d", "Инфотронов %d, электронов %d"), inf, el), theme::dim);
     y += 18;
-    ui_.text(r.x + 8, y, fmt("Зонков %d, сник-снаков %d, багов %d", l.count(T_ZONK), l.count(T_SNIKSNAK), l.count(T_BUG)),
+    ui_.text(x, y, fmt(tr("Zonks %d, snik snaks %d, bugs %d", "Зонков %d, сник-снаков %d, багов %d"), l.count(T_ZONK),
+                       l.count(T_SNIKSNAK), l.count(T_BUG)),
              theme::dim);
-    y += 22;
-    ui_.line(r.x + 8, y, r.x + r.w - 8, y, theme::line);
-    y += 6;
+    if (fzv > 2) {
+        y += 18;
+        ui_.text(x, y, fmt(tr("Zonk freeze byte is %d in the file (acts as 0)", "Заморозка зонков в файле — %d (действует как 0)"), fzv),
+                 theme::dim);
+    }
+    return W;
 }
 
-void App::drawPorts(Rect r, int& y) {
+// start camera: set by the editor (automatic) or by hand
+int App::drawCamera(Rect r) {
+    Level& l = lvl();
+    const int W = 184;
+    int x = r.x + 8, y = r.y + 6;
+    ui_.text(x, y, tr("Start camera", "Стартовая камера"), theme::dim);
+    y += 20;
+    if (ui_.checkbox({x, y, W - 16, 22}, tr("Automatic", "Автоматически"), autoCamera_,
+                     tr("On: the editor stores the camera the game shows (on Murphy if it leaves the map). Off: set it below",
+                        "Вкл.: редактор записывает камеру, которую покажет игра (на Murphy, если она за картой). Выкл.: задайте ниже")))
+        message(autoCamera_ ? tr("Automatic start camera", "Стартовая камера — автоматически")
+                            : tr("Start camera set by hand", "Стартовая камера — вручную"));
+    y += 28;
+    Camera st = l.storedCamera();
+    bool valid = true;
+    Camera shown = shownCamera(&valid);
+    Camera val = autoCamera_ ? shown : st;
+    auto spin = [&](const char* name, int v, int maxV, bool isX) {
+        ui_.text(x, y + 3, name);
+        int bx = x + 22;
+        bool en = !autoCamera_;
+        int nv = v;
+        if (ui_.button({bx, y, 24, 22}, "−", en && v > 0)) nv = v - 1;
+        ui_.fill({bx + 26, y, 44, 22}, theme::panel2);
+        ui_.textCentered({bx + 26, y, 44, 22}, fmt("%d", v), en ? theme::text : theme::dim);
+        if (ui_.button({bx + 72, y, 24, 22}, "+", en && v < maxV)) nv = v + 1;
+        if (ui_.hover({x, y, 120, 22}))
+            ui_.tooltip(isX ? tr("Left column of the start screen (0–39)", "Левый столбец стартового экрана (0–39)")
+                            : tr("Top row of the start screen (0–11)", "Верхняя строка стартового экрана (0–11)"));
+        if (nv != v) {
+            Camera c = st;
+            (isX ? c.x : c.y) = nv;
+            beginEdit();
+            l.setStoredCamera(c);
+            endEdit();
+        }
+        y += 26;
+    };
+    spin("X", val.x, 39, true);
+    spin("Y", val.y, 11, false);
+    if (!autoCamera_) {
+        Camera eff = l.effectiveCamera(&valid);
+        std::string s = valid ? fmt(tr("the game shows %d, %d", "игра покажет %d, %d"), eff.x, eff.y)
+                              : std::string(tr("off the map!", "за картой!"));
+        ui_.text(x, y + 2, s, valid ? theme::dim : theme::error);
+    } else {
+        ui_.text(x, y + 2, tr("follows Murphy", "по положению Murphy"), theme::dim);
+    }
+    return W;
+}
+
+int App::drawPorts(Rect r) {
     Level& l = lvl();
     auto all = l.specialPorts();
     // records on special port cells; the others are junk from the disk
@@ -1132,80 +1346,100 @@ void App::drawPorts(Rect r, int& y) {
     for (size_t i = 0; i < all.size(); i++)
         if (all[i].cell < kMapW * kMapH && isSpecialPort(l.b[size_t(all[i].cell)])) shown.push_back(int(i));
     int junk = int(all.size() - shown.size());
-    ui_.text(r.x + 8, y, fmt("Особые порты %d / %d", int(shown.size()), kMaxSpecialPorts), theme::dim);
+    const int colW = 232, W = 2 * colW + 8;
+    int x = r.x + 8, y = r.y + 6;
+    int tx = ui_.text(x, y, fmt(tr("Special ports %d / %d", "Особые порты %d / %d"), int(shown.size()), kMaxSpecialPorts), theme::dim);
     if (junk) {
-        Rect jr{r.x + 170, y, r.w - 178, 16};
-        ui_.text(jr.x, y, fmt("мусор: %d", junk), theme::warning);
-        if (ui_.hover(jr)) ui_.tooltip("Записи портов не на особых портах (так на дискете) — уберутся при сохранении правленого уровня");
+        Rect jr{tx + 16, y, 120, 16};
+        ui_.text(jr.x, y, fmt(tr("junk: %d", "мусор: %d"), junk), theme::warning);
+        if (ui_.hover(jr))
+            ui_.tooltip(tr("Port records not on special ports (so on the disk): removed when an edited level is saved",
+                           "Записи портов не на особых портах (так на дискете) — уберутся при сохранении правленого уровня"));
     }
     y += 20;
     if (shown.empty()) {
-        ui_.text(r.x + 8, y, "нет (тайлы с буквой S)", theme::dim);
-        return;
+        ui_.text(x, y + 4, tr("none (the blue port tiles)", "нет (синие тайлы портов)"), theme::dim);
+        return W;
     }
-    auto& ports = all;
-    ui_.text(r.x + 8, y, "клетка", theme::dim);
-    ui_.text(r.x + 92, y, "Грав.", theme::dim);
-    ui_.text(r.x + 142, y, "Зонки", theme::dim);
-    ui_.text(r.x + 200, y, "Враги", theme::dim);
-    y += 18;
-    int rows = std::max(1, (r.y + r.h - y) / 22);
-    int n = int(shown.size());
-    portScroll_ = std::clamp(portScroll_, 0, std::max(0, n - rows));
-    if (ui_.hover({r.x, y, r.w, rows * 22}) && ui_.wheelY) portScroll_ = std::clamp(portScroll_ - ui_.wheelY, 0, std::max(0, n - rows));
+    // two columns of 5: all 10 ports fit
     bool changed = false;
-    for (int k = 0; k < rows && portScroll_ + k < n; k++) {
-        SpecialPort& p = ports[size_t(shown[size_t(portScroll_ + k)])];
+    for (int col = 0; col < 2; col++) {
+        int cx = x + col * (colW + 8);
+        ui_.text(cx, y, tr("cell", "клетка"), theme::dim);
+        ui_.text(cx + 90, y, tr("Grav", "Грав"), theme::dim);
+        ui_.text(cx + 132, y, tr("Zonks", "Зонки"), theme::dim);
+        ui_.text(cx + 190, y, tr("Enem", "Враги"), theme::dim);
+    }
+    y += 18;
+    int n = int(shown.size());
+    for (int k = 0; k < n && k < kMaxSpecialPorts; k++) {
+        int cx = x + (k / 5) * (colW + 8), cy = y + (k % 5) * 24;
+        SpecialPort& p = all[size_t(shown[size_t(k)])];
         int px = p.cell % kMapW, py = p.cell / kMapW;
-        Rect lab{r.x + 8, y, 80, 20};
-        if (ui_.hover(lab)) { ui_.fill(lab, theme::panel2); ui_.tooltip("Показать на карте"); if (ui_.pressed[0]) { centreOn(px, py); ui_.captured = true; } }
-        ui_.text(r.x + 10, y + 2, fmt("%d (%d,%d)", portScroll_ + k + 1, px, py));
+        Rect lab{cx - 2, cy, 86, 22};
+        if (ui_.hover(lab)) {
+            ui_.fill(lab, theme::panel2);
+            ui_.tooltip(tr("Show on the map", "Показать на карте"));
+            if (ui_.pressed[0]) { centreOn(px, py); ui_.captured = true; }
+        }
+        drawTile(l.b[size_t(p.cell)], {cx, cy + 3, 16, 16});
+        ui_.text(cx + 20, cy + 3, fmt("%d,%d", px, py));
         bool gv = p.gravity != 0, ev = p.freezeEnemies != 0;
-        if (ui_.checkbox({r.x + 96, y, 30, 20}, "", gv, "Гравитация после прохода")) { p.gravity = gv ? 1 : 0; changed = true; }
-        const char* zl = p.freezeZonks == 2 ? "стоят" : p.freezeZonks == 0 ? "обычн" : "1";
-        if (ui_.button({r.x + 138, y, 54, 20}, zl, true, p.freezeZonks == 2,
-                       "Зонки после прохода: обычно (0) / 1 / стоят (2) — щелчок меняет")) {
+        if (ui_.checkbox({cx + 94, cy, 30, 22}, "", gv, tr("Gravity after passing", "Гравитация после прохода"))) {
+            p.gravity = gv ? 1 : 0;
+            changed = true;
+        }
+        const char* zl = p.freezeZonks == 2 ? tr("frozen", "стоят") : p.freezeZonks == 0 ? tr("normal", "обычн") : "1";
+        if (ui_.button({cx + 126, cy, 58, 22}, zl, true, p.freezeZonks == 2,
+                       tr("Zonks after passing: normal (0) / 1 / frozen (2); click to change",
+                          "Зонки после прохода: обычно (0) / 1 / стоят (2) — щелчок меняет"))) {
             p.freezeZonks = uint8_t(p.freezeZonks == 0 ? 2 : p.freezeZonks == 2 ? 1 : 0);
             changed = true;
         }
-        if (ui_.checkbox({r.x + 206, y, 30, 20}, "", ev, "Заморозить врагов после прохода")) { p.freezeEnemies = ev ? 1 : 0; changed = true; }
-        y += 22;
+        if (ui_.checkbox({cx + 196, cy, 30, 22}, "", ev, tr("Freeze the enemies after passing", "Заморозить врагов после прохода"))) {
+            p.freezeEnemies = ev ? 1 : 0;
+            changed = true;
+        }
     }
-    if (changed) { beginEdit(); l.setSpecialPorts(ports); endEdit(); }
+    if (changed) { beginEdit(); l.setSpecialPorts(all); endEdit(); }
+    return W;
 }
 
 void App::drawMinimap(Rect r) {
-    ui_.fill(r, {20, 21, 25});
     int s = std::max(1, std::min(r.w / kMapW, r.h / kMapH));
     int ox = r.x + (r.w - kMapW * s) / 2, oy = r.y + (r.h - kMapH * s) / 2;
+    Rect area{ox, oy, kMapW * s, kMapH * s};
+    ui_.fill(area.shrink(-2), theme::minimapBg);
     for (int y = 0; y < kMapH; y++)
         for (int x = 0; x < kMapW; x++) {
-            uint32_t c = gfx_.averageColor(TileGfx::imageFor(lvl().tile(x, y)));
             int code = lvl().tile(x, y);
+            uint32_t c = gfx_.averageColor(TileGfx::imageFor(code));
             if (code == T_MURPHY) c = 0xFFFF4040;
             else if (code == T_EXIT) c = 0xFFFFFFFF;
             else if (code == T_INFOTRON) c = 0xFF40E040;
+            else if (isSpecialPort(code)) c = 0xFF4080FF;
             ui_.fill({ox + x * s, oy + y * s, s, s}, {uint8_t(c >> 16), uint8_t(c >> 8), uint8_t(c), 255});
         }
     // the visible part of the map
     int z = kZooms[zoomIdx_];
-    int mapW = vw_ - kLeftW - kRightW, mapH = vh_ - kToolbarH - kStatusH - kIssuesH;
-    Rect v{ox + panX_ * s / z, oy + panY_ * s / z, mapW * s / z, mapH * s / z};
-    ui_.setClip(&r);
+    Rect m = mapRect();
+    Rect v{ox + panX_ * s / z, oy + panY_ * s / z, m.w * s / z, m.h * s / z};
+    Rect clip = area.shrink(-2);
+    ui_.setClip(&clip);
     ui_.frame(v, theme::accent);
     ui_.setClip(nullptr);
-    if (ui_.hover(r) && ui_.down[0]) {
+    if (ui_.hover(area) && ui_.down[0]) {
         int cx = (ui_.mx - ox) / s, cy = (ui_.my - oy) / s;
-        panX_ = cx * z - mapW / 2;
-        panY_ = cy * z - mapH / 2;
+        panX_ = cx * z - m.w / 2;
+        panY_ = cy * z - m.h / 2;
         ui_.captured = true;
     }
-    if (ui_.hover(r)) ui_.tooltip("Мини-карта: щёлкните, чтобы перейти");
+    if (ui_.hover(area)) ui_.tooltip(tr("Minimap: click to go there", "Мини-карта: щёлкните, чтобы перейти"));
 }
 
 void App::drawMap(Rect r) {
     ui_.setClip(&r);
-    ui_.fill(r, {16, 17, 20});
+    ui_.fill(r, theme::mapBg);
     int z = kZooms[zoomIdx_];
     Level& l = lvl();
     int x0 = std::max(0, panX_ / z), y0 = std::max(0, panY_ / z);
@@ -1215,15 +1449,8 @@ void App::drawMap(Rect r) {
         for (int cx = x0; cx <= x1; cx++) {
             Rect c = cellRect(cx, cy);
             int code = l.tile(cx, cy);
-            SDL_Rect src{TileGfx::imageFor(code) * kTilePx, 0, kTilePx, kTilePx}, dst{c.x, c.y, z, z};
-            SDL_RenderCopy(ren_, tiles_, &src, &dst);
-            if (code >= T_COUNT) { ui_.fill(c, {255, 0, 255, 160}); }
-            if (isSpecialPort(code)) {
-                bool hasRec = l.findPort(cy * kMapW + cx) >= 0;
-                Color mc = hasRec ? theme::warning : theme::error;
-                if (z >= 16) ui_.text(c.x + z - 9, c.y + z - 15, "S", mc);
-                else ui_.fill({c.x + z - 4, c.y, 4, 4}, mc);
-            }
+            drawTile(code, {c.x, c.y, z, z}, isSpecialPort(code) && l.findPort(cy * kMapW + cx) < 0);
+            if (code >= T_COUNT) ui_.fill(c, {255, 0, 255, 160});
         }
     // border problems
     for (int cy = y0; cy <= y1; cy++)
@@ -1237,15 +1464,25 @@ void App::drawMap(Rect r) {
     }
     // map outline
     ui_.frame({r.x - panX_ - 1, r.y - panY_ - 1, kMapW * z + 2, kMapH * z + 2}, theme::line);
-    // start camera
+    // start camera: a thick outline with dark edges and a label on a plate,
+    // readable over any tiles
     if (showCamera_ && l.murphyCell() >= 0) {
         bool valid = true;
-        Camera c = l.effectiveCamera(&valid);
-        if (!valid) c = l.recommendedCamera();
+        Camera c = shownCamera(&valid);
+        Color cc = valid ? Color{255, 214, 40} : Color{255, 70, 60};
+        Color dark{0, 0, 0, 220};
         Rect cr{r.x + c.x * z - panX_, r.y + c.y * z - panY_, kCamW * z, kCamH * z};
-        ui_.frame(cr, valid ? Color{120, 200, 255, 200} : theme::error, 2);
-        ui_.text(cr.x + 4, cr.y + 2, valid ? "стартовый экран" : "стартовый экран (будет пересчитан)",
-                 valid ? Color{120, 200, 255} : theme::error);
+        ui_.frame(cr.shrink(-3), dark);
+        ui_.frame(cr.shrink(-2), cc, 3);
+        ui_.frame(cr.shrink(1), dark);
+        std::string label = valid ? tr("START SCREEN", "СТАРТОВЫЙ ЭКРАН") : tr("START SCREEN: OFF THE MAP", "СТАРТОВЫЙ ЭКРАН: ЗА КАРТОЙ");
+        if (!autoCamera_) label += tr(" (manual)", " (вручную)");
+        int lw = ui_.textWidth(label) + 12, lh = 20;
+        Rect tag{cr.x - 3, cr.y - 3 - lh, lw, lh};
+        if (tag.y < r.y) tag.y = cr.y + 1;  // no room above: inside the frame
+        ui_.fill(tag, cc);
+        ui_.frame(tag, dark);
+        ui_.text(tag.x + 6, tag.y + 2, label, {20, 20, 20});
     }
     // selection
     if (hasSel_ || selecting_) {
@@ -1259,9 +1496,8 @@ void App::drawMap(Rect r) {
     auto ghost = [&](int cx, int cy, int code) {
         if (!l.inside(cx, cy)) return;
         Rect c = cellRect(cx, cy);
-        SDL_Rect src{TileGfx::imageFor(code) * kTilePx, 0, kTilePx, kTilePx}, dst{c.x, c.y, z, z};
         SDL_SetTextureAlphaMod(tiles_, 170);
-        SDL_RenderCopy(ren_, tiles_, &src, &dst);
+        drawTile(code, {c.x, c.y, z, z});
         SDL_SetTextureAlphaMod(tiles_, 255);
         ui_.frame(c, {255, 255, 255, 120});
     };
@@ -1296,55 +1532,21 @@ void App::drawMap(Rect r) {
     ui_.setClip(nullptr);
 }
 
-void App::drawIssues(Rect r) {
-    ui_.fill(r, theme::panel);
-    ui_.line(r.x, r.y, r.x + r.w, r.y, theme::line);
-    const auto& is = issues();
-    int errs = 0, warns = 0;
-    for (const Issue& i : is) { errs += i.level == Issue::Error; warns += i.level == Issue::Warning; }
-    int y = r.y + 4;
-    if (is.empty()) {
-        ui_.text(r.x + 8, y, "Проверка: ошибок нет — уровень готов к игре на Amiga", theme::ok);
-        return;
-    }
-    ui_.text(r.x + 8, y, fmt("Проверка: ошибок %d, предупреждений %d (щелчок — показать клетку)", errs, warns),
-             errs ? theme::error : theme::warning);
-    y += 20;
-    int rows = (r.y + r.h - y) / kRowH;
-    if (ui_.hover(r) && ui_.wheelY) issueScroll_ -= ui_.wheelY;
-    issueScroll_ = std::clamp(issueScroll_, 0, std::max(0, int(is.size()) - rows));
-    for (int k = 0; k < rows && issueScroll_ + k < int(is.size()); k++) {
-        const Issue& i = is[size_t(issueScroll_ + k)];
-        Rect row{r.x + 4, y, r.w - 8, kRowH};
-        if (i.x >= 0 && ui_.hover(row)) {
-            ui_.fill(row, theme::panel2);
-            if (ui_.pressed[0]) { centreOn(i.x, i.y); ui_.captured = true; }
-        }
-        const char* mark = i.level == Issue::Error ? "●" : i.level == Issue::Warning ? "▲" : "•";
-        Color c = i.level == Issue::Error ? theme::error : i.level == Issue::Warning ? theme::warning : theme::info;
-        ui_.text(row.x + 4, row.y + 1, i.level == Issue::Error ? "!" : i.level == Issue::Warning ? "▲" : "·", c);
-        (void)mark;
-        std::string t = i.text + (i.x >= 0 ? fmt("  (%d, %d)", i.x, i.y) : "");
-        ui_.textClipped({row.x + 20, row.y, row.w - 24, row.h}, t);
-        if (ui_.hover(row) && ui_.utf8Length(t) * 8 > size_t(row.w - 24)) ui_.tooltip(t);
-        y += kRowH;
-    }
-}
-
 void App::drawStatus(Rect r) {
     ui_.fill(r, theme::panel2);
     std::string left;
     if (hoverX_ >= 0) {
         int code = lvl().tile(hoverX_, hoverY_);
-        left = fmt("x %2d  y %2d   %s (%d)", hoverX_, hoverY_, tileInfo(code).name, code);
+        left = fmt("x %2d  y %2d   %s (%d)", hoverX_, hoverY_, tileInfo(code).name(), code);
         int k = lvl().findPort(hoverY_ * kMapW + hoverX_);
         if (k >= 0) {
             SpecialPort p = lvl().specialPorts()[size_t(k)];
-            left += fmt("   порт %d: гравитация %s, зонки %d, враги %s", k + 1, p.gravity ? "вкл" : "выкл", p.freezeZonks,
-                        p.freezeEnemies ? "стоят" : "ходят");
+            left += fmt(tr("   port %d: gravity %s, zonks %d, enemies %s", "   порт %d: гравитация %s, зонки %d, враги %s"), k + 1,
+                        p.gravity ? tr("on", "вкл") : tr("off", "выкл"), p.freezeZonks,
+                        p.freezeEnemies ? tr("frozen", "стоят") : tr("move", "ходят"));
         }
     } else {
-        left = fmt("Уровень %03d — %s", cur_ + 1, trimTitle(lvl().title()).c_str());
+        left = fmt(tr("Level %03d — %s", "Уровень %03d — %s"), cur_ + 1, trimTitle(lvl().title()).c_str());
     }
     ui_.text(r.x + 8, r.y + 3, left);
     if (!status_.empty() && SDL_GetTicks() - statusTime_ < 8000) {
@@ -1355,12 +1557,20 @@ void App::drawStatus(Rect r) {
 
 void App::drawModal() {
     ui_.modal = false;
-    ui_.fill({0, 0, vw_, vh_}, {0, 0, 0, 140});
+    ui_.fill({0, 0, vw_, vh_}, theme::shade);
     std::vector<std::string> lines;
     std::stringstream ss(modal_.text);
     std::string ln;
-    int w = std::max(360, ui_.textWidth(modal_.title) + 40);
+    // buttons as wide as their labels; the box as wide as the text and the buttons
+    std::vector<int> bws;
+    int buttonsW = 0;
+    for (const std::string& b : modal_.buttons) {
+        bws.push_back(std::max(110, ui_.textWidth(b) + 28));
+        buttonsW += bws.back() + 8;
+    }
+    int w = std::max({360, ui_.textWidth(modal_.title) + 40, buttonsW - 8 + 40});
     while (std::getline(ss, ln)) { lines.push_back(ln); w = std::max(w, ui_.textWidth(ln) + 40); }
+    w = std::min(w, vw_ - 20);
     int h = 70 + int(lines.size()) * 18 + 40;
     Rect box{(vw_ - w) / 2, (vh_ - h) / 2, w, h};
     ui_.fill(box, theme::panel);
@@ -1368,10 +1578,12 @@ void App::drawModal() {
     ui_.text(box.x + 20, box.y + 14, modal_.title, theme::accent);
     int y = box.y + 44;
     for (const std::string& l : lines) { ui_.text(box.x + 20, y, l); y += 18; }
-    int bw = 130, bx = box.x + box.w - 20 - int(modal_.buttons.size()) * (bw + 8) + 8;
+    int bx = box.x + box.w - 20 - (buttonsW - 8);
     int chosen = -1;
-    for (size_t i = 0; i < modal_.buttons.size(); i++)
-        if (ui_.button({bx + int(i) * (bw + 8), box.y + box.h - 40, bw, 26}, modal_.buttons[i], true, i == 0)) chosen = int(i);
+    for (size_t i = 0; i < modal_.buttons.size(); i++) {
+        if (ui_.button({bx, box.y + box.h - 40, bws[i], 26}, modal_.buttons[i], true, i == 0)) chosen = int(i);
+        bx += bws[i] + 8;
+    }
     for (const SDL_Keysym& k : ui_.keys) {
         if (k.sym == SDLK_RETURN || k.sym == SDLK_KP_ENTER) chosen = 0;
         if (k.sym == SDLK_ESCAPE) chosen = int(modal_.buttons.size()) - 1;
@@ -1384,47 +1596,127 @@ void App::drawModal() {
     ui_.modal = true;
 }
 
+// the level check in its own window; a click on a line shows the cell
+void App::drawCheck() {
+    ui_.modal = false;
+    ui_.fill({0, 0, vw_, vh_}, theme::shade);
+    const auto& is = issues();
+    int errs = 0, warns = 0;
+    for (const Issue& i : is) { errs += i.level == Issue::Error; warns += i.level == Issue::Warning; }
+    int w = std::min(900, vw_ - 40);
+    int rows = std::clamp(int(is.size()), 1, 14);
+    int h = 44 + 24 + rows * 22 + 56;
+    Rect box{(vw_ - w) / 2, (vh_ - h) / 2, w, h};
+    ui_.fill(box, theme::panel);
+    ui_.frame(box, theme::accent);
+    ui_.text(box.x + 20, box.y + 14,
+             fmt(tr("Level check — %03d %s", "Проверка уровня — %03d %s"), cur_ + 1, trimTitle(lvl().title()).c_str()), theme::accent);
+    int y = box.y + 44;
+    if (is.empty()) {
+        ui_.text(box.x + 20, y, tr("✓ No problems: the level is ready for the Amiga", "✓ Ошибок нет — уровень готов к игре на Amiga"), theme::ok);
+    } else {
+        ui_.text(box.x + 20, y,
+                 fmt(tr("Errors: %d, warnings: %d (click a line to show the cell)", "Ошибок: %d, предупреждений: %d (щелчок — показать клетку)"),
+                     errs, warns),
+                 errs ? theme::error : theme::warning);
+        y += 24;
+        Rect list{box.x + 12, y, box.w - 24, rows * 22};
+        if (ui_.hover(list) && ui_.wheelY) issueScroll_ -= ui_.wheelY;
+        issueScroll_ = std::clamp(issueScroll_, 0, std::max(0, int(is.size()) - rows));
+        for (int k = 0; k < rows && issueScroll_ + k < int(is.size()); k++) {
+            const Issue& i = is[size_t(issueScroll_ + k)];
+            Rect row{list.x, y, list.w, 22};
+            if (i.x >= 0 && ui_.hover(row)) {
+                ui_.fill(row, theme::panel2);
+                if (ui_.pressed[0]) {
+                    centreOn(i.x, i.y);
+                    check_ = false;
+                    ui_.captured = true;
+                }
+            }
+            Color c = i.level == Issue::Error ? theme::error : i.level == Issue::Warning ? theme::warning : theme::info;
+            ui_.text(row.x + 6, row.y + 3, i.level == Issue::Error ? "●" : i.level == Issue::Warning ? "▲" : "•", c);
+            std::string t = i.text + (i.x >= 0 ? fmt("  (%d, %d)", i.x, i.y) : "");
+            ui_.textClipped({row.x + 24, row.y + 3, row.w - 30, 16}, t);
+            if (ui_.hover(row) && ui_.textWidth(t) > row.w - 30) ui_.tooltip(t);
+            y += 22;
+        }
+    }
+    bool close = ui_.button({box.x + box.w - 130, box.y + box.h - 40, 110, 26}, tr("Close", "Закрыть"), true, true);
+    if (!checkOpened_) {  // not the key press / click that opened it
+        for (const SDL_Keysym& k : ui_.keys)
+            if (k.sym == SDLK_F7 || k.sym == SDLK_ESCAPE || k.sym == SDLK_RETURN || k.sym == SDLK_KP_ENTER) close = true;
+        if (ui_.pressed[0] && !box.contains(ui_.mx, ui_.my)) close = true;
+    }
+    checkOpened_ = false;
+    if (close) check_ = false;
+    ui_.modal = true;
+}
+
 void App::drawHelp() {
-    static const char* text[] = {
-        "Мышь",
-        "  ЛКМ — рисовать основным тайлом, ПКМ — вторым (по умолчанию «пусто»)",
-        "  Alt+ЛКМ / Alt+ПКМ или средняя кнопка — взять тайл с карты",
-        "  Колесо — прокрутка, Shift+колесо — вбок, Ctrl+колесо — масштаб",
-        "  Пробел+ЛКМ или средняя кнопка с перетаскиванием — двигать карту",
-        "  Перетащите в окно файл .SP (уровень) или LEVELS.DAT (все 111) — импорт",
-        "Инструменты",
-        "  P карандаш   L линия   R рамка   F прямоугольник   G заливка   S выделение",
-        "  0–9 — быстрый выбор тайла по коду (0 пусто, 1 зонк, 2 база, 3 Murphy, 4 инфотрон …)",
-        "Выделение и буфер",
-        "  Ctrl+C / Ctrl+X — копировать / вырезать, Ctrl+V — вставлять (щелчком, Esc — хватит)",
-        "  X / Y при вставке — отразить; Shift+H / Shift+V — отразить выделенное; Del — очистить",
-        "  Ctrl+A — выделить весь уровень",
-        "Уровни и файлы",
-        "  PageUp / PageDown — предыдущий / следующий уровень, Alt+↑/↓ — переставить уровень",
-        "  Ctrl+Shift+C / Ctrl+Shift+V — скопировать / вставить весь уровень",
-        "  Ctrl+S — сохранить (прежний файл — LEVELS.DAT.bak), Ctrl+E — экспорт .SP, Ctrl+P — картинка",
-        "  F5 — сыграть уровень в игре; Ctrl+Z / Ctrl+Y — отменить / вернуть",
-        "Вид",
-        "  Ctrl+G — сетка, C — стартовый экран игры, Ctrl+0 — весь уровень, стрелки — прокрутка",
-        "Правила Amiga, которые редактор соблюдает сам",
-        "  • камера старта ставится на Murphy (PC-редакторы пишут нули — камера уезжает за карту)",
-        "  • записи особых портов следуют за тайлами (S), не больше 10; лишние байты обнуляются",
-        "  • рамка должна быть из «железа»: объект, ушедший за карту, вешает игру на Amiga",
-        "  • неизменённые уровни сохраняются байт в байт",
-        "",
-        "F1 или Esc — закрыть справку",
+    struct Line { const char *en, *ru; };
+    static const Line text[] = {
+        {"Mouse", "Мышь"},
+        {"  Left button: draw with the main tile, right button: with the second one (empty by default)",
+         "  ЛКМ — рисовать основным тайлом, ПКМ — вторым (по умолчанию «пусто»)"},
+        {"  Alt+left / Alt+right button or the middle button: pick the tile from the map",
+         "  Alt+ЛКМ / Alt+ПКМ или средняя кнопка — взять тайл с карты"},
+        {"  Wheel: scroll, Shift+wheel: sideways, Ctrl+wheel: zoom", "  Колесо — прокрутка, Shift+колесо — вбок, Ctrl+колесо — масштаб"},
+        {"  Space+left button or dragging with the middle button: move the map",
+         "  Пробел+ЛКМ или средняя кнопка с перетаскиванием — двигать карту"},
+        {"  Drop a .SP file (one level) or LEVELS.DAT (all 111) onto the window: import",
+         "  Перетащите в окно файл .SP (уровень) или LEVELS.DAT (все 111) — импорт"},
+        {"Tools", "Инструменты"},
+        {"  P pencil   L line   R frame   F box   G fill   S select",
+         "  P карандаш   L линия   R рамка   F прямоугольник   G заливка   S выделение"},
+        {"  0–9: quick tile choice by code (0 empty, 1 zonk, 2 base, 3 Murphy, 4 infotron …)",
+         "  0–9 — быстрый выбор тайла по коду (0 пусто, 1 зонк, 2 база, 3 Murphy, 4 инфотрон …)"},
+        {"Selection and clipboard", "Выделение и буфер"},
+        {"  Ctrl+C / Ctrl+X: copy / cut, Ctrl+V: paste (click to place, Esc: done)",
+         "  Ctrl+C / Ctrl+X — копировать / вырезать, Ctrl+V — вставлять (щелчком, Esc — хватит)"},
+        {"  X / Y while pasting: mirror; Shift+H / Shift+V: mirror the selection; Del: clear",
+         "  X / Y при вставке — отразить; Shift+H / Shift+V — отразить выделенное; Del — очистить"},
+        {"  Ctrl+A: select the whole level", "  Ctrl+A — выделить весь уровень"},
+        {"Levels and files", "Уровни и файлы"},
+        {"  PageUp / PageDown: previous / next level, Alt+↑/↓: move the level",
+         "  PageUp / PageDown — предыдущий / следующий уровень, Alt+↑/↓ — переставить уровень"},
+        {"  Ctrl+Shift+C / Ctrl+Shift+V: copy / paste the whole level", "  Ctrl+Shift+C / Ctrl+Shift+V — скопировать / вставить весь уровень"},
+        {"  Ctrl+S: save (the previous file is LEVELS.DAT.bak), Ctrl+E: export .SP, Ctrl+P: picture",
+         "  Ctrl+S — сохранить (прежний файл — LEVELS.DAT.bak), Ctrl+E — экспорт .SP, Ctrl+P — картинка"},
+        {"  F5: play the level in the game, F7: level check; Ctrl+Z / Ctrl+Y: undo / redo",
+         "  F5 — сыграть уровень в игре, F7 — проверка уровня; Ctrl+Z / Ctrl+Y — отменить / вернуть"},
+        {"View", "Вид"},
+        {"  Ctrl+G: grid, C: start screen of the game, Ctrl+0: whole level, arrows: scroll",
+         "  Ctrl+G — сетка, C — стартовый экран игры, Ctrl+0 — весь уровень, стрелки — прокрутка"},
+        {"  ☀ / ☾: light / dark theme, EN / RU: interface language", "  ☀ / ☾ — светлая / тёмная тема, EN / RU — язык интерфейса"},
+        {"Amiga rules the editor keeps by itself", "Правила Amiga, которые редактор соблюдает сам"},
+        {"  • the start camera goes to Murphy (PC editors write zeros: the camera leaves the map);",
+         "  • камера старта ставится на Murphy (PC-редакторы пишут нули — камера уезжает за карту);"},
+        {"    turn off \"Automatic\" under the map to set it by hand",
+         "    выключите «Автоматически» под картой, чтобы задать её вручную"},
+        {"  • special port records (blue tiles) follow the tiles, at most 10; spare bytes are cleared",
+         "  • записи особых портов (синие тайлы) следуют за тайлами, не больше 10; лишние байты обнуляются"},
+        {"  • the border must be hardware: an object that leaves the map hangs the game on the Amiga",
+         "  • рамка должна быть из «железа»: объект, ушедший за карту, вешает игру на Amiga"},
+        {"  • levels that were not changed are saved byte for byte", "  • неизменённые уровни сохраняются байт в байт"},
+        {"", ""},
+        {"F1 or Esc: close the help", "F1 или Esc — закрыть справку"},
     };
     ui_.modal = false;
-    ui_.fill({0, 0, vw_, vh_}, {0, 0, 0, 150});
+    ui_.fill({0, 0, vw_, vh_}, theme::shade);
     int n = int(sizeof text / sizeof text[0]);
-    int w = 820, h = n * 18 + 40;
+    int w = 40;
+    for (const Line& t : text) w = std::max(w, ui_.textWidth(tr(t.en, t.ru)) + 40);
+    w = std::min(w, vw_ - 20);
+    int h = n * 18 + 40;
     Rect box{(vw_ - w) / 2, std::max(10, (vh_ - h) / 2), w, h};
     ui_.fill(box, theme::panel);
     ui_.frame(box, theme::accent);
     int y = box.y + 20;
-    for (const char* t : text) {
-        bool head = t[0] && t[0] != ' ';
-        ui_.text(box.x + 20, y, t, head ? theme::accent : theme::text);
+    for (const Line& t : text) {
+        const char* s = tr(t.en, t.ru);
+        bool head = s[0] && s[0] != ' ';
+        ui_.text(box.x + 20, y, s, head ? theme::accent : theme::text);
         y += 18;
     }
     if (!helpOpened_) {  // not the key press that opened it
@@ -1473,7 +1765,7 @@ void App::handleMapInput(Rect r) {
         if (!ui_.down[1] && !ui_.down[0]) {
             if (std::abs(ui_.mx - panStartX_) < 3 && std::abs(ui_.my - panStartY_) < 3 && hoverX_ >= 0 && !space) {
                 primary_ = lvl().tile(hoverX_, hoverY_);
-                message(std::string("Основной тайл: ") + tileInfo(primary_).name);
+                message(std::string(tr("Main tile: ", "Основной тайл: ")) + tileInfo(primary_).name());
             }
             panning_ = false;
         }
@@ -1489,14 +1781,14 @@ void App::handleMapInput(Rect r) {
     if (over && alt && hoverX_ >= 0 && (ui_.pressed[0] || ui_.pressed[2])) {
         int code = lvl().tile(hoverX_, hoverY_);
         if (ui_.pressed[0]) primary_ = code; else secondary_ = code;
-        message(std::string(ui_.pressed[0] ? "Основной тайл: " : "Второй тайл: ") + tileInfo(code).name);
+        message(std::string(ui_.pressed[0] ? tr("Main tile: ", "Основной тайл: ") : tr("Second tile: ", "Второй тайл: ")) + tileInfo(code).name());
         return;
     }
 
     // paste mode
     if (pasting_) {
         if (over && hoverX_ >= 0 && ui_.pressed[0]) pasteAt(hoverX_, hoverY_);
-        if (over && ui_.pressed[2]) { pasting_ = false; message("Вставка закончена"); }
+        if (over && ui_.pressed[2]) { pasting_ = false; message(tr("Paste done", "Вставка закончена")); }
         return;
     }
 
@@ -1561,7 +1853,7 @@ void App::handleKeys() {
         case SDLK_z: if (ctrl) { shift ? redo() : undo(); continue; } break;
         case SDLK_y: if (ctrl) { redo(); continue; } break;
         case SDLK_c:
-            if (ctrl && shift) { levelClip_ = lvl(); haveLevelClip_ = true; message(fmt("Уровень %03d скопирован", cur_ + 1)); continue; }
+            if (ctrl && shift) { copyLevel(); continue; }
             if (ctrl) { copySelection(false); continue; }
             if (!alt) { showCamera_ = !showCamera_; continue; }
             break;
@@ -1570,10 +1862,14 @@ void App::handleKeys() {
             if (pasting_) { mirrorClip(true); continue; }
             break;
         case SDLK_v:
-            if (ctrl && shift) { if (haveLevelClip_) replaceLevel(cur_, levelClip_, "Уровень вставлен (Ctrl+Z — отменить)"); continue; }
+            if (ctrl && shift) { pasteLevel(); continue; }
             if (ctrl) {
-                if (clip_.w) { pasting_ = true; hasSel_ = false; message("Вставка: щелчок — поставить, X/Y — отразить, Esc — закончить"); }
-                else message("Буфер пуст: выделите область и нажмите Ctrl+C");
+                if (clip_.w) {
+                    pasting_ = true;
+                    hasSel_ = false;
+                    message(tr("Paste: click to place, X/Y to mirror, Esc when done", "Вставка: щелчок — поставить, X/Y — отразить, Esc — закончить"));
+                }
+                else message(tr("The clipboard is empty: select an area and press Ctrl+C", "Буфер пуст: выделите область и нажмите Ctrl+C"));
                 continue;
             }
             if (shift) { mirrorSelection(false); continue; }
@@ -1584,14 +1880,15 @@ void App::handleKeys() {
         case SDLK_e: if (ctrl) { exportLevel(); continue; } break;
         case SDLK_p: if (ctrl) { exportPicture(); continue; } break;
         case SDLK_0: case SDLK_KP_0: if (ctrl) { fitMap(); continue; } break;
-        case SDLK_EQUALS: case SDLK_KP_PLUS: if (ctrl) { zoomAt(zoomIdx_ + 1, (vw_ - kLeftW - kRightW) / 2, 200); continue; } break;
-        case SDLK_MINUS: case SDLK_KP_MINUS: if (ctrl) { zoomAt(zoomIdx_ - 1, (vw_ - kLeftW - kRightW) / 2, 200); continue; } break;
+        case SDLK_EQUALS: case SDLK_KP_PLUS: if (ctrl) { zoomAt(zoomIdx_ + 1, mapRect().w / 2, mapRect().h / 2); continue; } break;
+        case SDLK_MINUS: case SDLK_KP_MINUS: if (ctrl) { zoomAt(zoomIdx_ - 1, mapRect().w / 2, mapRect().h / 2); continue; } break;
         default: break;
         }
         if (ctrl) continue;
         switch (k.sym) {
         case SDLK_F1: help_ = true; helpOpened_ = true; break;
         case SDLK_F5: startTest(); break;
+        case SDLK_F7: check_ = true; checkOpened_ = true; break;
         case SDLK_ESCAPE: pasting_ = false; hasSel_ = false; selecting_ = false; break;
         case SDLK_DELETE: case SDLK_BACKSPACE: deleteSelection(); break;
         case SDLK_PAGEUP: selectLevel(cur_ - 1); break;
@@ -1604,10 +1901,14 @@ void App::handleKeys() {
         case SDLK_RIGHT: panX_ += kZooms[zoomIdx_] * 2; break;
         case SDLK_y: if (pasting_) mirrorClip(false); break;
         default:
-            if (k.sym >= SDLK_0 && k.sym <= SDLK_9 && !shift) { primary_ = int(k.sym - SDLK_0); message(std::string("Основной тайл: ") + tileInfo(primary_).name); break; }
+            if (k.sym >= SDLK_0 && k.sym <= SDLK_9 && !shift) {
+                primary_ = int(k.sym - SDLK_0);
+                message(std::string(tr("Main tile: ", "Основной тайл: ")) + tileInfo(primary_).name());
+                break;
+            }
             if (shift) break;
             for (const ToolInfo& t : kTools)
-                if (k.sym == t.sym) { tool_ = t.t; pasting_ = false; message(std::string("Инструмент: ") + t.name); }
+                if (k.sym == t.sym) { tool_ = t.t; pasting_ = false; message(std::string(tr("Tool: ", "Инструмент: ")) + t.name()); }
             break;
         }
     }

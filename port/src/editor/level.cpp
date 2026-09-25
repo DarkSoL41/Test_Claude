@@ -6,58 +6,64 @@
 #include <fstream>
 #include <iterator>
 
+#include "i18n.hpp"
+
 namespace editor {
 
 namespace {
 
 const TileInfo kTiles[T_COUNT] = {
-    {"Пусто", "пустая клетка"},
-    {"Зонк", "камень: падает и скатывается"},
-    {"База", "съедается Murphy"},
-    {"Murphy", "игрок (ровно один на уровень)"},
-    {"Инфотрон", "собрать нужное число"},
-    {"RAM-чип", "стена, разрушается взрывом"},
-    {"Железо", "неразрушимая стена"},
-    {"Выход", "открывается после сбора инфотронов"},
-    {"Оранжевый диск", "падает, взрывается при ударе"},
-    {"Порт →", "проход только вправо"},
-    {"Порт ↓", "проход только вниз"},
-    {"Порт ←", "проход только влево"},
-    {"Порт ↑", "проход только вверх"},
-    {"Особый порт →", "вправо; меняет гравитацию/заморозки"},
-    {"Особый порт ↓", "вниз; меняет гравитацию/заморозки"},
-    {"Особый порт ←", "влево; меняет гравитацию/заморозки"},
-    {"Особый порт ↑", "вверх; меняет гравитацию/заморозки"},
-    {"Сник-снак", "враг, ходит вдоль левой стены"},
-    {"Жёлтый диск", "взрывается от терминала"},
-    {"Терминал", "взрывает все жёлтые диски"},
-    {"Красный диск", "Murphy может заложить"},
-    {"Порт ↕", "проход вверх и вниз"},
-    {"Порт ↔", "проход влево и вправо"},
-    {"Порт ✚", "проход во все стороны"},
-    {"Электрон", "враг; при взрыве — 9 инфотронов"},
-    {"Баг", "база, которая бьёт током"},
-    {"RAM-чип (лев.)", "левая половина чипа"},
-    {"RAM-чип (прав.)", "правая половина чипа"},
-    {"Железо 1", "вариант оформления стены"},
-    {"Железо 2", "вариант оформления стены"},
-    {"Железо 3", "вариант оформления стены"},
-    {"Железо 4", "вариант оформления стены"},
-    {"Железо 5", "вариант оформления стены"},
-    {"Железо 6", "вариант оформления стены"},
-    {"Железо 7", "вариант оформления стены"},
-    {"Железо 8", "вариант оформления стены"},
-    {"Железо 9", "вариант оформления стены"},
-    {"Железо 10", "вариант оформления стены"},
-    {"RAM-чип (верх)", "верхняя половина чипа"},
-    {"RAM-чип (низ)", "нижняя половина чипа"},
+    {"Empty", "empty cell", "Пусто", "пустая клетка"},
+    {"Zonk", "boulder: falls and rolls off", "Зонк", "камень: падает и скатывается"},
+    {"Base", "Murphy eats it", "База", "съедается Murphy"},
+    {"Murphy", "the player (exactly one per level)", "Murphy", "игрок (ровно один на уровень)"},
+    {"Infotron", "collect the required number", "Инфотрон", "собрать нужное число"},
+    {"RAM chip", "wall, destroyed by explosions", "RAM-чип", "стена, разрушается взрывом"},
+    {"Hardware", "indestructible wall", "Железо", "неразрушимая стена"},
+    {"Exit", "opens when the infotrons are collected", "Выход", "открывается после сбора инфотронов"},
+    {"Orange disk", "falls, explodes on impact", "Оранжевый диск", "падает, взрывается при ударе"},
+    {"Port →", "pass to the right only", "Порт →", "проход только вправо"},
+    {"Port ↓", "pass downwards only", "Порт ↓", "проход только вниз"},
+    {"Port ←", "pass to the left only", "Порт ←", "проход только влево"},
+    {"Port ↑", "pass upwards only", "Порт ↑", "проход только вверх"},
+    {"Special port →", "right; changes gravity / freezes", "Особый порт →", "вправо; меняет гравитацию/заморозки"},
+    {"Special port ↓", "down; changes gravity / freezes", "Особый порт ↓", "вниз; меняет гравитацию/заморозки"},
+    {"Special port ←", "left; changes gravity / freezes", "Особый порт ←", "влево; меняет гравитацию/заморозки"},
+    {"Special port ↑", "up; changes gravity / freezes", "Особый порт ↑", "вверх; меняет гравитацию/заморозки"},
+    {"Snik snak", "enemy, follows the left wall", "Сник-снак", "враг, ходит вдоль левой стены"},
+    {"Yellow disk", "explodes when a terminal is used", "Жёлтый диск", "взрывается от терминала"},
+    {"Terminal", "blows up all yellow disks", "Терминал", "взрывает все жёлтые диски"},
+    {"Red disk", "Murphy can pick it up and drop it", "Красный диск", "Murphy может заложить"},
+    {"Port ↕", "pass up and down", "Порт ↕", "проход вверх и вниз"},
+    {"Port ↔", "pass left and right", "Порт ↔", "проход влево и вправо"},
+    {"Port ✚", "pass in all directions", "Порт ✚", "проход во все стороны"},
+    {"Electron", "enemy; leaves 9 infotrons when it explodes", "Электрон", "враг; при взрыве — 9 инфотронов"},
+    {"Bug", "base that gives electric shocks", "Баг", "база, которая бьёт током"},
+    {"RAM chip (left)", "left half of a chip", "RAM-чип (лев.)", "левая половина чипа"},
+    {"RAM chip (right)", "right half of a chip", "RAM-чип (прав.)", "правая половина чипа"},
+    {"Hardware 1", "decorative wall variant", "Железо 1", "вариант оформления стены"},
+    {"Hardware 2", "decorative wall variant", "Железо 2", "вариант оформления стены"},
+    {"Hardware 3", "decorative wall variant", "Железо 3", "вариант оформления стены"},
+    {"Hardware 4", "decorative wall variant", "Железо 4", "вариант оформления стены"},
+    {"Hardware 5", "decorative wall variant", "Железо 5", "вариант оформления стены"},
+    {"Hardware 6", "decorative wall variant", "Железо 6", "вариант оформления стены"},
+    {"Hardware 7", "decorative wall variant", "Железо 7", "вариант оформления стены"},
+    {"Hardware 8", "decorative wall variant", "Железо 8", "вариант оформления стены"},
+    {"Hardware 9", "decorative wall variant", "Железо 9", "вариант оформления стены"},
+    {"Hardware 10", "decorative wall variant", "Железо 10", "вариант оформления стены"},
+    {"RAM chip (top)", "upper half of a chip", "RAM-чип (верх)", "верхняя половина чипа"},
+    {"RAM chip (bottom)", "lower half of a chip", "RAM-чип (низ)", "нижняя половина чипа"},
 };
 
-const TileInfo kUnknown = {"Неизвестный код", "игра не знает этот код клетки"};
+const TileInfo kUnknown = {"Unknown code", "the game does not know this cell code", "Неизвестный код",
+                           "игра не знает этот код клетки"};
 
 int clampi(int v, int lo, int hi) { return std::max(lo, std::min(hi, v)); }
 
 }  // namespace
+
+const char* TileInfo::name() const { return tr(nameEn, nameRu); }
+const char* TileInfo::hint() const { return tr(hintEn, hintRu); }
 
 const TileInfo& tileInfo(int code) { return code >= 0 && code < T_COUNT ? kTiles[code] : kUnknown; }
 bool isHardware(int c) { return c == T_HARDWARE || (c >= T_HW_FIRST && c <= T_HW_LAST); }
@@ -199,11 +205,13 @@ int Level::murphyCell() const {
     return -1;
 }
 
-void Level::normalize() {
+void Level::normalize(bool autoCamera) {
     // keep the camera the game would show; recentre only if it leaves the map
-    bool valid = false;
-    Camera eff = effectiveCamera(&valid);
-    setStoredCamera(valid ? eff : recommendedCamera());
+    if (autoCamera) {
+        bool valid = false;
+        Camera eff = effectiveCamera(&valid);
+        setStoredCamera(valid ? eff : recommendedCamera());
+    }
     std::vector<SpecialPort> keep;
     for (const SpecialPort& p : specialPorts())
         if (p.cell < kMapW * kMapH && isSpecialPort(b[size_t(p.cell)]) &&
@@ -220,24 +228,27 @@ std::vector<Issue> Level::validate() const {
     };
     char buf[256];
     int murphys = count(T_MURPHY);
-    if (murphys == 0) add(Issue::Error, "Нет Murphy — уровень не запустится");
+    if (murphys == 0) add(Issue::Error, tr("No Murphy: the level will not start", "Нет Murphy — уровень не запустится"));
     if (murphys > 1) {
         int second = -1, n = 0;
         for (int i = 0; i < kMapW * kMapH; i++)
             if (b[size_t(i)] == T_MURPHY && ++n == 2) { second = i; break; }
-        std::snprintf(buf, sizeof buf, "Murphy на уровне %d раз: игра управляет первым, остальные — неподвижные «двойники»", murphys);
+        std::snprintf(buf, sizeof buf, tr("Murphy is on the level %d times: the game controls the first one, the others are still \"doubles\"",
+                                         "Murphy на уровне %d раз: игра управляет первым, остальные — неподвижные «двойники»"), murphys);
         add(Issue::Warning, buf, second);
     }
-    if (count(T_EXIT) == 0) add(Issue::Warning, "Нет выхода — уровень нельзя пройти");
+    if (count(T_EXIT) == 0) add(Issue::Warning, tr("No exit: the level cannot be finished", "Нет выхода — уровень нельзя пройти"));
 
     int infotrons = count(T_INFOTRON), electrons = count(T_ELECTRON);
     int need = infotronsNeeded() ? infotronsNeeded() : infotrons;
     if (infotronsNeeded() > infotrons + 9 * electrons) {
-        std::snprintf(buf, sizeof buf, "Нужно %d инфотронов, а на уровне %d (и %d электронов × 9)", infotronsNeeded(),
+        std::snprintf(buf, sizeof buf, tr("%d infotrons needed, the level has %d (and %d electrons × 9)",
+                                         "Нужно %d инфотронов, а на уровне %d (и %d электронов × 9)"), infotronsNeeded(),
                       infotrons, electrons);
         add(Issue::Error, buf);
     } else if (infotronsNeeded() > infotrons) {
-        std::snprintf(buf, sizeof buf, "Нужно %d инфотронов, на уровне только %d — остальные придётся добыть из электронов",
+        std::snprintf(buf, sizeof buf, tr("%d infotrons needed, the level has only %d: the rest must come from electrons",
+                                         "Нужно %d инфотронов, на уровне только %d — остальные придётся добыть из электронов"),
                       infotronsNeeded(), infotrons);
         add(Issue::Warning, buf);
     }
@@ -252,8 +263,10 @@ std::vector<Issue> Level::validate() const {
         }
     if (holes) {
         std::snprintf(buf, sizeof buf,
-                      "Рамка не из «железа» в %d клетках: Murphy через край не пройдёт, но зонк или враг, "
-                      "ушедший за карту, вешает игру на Amiga", holes);
+                      tr("Border is not hardware in %d cells: Murphy cannot pass the edge, but a zonk or an enemy "
+                         "leaving the map hangs the game on the Amiga",
+                         "Рамка не из «железа» в %d клетках: Murphy через край не пройдёт, но зонк или враг, "
+                         "ушедший за карту, вешает игру на Amiga"), holes);
         add(Issue::Error, buf, firstHole);
     }
 
@@ -265,33 +278,36 @@ std::vector<Issue> Level::validate() const {
             if (findPort(i) < 0 && missing < 0) missing = i;
         }
     if (sports > kMaxSpecialPorts) {
-        std::snprintf(buf, sizeof buf, "Особых портов %d, а в формате уровня помещается %d", sports, kMaxSpecialPorts);
+        std::snprintf(buf, sizeof buf, tr("%d special ports, the level format holds %d", "Особых портов %d, а в формате уровня помещается %d"),
+                      sports, kMaxSpecialPorts);
         add(Issue::Error, buf);
     }
-    if (missing >= 0) add(Issue::Warning, "Особый порт без записи: работает как обычный порт", missing);
+    if (missing >= 0) add(Issue::Warning, tr("Special port without a record: works as a plain port", "Особый порт без записи: работает как обычный порт"), missing);
     for (const SpecialPort& p : specialPorts()) {
         if (p.cell >= kMapW * kMapH || !isSpecialPort(b[size_t(p.cell)])) {
-            add(Issue::Info, "Запись особого порта не на особом порту (мусор) — уберётся при сохранении",
+            add(Issue::Info, tr("Special port record not on a special port (junk): removed when saved",
+                                "Запись особого порта не на особом порту (мусор) — уберётся при сохранении"),
                 p.cell < kMapW * kMapH ? p.cell : -1);
             break;
         }
     }
     if (b[1532] || b[1533] || b[1534] || b[1535])
-        add(Issue::Info, "Байты 1532–1535 не нулевые (игра читает их как 11-й порт) — обнулятся при сохранении");
+        add(Issue::Info, tr("Bytes 1532–1535 are not zero (the game reads them as an 11th port): cleared when saved",
+                            "Байты 1532–1535 не нулевые (игра читает их как 11-й порт) — обнулятся при сохранении"));
 
     bool valid = true;
     Camera eff = effectiveCamera(&valid);
     if (!valid) {
-        std::snprintf(buf, sizeof buf, "Стартовая камера уходит за карту (%d, %d) — будет пересчитана при сохранении", eff.x,
+        std::snprintf(buf, sizeof buf, tr("Start camera leaves the map (%d, %d)", "Стартовая камера уходит за карту (%d, %d)"), eff.x,
                       eff.y);
         add(Issue::Warning, buf);
     }
 
     std::string t = title();
     for (char c : t)
-        if (uint8_t(c) < 32 || uint8_t(c) > 95) { add(Issue::Warning, "В названии есть символы, которых нет в шрифте игры"); break; }
+        if (uint8_t(c) < 32 || uint8_t(c) > 95) { add(Issue::Warning, tr("The title has characters the game font does not have", "В названии есть символы, которых нет в шрифте игры")); break; }
     for (int i = 0; i < kMapW * kMapH; i++)
-        if (b[size_t(i)] >= T_COUNT) { add(Issue::Error, "Неизвестный код клетки", i); break; }
+        if (b[size_t(i)] >= T_COUNT) { add(Issue::Error, tr("Unknown cell code", "Неизвестный код клетки"), i); break; }
     return out;
 }
 
@@ -311,9 +327,9 @@ bool LevelSet::writeFile(const std::string& path, const std::vector<uint8_t>& da
 
 bool LevelSet::load(const std::string& path, std::string* err) {
     std::vector<uint8_t> d;
-    if (!readFile(path, d)) { if (err) *err = "не удалось прочитать " + path; return false; }
+    if (!readFile(path, d)) { if (err) *err = tr("cannot read ", "не удалось прочитать ") + path; return false; }
     if (d.size() != size_t(kLevelCount * kLevelSize)) {
-        if (err) *err = path + ": ожидалось 111 уровней по 1536 байт";
+        if (err) *err = path + tr(": 111 levels of 1536 bytes expected", ": ожидалось 111 уровней по 1536 байт");
         return false;
     }
     for (int i = 0; i < kLevelCount; i++)
@@ -322,22 +338,22 @@ bool LevelSet::load(const std::string& path, std::string* err) {
     return true;
 }
 
-bool LevelSet::save(const std::string& path, std::string* err) {
+bool LevelSet::save(const std::string& path, std::string* err, bool autoCamera) {
     std::vector<uint8_t> d;
     d.reserve(size_t(kLevelCount * kLevelSize));
     for (int i = 0; i < kLevelCount; i++) {
-        if (edited[size_t(i)]) levels[size_t(i)].normalize();
+        if (edited[size_t(i)]) levels[size_t(i)].normalize(autoCamera);
         d.insert(d.end(), levels[size_t(i)].b.begin(), levels[size_t(i)].b.end());
     }
     // write to a temporary file first, then replace
     std::string tmp = path + ".tmp";
-    if (!writeFile(tmp, d)) { if (err) *err = "не удалось записать " + tmp; return false; }
+    if (!writeFile(tmp, d)) { if (err) *err = tr("cannot write ", "не удалось записать ") + tmp; return false; }
     std::error_code ec;
     std::filesystem::rename(std::filesystem::u8path(tmp), std::filesystem::u8path(path), ec);
     if (ec) {
         std::filesystem::remove(std::filesystem::u8path(path), ec);
         std::filesystem::rename(std::filesystem::u8path(tmp), std::filesystem::u8path(path), ec);
-        if (ec) { if (err) *err = "не удалось заменить " + path; return false; }
+        if (ec) { if (err) *err = tr("cannot replace ", "не удалось заменить ") + path; return false; }
     }
     return true;
 }

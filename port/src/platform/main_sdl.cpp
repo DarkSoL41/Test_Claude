@@ -386,11 +386,23 @@ private:
     }
 
     void typeKey(SDL_Scancode sc, bool down) {
-        // keys typed outside the name entry would stay queued in the CIA and
-        // pop up in the next name entry
-        if (!nameEntry()) return;
         int code = amigaKey(sc);
-        if (code >= 0) hw_.keyEvent(uint8_t(code), down);
+        if (code < 0) return;
+        if (down) {
+            // keys pressed outside the name entry would stay queued in the CIA
+            // and pop up in the next name entry
+            if (!nameEntry() || keySent_[code]) return;
+            keySent_[code] = true;
+        } else {
+            // The release of a key the game has seen pressed always goes out,
+            // like from the real keyboard. Return ends the name entry before it
+            // is released: the release waits in the CIA until the next entry
+            // enables the keyboard interrupt. Without it the game's key table
+            // keeps Return down and the next name entry never sees a new key.
+            if (!keySent_[code]) return;
+            keySent_[code] = false;
+        }
+        hw_.keyEvent(uint8_t(code), down);
     }
 
     bool keyDown(SDL_Scancode sc) const {
@@ -453,6 +465,7 @@ private:
     bool fullscreen_ = false, paused_ = false, lmb_ = false, rmb_ = false;
     bool inLevel_ = false, holdLmb_ = false, holdRmb_ = false, holdFire_ = false;
     uint8_t lastTick_ = 0;
+    bool keySent_[128] = {};  // Amiga keys whose press went to the game
     int idle_ = 0;
     int testState_ = 0, testFire_ = 0, testWait_ = 0;
     long testFrames_ = 0;

@@ -11,7 +11,7 @@ TTF = sys.argv[1] if len(sys.argv) > 1 else '/usr/share/fonts/truetype/dejavu/De
 W, H, SIZE = 8, 16, 13
 chars = [chr(c) for c in range(32, 127)]
 chars += [chr(c) for c in range(0x410, 0x450)] + ['Ё', 'ё', '№']
-chars += list('→←↑↓•…—–−«»×±·▶▼✓↶↷✚●▲')
+chars += list('→←↑↓•…—–−«»×±·▶▼✓↶↷✚●▲↕↔☀☾')
 
 font = ImageFont.truetype(TTF, SIZE)
 asc, desc = font.getmetrics()

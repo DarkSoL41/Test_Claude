@@ -19,11 +19,12 @@ struct Rect {
 
 struct Color { uint8_t r, g, b, a = 255; };
 
+// Colours of the interface; applyTheme() switches between the dark and the
+// light set (the map itself keeps the game's colours).
 namespace theme {
-constexpr Color bg{30, 32, 38}, panel{40, 43, 51}, panel2{50, 54, 64}, line{70, 75, 88};
-constexpr Color text{220, 223, 230}, dim{140, 146, 160}, accent{86, 156, 255}, accentDim{50, 90, 150};
-constexpr Color button{58, 62, 74}, buttonHot{72, 78, 94}, buttonDown{44, 48, 58};
-constexpr Color error{235, 80, 70}, warning{240, 190, 60}, info{120, 170, 230}, ok{110, 200, 120};
+inline Color bg, panel, panel2, line, text, dim, accent, accentDim, button, buttonHot, buttonDown;
+inline Color error, warning, info, ok, field, tooltip, mapBg, minimapBg, shade;
+void applyTheme(bool light);
 }  // namespace theme
 
 class Ui {
