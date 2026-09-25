@@ -18,13 +18,14 @@ set(AMIGA_SRC
   src/amiga/amiga.cpp
   src/amiga/paula.cpp
   src/amiga/adf.cpp
+  src/amiga/gamefiles.cpp
 )
 
 add_library(amigahw STATIC ${AMIGA_SRC})
 target_include_directories(amigahw PUBLIC src)
 
 # the game: translated 68000 routines + runtime
-file(GLOB GAME_GENERATED src/game/generated/gen_phil_*.cpp src/game/generated/gen_dispatch.cpp)
+file(GLOB GAME_GENERATED src/game/generated/*.cpp)
 add_library(supaplexgame STATIC
   src/game/runtime.cpp
   ${GAME_GENERATED}
@@ -60,7 +61,7 @@ if(SUPAPLEX_BUILD_TESTS)
     target_compile_options(musashi PRIVATE -w)
   endif()
 
-  add_library(refemu STATIC tests/refemu.cpp src/game/generated/gen_cycles.cpp)
+  add_library(refemu STATIC tests/refemu.cpp)
   target_link_libraries(refemu PUBLIC amigahw musashi)
 
   add_executable(refrun tests/refrun_main.cpp)

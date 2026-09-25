@@ -5,24 +5,28 @@
 // the audio produced by Paula to SDL, reads the input devices and waits for
 // the next PAL frame (50 Hz).
 //
-// Controls
-//   joystick : cursor keys / numeric keypad, fire = Space, Ctrl or keypad 0;
-//              any game controller (d-pad / left stick, A B X Y = fire)
-//   mouse    : menu pointer, left / right button
-//   keyboard : while the game asks for a player name, keys go to the Amiga
-//              keyboard only (the game reads the keyboard nowhere else), and
-//              the keyboard does not act as a joystick
-//   F11 or Alt+Enter : fullscreen,  Pause : pause,  F12 : quit
+// Controls (as on the Amiga: joystick in port 2, mouse in port 1)
+//   game controller : the joystick (d-pad / left stick, A B X Y = fire)
+//   mouse           : the Amiga mouse; the Windows cursor leads the game's
+//                     pointer, nothing is captured
+//   keyboard        : in a level, cursor keys + Space act as the joystick
+//                     (a PC has no joystick port); while the game asks for a
+//                     player name the keys go to the Amiga keyboard. Elsewhere
+//                     the keyboard does nothing, like in the original.
+//   F11 or Alt+Enter : fullscreen,  Pause : pause,  F12 or window close : quit
 #include <SDL.h>
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <string>
+#include <vector>
 
-#include "amiga/adf.hpp"
+#include "amiga/gamefiles.hpp"
 #include "amiga/amiga.hpp"
 #include "amiga/paula.hpp"
 #include "game/hiscores.hpp"
@@ -201,15 +205,39 @@ private:
     // only while a player name is typed in.
     bool nameEntry() const { return hw_.chipL(0x68) == 0x10214; }
 
+    // A level (or the demo) runs while game_frame counts v_frame_div50
+    // ($11294) every frame (nothing else writes it); the first count comes
+    // one frame before the level first looks at the mouse button.
+    void trackLevel() {
+        uint8_t t = hw_.chip()[0x11294];
+        bool counting = t != lastTick_;
+        lastTick_ = t;
+        if (counting) {
+            if (!inLevel_) {
+                // On the Amiga the level is loaded from floppy after the click
+                // on OK (or the fire button): by the time it runs, the button
+                // is up. Here it starts at once, so a button still held from
+                // the menu must not reach the level (left button = give up).
+                holdLmb_ = lmb_;
+                holdRmb_ = rmb_;
+                holdFire_ = true;
+            }
+            inLevel_ = true;
+            idle_ = 0;
+        } else if (inLevel_ && ++idle_ > 5) {
+            inLevel_ = false;
+        }
+    }
+
     void updateJoystick() {
-        const Uint8* k = SDL_GetKeyboardState(nullptr);
-        bool keys = !nameEntry();
-        bool up = keys && (k[SDL_SCANCODE_UP] || k[SDL_SCANCODE_KP_8]);
-        bool down = keys && (k[SDL_SCANCODE_DOWN] || k[SDL_SCANCODE_KP_2] || k[SDL_SCANCODE_KP_5]);
-        bool left = keys && (k[SDL_SCANCODE_LEFT] || k[SDL_SCANCODE_KP_4]);
-        bool right = keys && (k[SDL_SCANCODE_RIGHT] || k[SDL_SCANCODE_KP_6]);
-        bool fire = keys && (k[SDL_SCANCODE_SPACE] || k[SDL_SCANCODE_LCTRL] || k[SDL_SCANCODE_RCTRL] ||
-                             k[SDL_SCANCODE_KP_0]);
+        bool up = false, down = false, left = false, right = false, fire = false;
+        if (inLevel_ && !nameEntry()) {
+            up = keyDown(SDL_SCANCODE_UP);
+            down = keyDown(SDL_SCANCODE_DOWN);
+            left = keyDown(SDL_SCANCODE_LEFT);
+            right = keyDown(SDL_SCANCODE_RIGHT);
+            fire = keyDown(SDL_SCANCODE_SPACE);
+        }
         if (pad_) {
             auto b = [&](SDL_GameControllerButton x) { return SDL_GameControllerGetButton(pad_, x) != 0; };
             const int dz = 12000;
@@ -222,7 +250,40 @@ private:
             fire = fire || b(SDL_CONTROLLER_BUTTON_A) || b(SDL_CONTROLLER_BUTTON_B) ||
                    b(SDL_CONTROLLER_BUTTON_X) || b(SDL_CONTROLLER_BUTTON_Y);
         }
-        hw_.setJoystick(up, down, left, right, fire);
+        if (!fire) holdFire_ = false;
+        hw_.setJoystick(up, down, left, right, fire && !holdFire_);
+    }
+
+    void updateMouse() {
+        if (!lmb_) holdLmb_ = false;
+        if (!rmb_) holdRmb_ = false;
+        hw_.setMouseButtons(lmb_ && !holdLmb_, rmb_ && !holdRmb_);
+
+        // The game moves its pointer by the change of the mouse counters and
+        // keeps the position in $112EC/$112EE (in counts, pixel = count / 2).
+        // Feed the counters so that the pointer goes to the Windows cursor.
+        int ox = testX_, oy = testY_;
+        if (!testMode_) {
+            if (SDL_GetMouseFocus() != window_ || dst_.w <= 0 || dst_.h <= 0) return;
+            int mx, my, ww, wh, rw, rh;
+            SDL_GetMouseState(&mx, &my);
+            SDL_GetWindowSize(window_, &ww, &wh);
+            SDL_GetRendererOutputSize(renderer_, &rw, &rh);
+            double px = mx * double(rw) / std::max(ww, 1), py = my * double(rh) / std::max(wh, 1);
+            ox = std::clamp(int((px - dst_.x) * amiga::kOutWidth / dst_.w), 0, amiga::kOutWidth - 1);
+            oy = std::clamp(int((py - dst_.y) * amiga::kOutHeight / dst_.h), 0, amiga::kOutHeight - 1);
+        }
+        // pointer sprite: x = lowres pixel + 1 (display window starts at $81), y = line - $2C
+        int targetX = (ox / 2 + 1) * 2, targetY = oy * 2;
+        const uint8_t* c = hw_.chip();
+        auto feed = [](int target, int pos, uint8_t counter, uint8_t lastRead) {
+            int pending = int8_t(uint8_t(counter - lastRead));   // not yet seen by the game
+            int want = std::clamp(target - pos, -100, 100);       // the game takes up to ±127 per read
+            return want - pending;
+        };
+        int dx = feed(targetX, int16_t(c[0x112EC] << 8 | c[0x112ED]), hw_.mouseCounterX(), c[0x112EA]);
+        int dy = feed(targetY, int16_t(c[0x112EE] << 8 | c[0x112EF]), hw_.mouseCounterY(), c[0x112EB]);
+        if (dx || dy) hw_.moveMouse(dx, dy);
     }
 
     void handleEvents() {
@@ -243,23 +304,7 @@ private:
                 if (down && sc == SDL_SCANCODE_F12) throw game::QuitGame{};
                 if (down && sc == SDL_SCANCODE_PAUSE) { paused_ = !paused_; break; }
                 if (e.key.repeat) break;
-                // keys typed outside the name entry would stay queued in the
-                // CIA and pop up in the next name entry
-                if (!nameEntry()) break;
-                int code = amigaKey(sc);
-                if (code >= 0) hw_.keyEvent(uint8_t(code), down);
-                break;
-            }
-            case SDL_MOUSEMOTION: {
-                // Amiga mouse counts; the game uses half of them as lowres pixels
-                double sx = dst_.w > 0 ? 640.0 / dst_.w : 1.0;
-                double sy = dst_.h > 0 ? 512.0 / dst_.h : 1.0;
-                accX_ += e.motion.xrel * sx;
-                accY_ += e.motion.yrel * sy;
-                int dx = int(accX_), dy = int(accY_);
-                accX_ -= dx;
-                accY_ -= dy;
-                hw_.moveMouse(dx, dy);
+                typeKey(sc, down);
                 break;
             }
             case SDL_MOUSEBUTTONDOWN:
@@ -267,13 +312,10 @@ private:
                 bool d = e.type == SDL_MOUSEBUTTONDOWN;
                 if (e.button.button == SDL_BUTTON_LEFT) lmb_ = d;
                 if (e.button.button == SDL_BUTTON_RIGHT) rmb_ = d;
-                hw_.setMouseButtons(lmb_, rmb_);
-                if (d && !SDL_GetRelativeMouseMode()) SDL_SetRelativeMouseMode(SDL_TRUE);
                 break;
             }
             case SDL_WINDOWEVENT:
-                if (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) SDL_SetRelativeMouseMode(SDL_TRUE);
-                if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) SDL_SetRelativeMouseMode(SDL_FALSE);
+                if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) lmb_ = rmb_ = false;
                 break;
             case SDL_CONTROLLERDEVICEADDED:
                 if (!pad_) pad_ = SDL_GameControllerOpen(e.cdevice.which);
@@ -287,7 +329,66 @@ private:
             default: break;
             }
         }
+        if (testMode_) applyTestInput();
+        trackLevel();
         updateJoystick();
+        updateMouse();
+    }
+
+    void typeKey(SDL_Scancode sc, bool down) {
+        // keys typed outside the name entry would stay queued in the CIA and
+        // pop up in the next name entry
+        if (!nameEntry()) return;
+        int code = amigaKey(sc);
+        if (code >= 0) hw_.keyEvent(uint8_t(code), down);
+    }
+
+    bool keyDown(SDL_Scancode sc) const {
+        if (testMode_) return testKeys_[sc];
+        return SDL_GetKeyboardState(nullptr)[sc] != 0;
+    }
+
+public:
+    // Testing without a window: physical input from a script, one event per
+    // line "FRAME mouse X Y" (cursor on the 640x256 picture), "FRAME lmb 0|1",
+    // "FRAME rmb 0|1", "FRAME key NAME 0|1" (SDL key name), "FRAME print ADDR"
+    // (print the word at ADDR).
+    bool loadTestInput(const std::string& path) {
+        std::ifstream f(path);
+        if (!f) return false;
+        std::string line;
+        while (std::getline(f, line)) {
+            if (line.empty() || line[0] == '#') continue;
+            TestEvent ev;
+            std::istringstream ls(line);
+            if (!(ls >> ev.frame >> ev.what)) continue;
+            if (ev.what == "key" || ev.what == "print") ls >> ev.arg;
+            ls >> ev.a >> ev.b;
+            test_.push_back(ev);
+        }
+        testMode_ = true;
+        return true;
+    }
+
+private:
+    struct TestEvent { long frame = 0; std::string what, arg; int a = 0, b = 0; };
+
+    void applyTestInput() {
+        long frame = long(hw_.frameCount());
+        for (const TestEvent& ev : test_) {
+            if (ev.frame != frame) continue;
+            if (ev.what == "mouse") { testX_ = ev.a; testY_ = ev.b; }
+            else if (ev.what == "lmb") lmb_ = ev.a != 0;
+            else if (ev.what == "rmb") rmb_ = ev.a != 0;
+            else if (ev.what == "key") {
+                SDL_Scancode sc = SDL_GetScancodeFromName(ev.arg.c_str());
+                testKeys_[sc] = ev.a != 0;
+                typeKey(sc, ev.a != 0);
+            } else if (ev.what == "print") {
+                uint32_t a = uint32_t(std::strtoul(ev.arg.c_str(), nullptr, 16));
+                std::printf("frame %ld: $%X = %04X\n", frame, a, hw_.chipW(a));
+            }
+        }
     }
 
     amiga::Amiga& hw_;
@@ -300,21 +401,29 @@ private:
     SDL_Rect dst_{0, 0, 640, 512};
     Uint64 nextFrame_ = 0;
     bool fullscreen_ = false, paused_ = false, lmb_ = false, rmb_ = false;
-    double accX_ = 0, accY_ = 0;
+    bool inLevel_ = false, holdLmb_ = false, holdRmb_ = false, holdFire_ = false;
+    uint8_t lastTick_ = 0;
+    int idle_ = 0;
+    bool testMode_ = false;
+    std::vector<TestEvent> test_;
+    bool testKeys_[SDL_NUM_SCANCODES] = {};
+    int testX_ = 0, testY_ = 0;
 };
 
 }  // namespace
 
 int main(int argc, char** argv) {
-    std::string adfPath, savePath;
+    std::string adfPath, savePath, dataDir, extractDir;
     int scale = 3;
     bool fullscreen = false, originalHiscores = false, resetHiscores = false;
     long quitAfter = -1;
-    std::string shot;
+    std::string shot, testInput;
     for (int i = 1; i < argc; i++) {
         std::string a = argv[i];
         auto next = [&]() { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
         if (a == "--adf") adfPath = next();
+        else if (a == "--data") dataDir = next();
+        else if (a == "--extract") extractDir = next();
         else if (a == "--save") savePath = next();
         else if (a == "--scale") scale = std::max(1, std::atoi(next().c_str()));
         else if (a == "--fullscreen") fullscreen = true;
@@ -322,48 +431,68 @@ int main(int argc, char** argv) {
         else if (a == "--reset-hiscores") resetHiscores = true;
         else if (a == "--frames") quitAfter = std::atol(next().c_str());
         else if (a == "--shot") shot = next();
+        else if (a == "--test-input") testInput = next();
         else if (a == "--help" || a == "-h") {
-            std::printf("usage: supaplex [--adf image.adf] [--save hiscores.sav] [--scale N] [--fullscreen]\n"
-                        "                [--reset-hiscores] [--original-hiscores]\n"
-                        "  a new hiscore file starts without players and records;\n"
-                        "  --original-hiscores starts it with the data of the disk image instead\n"
-                        "  (CRYSTAL records, players ALLEN, ME, KIP); --reset-hiscores starts over\n");
+            std::printf(
+                "usage: supaplex [--scale N] [--fullscreen] [--reset-hiscores] [--original-hiscores]\n"
+                "                [--data DIR] [--save FILE] [--adf IMAGE] [--extract DIR]\n"
+                "Everything lives in the program's folder: the game data in data\\ (LEVELS.DAT,\n"
+                "INTRO.BIN, MAIN.BIN, GRAPHICS.BIN, HISCORE.BIN) and the hiscores in hiscores.sav.\n"
+                "If data\\ is missing, it is extracted once from \"Supaplex (1991).adf\" found next\n"
+                "to the program (or given with --adf); --extract DIR only extracts and exits.\n"
+                "A new hiscore file starts without players and records; --original-hiscores\n"
+                "starts it with the disk's CRYSTAL records and players; --reset-hiscores starts over.\n");
             return 0;
         } else if (adfPath.empty()) adfPath = a;
     }
+    namespace fs = std::filesystem;
     char* base = SDL_GetBasePath();
-    std::string exeDir = base ? base : "";
+    const fs::path gameDir = fs::u8path(base ? base : "");
     if (base) SDL_free(base);
-    amiga::Adf adf;
-    const char* candidates[] = {"Supaplex (1991).adf", "Supaplex.adf", "supaplex.adf"};
-    bool ok = false;
-    if (!adfPath.empty()) ok = adf.open(adfPath);
-    for (const char* c : candidates) {
-        if (ok || !adfPath.empty()) break;
-        ok = adf.open(exeDir + c) || adf.open(c) || adf.open(std::string("../") + c);
-    }
-    if (!ok) {
-        std::string msg = "Supaplex disk image not found.\n\nPut \"Supaplex (1991).adf\" next to the program "
-                          "or pass its path: supaplex --adf <file>.";
-        if (!adf.error().empty()) msg += "\n\n" + adf.error();
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Supaplex", msg.c_str(), nullptr);
+    auto fail = [&](const std::string& msg) {
         std::fprintf(stderr, "%s\n", msg.c_str());
+        if (extractDir.empty()) SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Supaplex", msg.c_str(), nullptr);
         return 1;
+    };
+    // the original disk image: only needed to create the data folder
+    auto openAdf = [&](amiga::GameFiles& f) {
+        if (!adfPath.empty()) return f.openAdf(adfPath);
+        for (const char* c : {"Supaplex (1991).adf", "Supaplex.adf", "supaplex.adf"})
+            if (f.openAdf((gameDir / c).string())) return true;
+        return false;
+    };
+
+    if (!extractDir.empty()) {
+        amiga::GameFiles adf;
+        if (!openAdf(adf)) return fail("Disk image not found: " + (adfPath.empty() ? "Supaplex (1991).adf" : adfPath));
+        if (!adf.extractTo(extractDir)) return fail(adf.error());
+        std::printf("game data extracted to %s\n", extractDir.c_str());
+        return 0;
     }
-    if (savePath.empty()) {
-        char* pref = SDL_GetPrefPath("Supaplex", "SupaplexAmiga");
-        savePath = std::string(pref ? pref : exeDir.c_str()) + "hiscores.sav";
-        if (pref) SDL_free(pref);
+
+    if (dataDir.empty()) dataDir = (gameDir / "data").string();
+    amiga::GameFiles files;
+    if (!files.openDir(dataDir)) {
+        amiga::GameFiles adf;
+        if (!openAdf(adf))
+            return fail("Game data not found.\n\nThe folder \"" + dataDir +
+                        "\" must contain LEVELS.DAT, INTRO.BIN, MAIN.BIN, GRAPHICS.BIN and HISCORE.BIN.\n"
+                        "To create it, put \"Supaplex (1991).adf\" next to the program and start it once.");
+        if (!adf.extractTo(dataDir) || !files.openDir(dataDir))
+            return fail("Cannot create the data folder \"" + dataDir + "\": " + adf.error());
+        std::fprintf(stderr, "game data extracted to %s\n", dataDir.c_str());
     }
-    // a new (or reset) hiscore file: clean, or the one from the disk image
+    if (savePath.empty()) savePath = (gameDir / "hiscores.sav").string();
+
+    // a new (or reset) hiscore file: clean, or the one from the disk
     bool haveSave = false;
     {
-        std::ifstream f(savePath, std::ios::binary);
+        std::ifstream f(fs::path(savePath), std::ios::binary);
         haveSave = bool(f);
     }
     if (!haveSave || resetHiscores) {
-        std::vector<uint8_t> data = originalHiscores ? adf.read("PHIL_03") : game::cleanHiscores();
-        std::ofstream f(savePath, std::ios::binary);
+        std::vector<uint8_t> data = originalHiscores ? files.read("PHIL_03") : game::cleanHiscores();
+        std::ofstream f(fs::path(savePath), std::ios::binary);
         f.write(reinterpret_cast<const char*>(data.data()), std::streamsize(data.size()));
     }
 
@@ -374,10 +503,11 @@ int main(int argc, char** argv) {
     if (!fe.init(scale, fullscreen)) return 1;
     fe.quitAfter = quitAfter;
     fe.shotPath = shot;
+    if (!testInput.empty() && !fe.loadTestInput(testInput)) return fail("cannot read " + testInput);
     hw.setHost(&fe);
 
     game::Environment env;
-    env.adf = &adf;
+    env.files = &files;
     env.savePath = savePath;
     game::attach(hw, env);
     try {

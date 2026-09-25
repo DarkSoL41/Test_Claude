@@ -5,9 +5,7 @@
 namespace game {
 
 void intro_main() {
-    tick(20);
     call(intro_show_pictures, 0x54006);  // 054000  jsr $540a4.l
-    tick(88);
     A6 = 0xDFF000;  // 054006  lea.l $dff000.l, a6
     A0 = 0x54672;  // 05400C  lea.l $54672.l, a0
     wr32(A6 + 0x80, A0);  // 054012  move.l a0, 128(a6)
@@ -17,28 +15,22 @@ void intro_main() {
     A0 = A6 + 0x180;  // 054022  lea.l 384(a6), a0
     setW(D7, 0xF);  // 054026  move.w #$f, d7
 L_05402A:
-    tick(20);
     {  wr16(A0, logic<2>((D0 & 0xFFFF))); A0 += 2; }  // 05402A  move.w d0, (a0)+
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_05402A;  // 05402C  dbf.w d7, $5402a
-    tick(30);
     A0 = 0x78000;  // 054030  movea.l #$78000, a0
     call(native_diskInit, 0x5403A);  // 054036  bsr $541ae
-    tick(52);
     D0 = 0x0;  // 05403A  moveq.l #$0, d0
     setW(D1, 0x82);  // 05403C  move.w #$82, d1
     setW(D2, logic<2>(0x5C));  // 054040  move.w #$5c, d2
     A0 = 0x7E00;  // 054044  movea.l #$7e00, a0
     call(native_loadFile, 0x54050);  // 05404A  jsr $54264.l
-    tick(20);
     call(native_diskMotorOff, 0x54056);  // 054050  jsr $54212.l
-    tick(56);
     wr8(0xBFD100, 0xFD);  // 054056  move.b #$fd, $bfd100.l
     ; // 05405E  nop 
     ; // 054060  nop 
     wr8(0xBFD100, 0xF7);  // 054062  move.b #$f7, $bfd100.l
     setW(D0, 0x2);  // 05406A  move.w #$2, d0
 L_05406E:
-    tick(76);
     wr8(0xBFEE01, 0x8);  // 05406E  move.b #$8, $bfee01.l
     wr8(0xBFE401, 0xCC);  // 054076  move.b #$cc, $bfe401.l
     wr8(0xBFE501, 0x2);  // 05407E  move.b #$2, $bfe501.l
@@ -47,69 +39,50 @@ L_05406E:
     ; // 05408A  nop 
     ; // 05408C  nop 
 L_05408E:
-    tick(30);
     // 05408E  btst.b #$0, $bfee01.l
     if ((rd8(0xBFEE01) & (1u << 0))) goto L_05408E;  // 054096  bne $5408e
-    tick(12);
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_05406E;  // 054098  dbf.w d0, $5406e
-    tick(20);
     A0 = 0x7E00;  // 05409C  movea.l #$7e00, a0
     callAddress(A0); return;  // 0540A2  jmp (a0)
 }
 
 void intro_show_pictures() {
-    tick(18);
     call(intro_copy_palettes, 0x540A8);  // 0540A4  bsr $5411a
-    tick(18);
     call(intro_set_bitplanes, 0x540AC);  // 0540A8  bsr $5414c
-    tick(72);
     A5 = 0xDFF000;  // 0540AC  movea.l #$dff000, a5
     wr32(A5 + 0x80, 0x54676);  // 0540B2  move.l #$54676, 128(a5)
     wr16(A5 + 0x88, (D0 & 0xFFFF));  // 0540BA  move.w d0, 136(a5)
     wr16(A5 + 0x96, 0x8380);  // 0540BE  move.w #$8380, 150(a5)
     setW(D7, 0xFF);  // 0540C4  move.w #$ff, d7
 L_0540C8:
-    tick(26);
     // 0540C8  cmpi.b #$64, 6(a5)
     if (rd8(A5 + 0x6) != 0x64) goto L_0540C8;  // 0540CE  bne $540c8
 L_0540D0:
-    tick(26);
     // 0540D0  cmpi.b #$64, 6(a5)
     if (rd8(A5 + 0x6) == 0x64) goto L_0540D0;  // 0540D6  beq $540d0
-    tick(12);
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_0540C8;  // 0540D8  dbf.w d7, $540c8
-    tick(28);
     wr32(A5 + 0x80, 0x54706);  // 0540DC  move.l #$54706, 128(a5)
     D7 = 0x64;  // 0540E4  moveq.l #$64, d7
 L_0540E6:
-    tick(26);
     // 0540E6  cmpi.b #$64, 6(a5)
     if (rd8(A5 + 0x6) != 0x64) goto L_0540E6;  // 0540EC  bne $540e6
 L_0540EE:
-    tick(26);
     // 0540EE  cmpi.b #$64, 6(a5)
     if (rd8(A5 + 0x6) == 0x64) goto L_0540EE;  // 0540F4  beq $540ee
-    tick(12);
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_0540E6;  // 0540F6  dbf.w d7, $540e6
-    tick(28);
     wr32(A5 + 0x80, 0x547D6);  // 0540FA  move.l #$547d6, 128(a5)
     D7 = 0x64;  // 054102  moveq.l #$64, d7
 L_054104:
-    tick(26);
     // 054104  cmpi.b #$64, 6(a5)
     if (rd8(A5 + 0x6) != 0x64) goto L_054104;  // 05410A  bne $54104
 L_05410C:
-    tick(26);
     // 05410C  cmpi.b #$64, 6(a5)
     if (rd8(A5 + 0x6) == 0x64) goto L_05410C;  // 054112  beq $5410c
-    tick(12);
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_054104;  // 054114  dbf.w d7, $54104
-    tick(16);
     return;  // 054118  rts 
 }
 
 void intro_copy_palettes() {
-    tick(64);
     A0 = 0x5E8A6;  // 05411A  lea.l $5e8a6.l, a0
     A1 = 0x665C6;  // 054120  lea.l $665c6.l, a1
     A2 = 0x6E2E6;  // 054126  lea.l $6e2e6.l, a2
@@ -118,7 +91,6 @@ void intro_copy_palettes() {
     A5 = 0x54820;  // 054134  lea.l $54820(pc), a5
     D7 = 0xF;  // 054138  moveq.l #$f, d7
 L_05413A:
-    tick(72);
     {  uint32_t v = rd16(A0); A0 += 2;  wr16(A3, v);  }  // 05413A  move.w (a0)+, (a3)
     {  uint32_t v = rd16(A1); A1 += 2;  wr16(A4, v);  }  // 05413C  move.w (a1)+, (a4)
     {  uint32_t v = rd16(A2); A2 += 2;  wr16(A5, v);  }  // 05413E  move.w (a2)+, (a5)
@@ -126,12 +98,10 @@ L_05413A:
     A4 += 0x4;  // 054142  addq.l #$4, a4
     A5 += 0x4;  // 054144  addq.l #$4, a5
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_05413A;  // 054146  dbf.w d7, $5413a
-    tick(16);
     return;  // 05414A  rts 
 }
 
 void intro_set_bitplanes() {
-    tick(88);
     D0 = 0x548A6;  // 05414C  move.l #$548a6, d0
     D1 = 0x5E8C6;  // 054152  move.l #$5e8c6, d1
     D2 = 0x665E6;  // 054158  move.l #$665e6, d2
@@ -142,7 +112,6 @@ void intro_set_bitplanes() {
     D4 = 0x1F40;  // 054170  move.l #$1f40, d4
     D7 = 0x3;  // 054176  moveq.l #$3, d7
 L_054178:
-    tick(150);
     wr16(A0 + 0x6, (D0 & 0xFFFF));  // 054178  move.w d0, 6(a0)
     wr16(A1 + 0x6, (D1 & 0xFFFF));  // 05417C  move.w d1, 6(a1)
     wr16(A2 + 0x6, (D2 & 0xFFFF));  // 054180  move.w d2, 6(a2)
@@ -162,7 +131,6 @@ L_054178:
     A1 += 0x8;  // 0541A4  addq.l #$8, a1
     A2 += 0x8;  // 0541A6  addq.l #$8, a2
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_054178;  // 0541A8  dbf.w d7, $54178
-    tick(16);
     return;  // 0541AC  rts 
 }
 

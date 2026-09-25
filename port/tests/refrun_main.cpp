@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
         else if (a == "--input") script = next();
         else if (a == "--main") mainOnly = true;
     }
-    amiga::Adf adf;
-    if (!adf.open(adfPath)) { std::fprintf(stderr, "%s\n", adf.error().c_str()); return 1; }
-    RefEmu ref(adf);
+    amiga::GameFiles files;
+    if (!files.openAdf(adfPath)) { std::fprintf(stderr, "%s\n", files.error().c_str()); return 1; }
+    RefEmu ref(files);
     InputScript in;
     if (!script.empty() && !in.load(script)) { std::fprintf(stderr, "cannot read %s\n", script.c_str()); return 1; }
     if (mainOnly) ref.bootMain(); else ref.bootIntro();

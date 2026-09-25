@@ -15,6 +15,8 @@
 // --hiscores X   : hiscore file both machines load instead of PHIL_03 on the
 //                  disk ("clean" = the port's clean file without players);
 //                  saves go to X.ref / X.port
+// --port-data DIR : the port reads the extracted data folder (the reference
+//                  keeps reading the ADF image)
 #include <condition_variable>
 #include <cstdio>
 #include <cstdlib>
@@ -56,11 +58,11 @@ struct PortRunner : amiga::Host {
         cv.wait(lk, [&] { return portTurn || stop; });
         if (stop) throw game::QuitGame{};
     }
-    void start(const amiga::Adf& adf, const std::string& savePath) {
+    void start(const amiga::GameFiles& files, const std::string& savePath) {
         hw.setHost(this);
         hw.setPaula(&paula);
         game::Environment env;
-        env.adf = &adf;
+        env.files = &files;
         env.savePath = savePath;
         game::attach(hw, env);
         th = std::thread([this] {
@@ -103,7 +105,7 @@ int main(int argc, char** argv) {
     long frames = 1000, every = 0;
     bool keepGoing = false, clearSkips = false;
     long seed = -1, level = 0;
-    std::string coverage, autopilot, hiscores;
+    std::string coverage, autopilot, hiscores, portDataDir;
     struct Poke { long frame; uint32_t addr; uint16_t value; };
     std::vector<Poke> pokes;
     std::vector<uint32_t> reportPcs;
@@ -123,6 +125,7 @@ int main(int argc, char** argv) {
         else if (a == "--coverage") coverage = next();
         else if (a == "--autopilot") autopilot = next();
         else if (a == "--hiscores") hiscores = next();
+        else if (a == "--port-data") portDataDir = next();
         else if (a == "--clear-skips") clearSkips = true;
         else if (a == "--report") {
             std::string list = next();
@@ -144,8 +147,9 @@ int main(int argc, char** argv) {
         else if (a == "--watch-from") watchFrom = std::atol(next().c_str());
         else if (a == "--trace-frame") traceFrame = std::atol(next().c_str());
     }
-    amiga::Adf adf;
-    if (!adf.open(adfPath)) { std::fprintf(stderr, "%s\n", adf.error().c_str()); return 1; }
+    amiga::GameFiles adf, portData;
+    if (!adf.openAdf(adfPath)) { std::fprintf(stderr, "%s\n", adf.error().c_str()); return 1; }
+    if (!portDataDir.empty() && !portData.openDir(portDataDir)) { std::fprintf(stderr, "%s\n", portData.error().c_str()); return 1; }
     InputScript in;
     if (!script.empty() && !in.load(script)) { std::fprintf(stderr, "cannot read %s\n", script.c_str()); return 1; }
 
@@ -171,7 +175,7 @@ int main(int argc, char** argv) {
     ref.bootIntro();
     for (uint32_t pc : reportPcs) ref.reportPcs.insert(pc);
     PortRunner port;
-    port.start(adf, portSave);
+    port.start(portDataDir.empty() ? adf : portData, portSave);
 
     const uint32_t kStackLo = 0x7F000;  // $7F000-$7FFFF: stack (interrupt frames), not compared; level bitmap ends at $7EFFF
     int mismatches = 0;

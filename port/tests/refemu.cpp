@@ -1,10 +1,5 @@
 #include "refemu.hpp"
 
-namespace game {
-extern const uint32_t kBlockCycles[][2];
-extern const size_t kBlockCycleCount;
-}
-
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -32,19 +27,18 @@ unsigned int m68k_read_disassembler_32(unsigned int a) { return (g_ref->hw.chipW
 }
 void ref_instruction_hook(unsigned int pc) { g_ref->hook(pc); }
 
-RefEmu::RefEmu(const amiga::Adf& adf) : paula(hw), adf_(adf) {
+RefEmu::RefEmu(const amiga::GameFiles& files) : paula(hw), files_(files) {
     g_ref = this;
     hw.setHost(this);
     hw.setPaula(&paula);
     m68k_init();
     m68k_set_cpu_type(M68K_CPU_TYPE_68000);
-    for (size_t i = 0; i < game::kBlockCycleCount; i++) blockCost_[game::kBlockCycles[i][0] & 0x7FFFF] = uint16_t(game::kBlockCycles[i][1]);
 }
 
 uint32_t RefEmu::pc() const { return m68k_get_reg(nullptr, M68K_REG_PC); }
 
 void RefEmu::bootIntro() {
-    hw.load(0x54000, adf_.read("PHIL_00"));
+    hw.load(0x54000, files_.read("PHIL_00"));
     m68k_pulse_reset();
     m68k_set_reg(M68K_REG_SR, 0x2000);
     m68k_set_reg(M68K_REG_A7, 0x80000);
@@ -53,7 +47,7 @@ void RefEmu::bootIntro() {
 }
 
 void RefEmu::bootMain() {
-    hw.load(0x7E00, adf_.read("PHIL_01"));
+    hw.load(0x7E00, files_.read("PHIL_01"));
     m68k_pulse_reset();
     m68k_set_reg(M68K_REG_SR, 0x2000);
     m68k_set_reg(M68K_REG_A7, 0x80000);
@@ -128,9 +122,8 @@ void RefEmu::loadFileCall(bool) {
         std::ifstream f(savePath, std::ios::binary);
         if (f) data.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
     }
-    if (data.empty()) data = adf_.read(name);
+    if (data.empty()) data = files_.read(name);
     hw.load(a0, data);
-    hw.addCpuCycles(amiga::diskLoadCycles(data.size()));
     m68k_set_reg(M68K_REG_D0, 0);
     uint32_t sr = m68k_get_reg(nullptr, M68K_REG_SR);
     m68k_set_reg(M68K_REG_SR, (sr & ~0x1F) | 0x04);  // Z set
@@ -172,8 +165,6 @@ void RefEmu::hook(uint32_t pc) {
         doRts();
         break;
     }
-    default:
-        if (blockCost_[pc & 0x7FFFF]) hw.addCpuCycles(blockCost_[pc & 0x7FFFF]);
-        break;
+    default: break;
     }
 }

@@ -63,7 +63,7 @@ void Paula::stepByte(Channel& c, int idx) {
             c.ptr = c.lc;
             c.remain = c.len ? c.len : 0x10000;
             // audio interrupt request for this channel
-            m_.requestInterrupt(uint16_t(0x80 << idx));
+            m_.wr16(0xDFF09C, uint16_t(0x8000 | (0x80 << idx)));
         }
         c.word = m_.chipW(c.ptr);
         c.ptr += 2;

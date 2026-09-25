@@ -29,6 +29,7 @@ jobs:
           New-Item -ItemType Directory dist | Out-Null
           Copy-Item build\Release\supaplex.exe dist\
           Copy-Item "$env:SDL2_DLL" dist\
+          Copy-Item -Recurse data dist\data
           Copy-Item README.md dist\
       - uses: actions/upload-artifact@v4
         with:
@@ -48,6 +49,10 @@ jobs:
         run: |
           python3 tools/m68k2cpp.py tools/translate.json
           git diff --exit-code -- port/src/game/generated
+      - name: data/ matches the disk image
+        run: |
+          ./port/build/supaplex --adf "Supaplex (1991).adf" --extract /tmp/data
+          diff -r data /tmp/data
       - name: Accuracy (original 68000 code vs port)
         working-directory: port
         run: |

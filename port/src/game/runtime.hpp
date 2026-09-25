@@ -3,13 +3,13 @@
 #include <functional>
 #include <string>
 
-#include "amiga/adf.hpp"
+#include "amiga/gamefiles.hpp"
 #include "amiga/amiga.hpp"
 
 namespace game {
 
 struct Environment {
-    const amiga::Adf* adf = nullptr;   // original disk image (graphics, levels, code data)
+    const amiga::GameFiles* files = nullptr;  // files of the original disk (data folder or ADF)
     std::string savePath;              // hiscore file written instead of PHIL_03 on disk
 };
 

@@ -46,54 +46,20 @@ void Amiga::load(uint32_t addr, const std::vector<uint8_t>& data) {
 uint8_t Amiga::rd8(uint32_t a) {
     a &= 0xFFFFFF;
     if (a < kChipSize) return chip_[a];
-    const uint64_t frame = frames_;
-    uint8_t v = 0;
     if ((a & 0xFFF000) == 0xDFF000) {
         uint16_t w = customRead(a & 0x1FE);
-        v = (a & 1) ? uint8_t(w) : uint8_t(w >> 8);
-    } else if ((a & 0xFF0000) == 0xBF0000) {
-        v = ciaRead(a);
+        return (a & 1) ? uint8_t(w) : uint8_t(w >> 8);
     }
-    applyCpuTime(frame);
-    return v;
+    if ((a & 0xFF0000) == 0xBF0000) return ciaRead(a);
+    return 0;
 }
 
-// word access to a custom chip / CIA register (no CPU time applied)
-uint16_t Amiga::hwRead16(uint32_t a) {
+uint16_t Amiga::rd16(uint32_t a) {
     a &= 0xFFFFFF;
     if (a < kChipSize - 1) return uint16_t(chip_[a] << 8 | chip_[a + 1]);
     if ((a & 0xFFF000) == 0xDFF000) return customRead(a & 0x1FE);
     if ((a & 0xFF0000) == 0xBF0000) return uint16_t(ciaRead(a) << 8 | ciaRead(a + 1));
     return 0;
-}
-
-void Amiga::hwWrite16(uint32_t a, uint16_t v) {
-    a &= 0xFFFFFF;
-    if (a < kChipSize - 1) { chip_[a] = uint8_t(v >> 8); chip_[a + 1] = uint8_t(v); return; }
-    if ((a & 0xFFF000) == 0xDFF000) customWrite(a & 0x1FE, v);
-    else if ((a & 0xFF0000) == 0xBF0000) { ciaWrite(a, uint8_t(v >> 8)); ciaWrite(a + 1, uint8_t(v)); }
-}
-
-// Pending CPU time is applied after each hardware register *read* (a long
-// word counts as one): only reads observe time (beam position, input), and
-// at most one frame boundary can happen per instruction.
-uint16_t Amiga::rd16(uint32_t a) {
-    a &= 0xFFFFFF;
-    if (a < kChipSize - 1) return uint16_t(chip_[a] << 8 | chip_[a + 1]);
-    const uint64_t frame = frames_;
-    uint16_t v = hwRead16(a);
-    applyCpuTime(frame);
-    return v;
-}
-
-uint32_t Amiga::rd32(uint32_t a) {
-    a &= 0xFFFFFF;
-    if (a < kChipSize - 3) return uint32_t(chip_[a] << 24 | chip_[a + 1] << 16 | chip_[a + 2] << 8 | chip_[a + 3]);
-    const uint64_t frame = frames_;
-    uint32_t v = uint32_t(hwRead16(a)) << 16;
-    v |= hwRead16(a + 2);
-    applyCpuTime(frame);
-    return v;
 }
 
 void Amiga::wr8(uint32_t a, uint8_t v) {
@@ -102,21 +68,16 @@ void Amiga::wr8(uint32_t a, uint8_t v) {
     if ((a & 0xFFF000) == 0xDFF000) {
         // byte writes to custom registers put the byte on both halves of the bus
         customWrite(a & 0x1FE, uint16_t(v << 8 | v));
-    } else if ((a & 0xFF0000) == 0xBF0000) {
-        ciaWrite(a, v);
+        return;
     }
+    if ((a & 0xFF0000) == 0xBF0000) ciaWrite(a, v);
 }
 
 void Amiga::wr16(uint32_t a, uint16_t v) {
     a &= 0xFFFFFF;
     if (a < kChipSize - 1) { chip_[a] = uint8_t(v >> 8); chip_[a + 1] = uint8_t(v); return; }
-    hwWrite16(a, v);
-}
-
-void Amiga::wr32(uint32_t a, uint32_t v) {
-    a &= 0xFFFFFF;
-    hwWrite16(a, uint16_t(v >> 16));
-    hwWrite16(a + 2, uint16_t(v));
+    if ((a & 0xFFF000) == 0xDFF000) { customWrite(a & 0x1FE, v); return; }
+    if ((a & 0xFF0000) == 0xBF0000) { ciaWrite(a, uint8_t(v >> 8)); ciaWrite(a + 1, uint8_t(v)); }
 }
 
 // ---------------------------------------------------------------------------
@@ -550,29 +511,6 @@ void Amiga::deliverKey() {
 
 // Time model for polling loops that do not read the beam counter (fire
 // button, keyboard): every such hardware read lets a few colour clocks pass.
-// At most one frame boundary per access: the rest of a long computation (or a
-// disk load) stays pending for the following accesses, so every frame is
-// still seen by the host one at a time.
-void Amiga::applyCpuTime(uint64_t frame) {
-    if (inTime_) return;
-    inTime_ = true;
-    pendingClocks_ += cpuCycles_ >> 1;
-    cpuCycles_ &= 1;
-    while (pendingClocks_ > 0 && frames_ == frame) {
-        uint64_t rest = uint64_t(kClocksPerLine - hclock_);
-        if (pendingClocks_ < rest) { hclock_ += int(pendingClocks_); pendingClocks_ = 0; break; }
-        pendingClocks_ -= rest;
-        hclock_ = 0;
-        advanceLines(1);
-    }
-    inTime_ = false;
-}
-
-void Amiga::requestInterrupt(uint16_t bits) {
-    intreq_ |= (bits & 0x7FFF);
-    updateIrqLevel();
-}
-
 void Amiga::pollTick() {
     hclock_ += kPollClocks;
     if (hclock_ >= kClocksPerLine) {

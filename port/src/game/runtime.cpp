@@ -126,9 +126,8 @@ void native_loadFile() {
         std::ifstream f(g_env.savePath, std::ios::binary);
         if (f) data.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
     }
-    if (data.empty() && g_env.adf) data = g_env.adf->read(name);
+    if (data.empty() && g_env.files) data = g_env.files->read(name);
     bus->load(A0, data);
-    bus->addCpuCycles(amiga::diskLoadCycles(data.size()));
     D0 = 0;
     cpu.x = cpu.n = cpu.v = cpu.c = false;
     cpu.z = true;
@@ -147,7 +146,7 @@ void native_saveHiscores() {
 }
 
 void run() {
-    bus->load(0x54000, g_env.adf->read("PHIL_00"));
+    bus->load(0x54000, g_env.files->read("PHIL_00"));
     intro_main();
 }
 

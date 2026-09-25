@@ -86,8 +86,9 @@ def main():
         s.key(k)
     s.f += 60
     s.zone(2, after=30)
-    s.zone(11, after=150)       # ok: starts the level (after the disk load)
-    s.click(after=250)          # left button in a level: give up
+    s.zone(11, after=150)       # ok: starts the level (the button is still down
+                                # here - no front end - so Murphy gives up at once)
+    s.click(after=250)          # click on the "hard luck" screen
     s.zone(8, after=100)        # skip level
     s.click(after=80)
     s.zone(14, after=60)        # data disc exchange screen

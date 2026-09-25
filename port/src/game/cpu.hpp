@@ -323,9 +323,6 @@ void setSR(uint32_t v);  // may unmask pending interrupts
 #define CC_T true
 #define CC_F false
 
-// execution time of a basic block (68000 cycles, emitted at every block start)
-inline void tick(uint32_t cycles) { bus->addCpuCycles(cycles); }
-
 // dispatch of computed jumps/calls (generated)
 void callAddress(uint32_t addr);
 

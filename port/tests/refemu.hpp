@@ -8,13 +8,13 @@
 #include <string>
 #include <vector>
 
-#include "../src/amiga/adf.hpp"
+#include "../src/amiga/gamefiles.hpp"
 #include "../src/amiga/amiga.hpp"
 #include "../src/amiga/paula.hpp"
 
 class RefEmu : public amiga::Host {
 public:
-    explicit RefEmu(const amiga::Adf& adf);
+    explicit RefEmu(const amiga::GameFiles& files);
     // boot like the cracked disk does: PHIL_00 (intro) at $54000
     void bootIntro();
     // start directly at the main program (PHIL_01 at $7E00), skipping the intro
@@ -50,11 +50,8 @@ public:
 private:
     void loadFileCall(bool phil00);
     void doRts();
-    const amiga::Adf& adf_;
+    const amiga::GameFiles& files_;
     bool frameDone_ = false;
     bool irqDirty_ = false;
     uint64_t instrCount_ = 0;
-    // execution time of each basic block of the original code, by start
-    // address (same table the translated code uses)
-    std::vector<uint16_t> blockCost_ = std::vector<uint16_t>(0x80000, 0);
 };

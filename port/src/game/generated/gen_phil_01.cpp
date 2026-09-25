@@ -8,192 +8,121 @@ namespace game {
 // загрузка графики (PHIL_02) и рекордов (PHIL_03), главное меню, затем
 // вечный цикл: уровень -> game_frame каждый кадр -> меню.
 void main_entry() {
-    tick(18);
     call(init_hardware_base, 0x7E04);  // 007E00  bsr $840c
-    tick(18);
     call(relocate_pointer_table, 0x7E08);  // 007E04  bsr $8446
-    tick(20);
     call(copylock_removed, 0x7E0E);  // 007E08  jsr $84f4.l
-    tick(18);
     call(load_graphics_and_hiscores, 0x7E12);  // 007E0E  bsr $845c
-    tick(18);
     call(clear_irq_vectors, 0x7E16);  // 007E12  bsr $8426
-    tick(18);
     call(unpack_hiscore_file, 0x7E1A);  // 007E16  bsr $898a
-    tick(18);
     call(set_menu_bitplanes, 0x7E1E);  // 007E1A  bsr $9366
-    tick(20);
     call(music_start, 0x7E24);  // 007E1E  jsr $10aaa.l
-    tick(18);
     call(init_mouse_counters, 0x7E28);  // 007E24  bsr $91c4
-    tick(18);
     call(sort_positions, 0x7E2C);  // 007E28  bsr $aaa8
-    tick(18);
     call(draw_positions_list, 0x7E30);  // 007E2C  bsr $93ea
-    tick(18);
     call(draw_positions_scroll, 0x7E34);  // 007E30  bsr $94d6
-    tick(18);
     call(draw_player_list, 0x7E38);  // 007E34  bsr $951a
-    tick(18);
     call(draw_level_list, 0x7E3C);  // 007E38  bsr $95b8
-    tick(18);
     call(draw_hall_of_fame, 0x7E40);  // 007E3C  bsr $975c
 L_007E40:
-    tick(18);
     call(main_menu, 0x7E44);  // 007E40  bsr $99c0
-    tick(34);
     wr16(A5 + 0x96, 0x8040);  // 007E44  move.w #$8040, 150(a5)
     call(wait_blitter, 0x7E4E);  // 007E4A  bsr $f8a8
-    tick(42);
     wr32(A5 + 0x44, 0xFFFFFFFF);  // 007E4E  move.l #$ffffffff, 68(a5)
     call(convert_tile_sheets, 0x7E5A);  // 007E56  bsr $8b02
-    tick(18);
     call(set_game_palette, 0x7E5E);  // 007E5A  bsr $89ca
-    tick(18);
     call(level_bytes_to_map, 0x7E62);  // 007E5E  bsr $8bc8
-    tick(18);
     call(init_scroll_position, 0x7E66);  // 007E62  bsr $8d1c
-    tick(18);
     call(set_panel_bitplanes, 0x7E6A);  // 007E66  bsr $8ee8
-    tick(18);
     call(draw_whole_level, 0x7E6E);  // 007E6A  bsr $b20a
-    tick(18);
     call(build_object_lists, 0x7E72);  // 007E6E  bsr $8bf2
-    tick(18);
     call(convert_special_tiles, 0x7E76);  // 007E72  bsr $8c84
-    tick(18);
     call(build_cell_address_table, 0x7E7A);  // 007E76  bsr $b350
-    tick(18);
     call(build_gfx_frame_table, 0x7E7E);  // 007E7A  bsr $b37c
-    tick(18);
     call(scan_zonks_normal, 0x7E82);  // 007E7E  bsr $e3ca
-    tick(18);
     call(scan_infotrons, 0x7E86);  // 007E82  bsr $e786
-    tick(18);
     call(init_gfx_pointers, 0x7E8A);  // 007E86  bsr $8f22
-    tick(18);
     call(build_murphy_anim_tables, 0x7E8E);  // 007E8A  bsr $9070
-    tick(18);
     call(draw_level_title, 0x7E92);  // 007E8E  bsr $9152
-    tick(18);
     call(draw_player_name, 0x7E96);  // 007E92  bsr $9184
-    tick(18);
     call(draw_level_number, 0x7E9A);  // 007E96  bsr $9480
-    tick(20);
     call(init_infotrons_needed, 0x7EA0);  // 007E9A  jsr $ff84.l
-    tick(20);
     call(update_infotron_counter, 0x7EA6);  // 007EA0  jsr $ff9c.l
-    tick(20);
     call(reset_panel_clock, 0x7EAC);  // 007EA6  jsr $1002e.l
-    tick(18);
     call(start_game_copper, 0x7EB0);  // 007EAC  bsr $8f12
-    tick(54);
     wr16(0x1133A, 0);  // 007EB0  clr.w $1133a.l
     wr16(A5 + 0x96, 0x800F);  // 007EB6  move.w #$800f, 150(a5)
     call(wait_blitter, 0x7EC0);  // 007EBC  bsr $f8a8
-    tick(24);
     wr32(A5 + 0x44, 0xFFFFFFFF);  // 007EC0  move.l #$ffffffff, 68(a5)
 L_007EC8:
-    tick(18);
     call(game_frame, 0x7ECC);  // 007EC8  bsr $b5a4
-    tick(30);
     // 007ECC  cmpi.w #$2, $112d2.l
     if (rd16(v_level_completed) == 0x2) goto L_008066;  // 007ED4  beq $8066
-    tick(30);
     // 007ED8  cmpi.w #$1, $112d2.l
     if (rd16(v_level_completed) != 0x1) goto L_007EF4;  // 007EE0  bne $7ef4
-    tick(38);
     // 007EE2  cmpi.l #$28, $11372.l
     if (rd32(0x11372) == 0x28) goto L_008066;  // 007EEC  beq $8066
-    tick(18);
     call(game_outro_step, 0x7EF4);  // 007EF0  bsr $7fb8
 L_007EF4:
-    tick(26);
     // 007EF4  tst.w $112da.l
     if (rd16(v_murphy_killed) != 0) goto L_007F04;  // 007EFA  bne $7f04
-    tick(26);
     // 007EFC  tst.w $112d4.l
     if (rd16(v_death_anim) == 0) goto L_007F1A;  // 007F02  beq $7f1a
 L_007F04:
-    tick(18);
     call(murphy_die, 0x7F08);  // 007F04  bsr $f21a
-    tick(30);
     // 007F08  cmpi.w #$12, $112d4.l
     if (rd16(v_death_anim) == 0x12) goto L_008066;  // 007F10  beq $8066
-    tick(20);
     wr16(0x112E0, 0);  // 007F14  clr.w $112e0.l
 L_007F1A:
-    tick(26);
     // 007F1A  tst.w $112e6.l
     if (rd16(0x112E6) != 0) goto L_007F6A;  // 007F20  bne $7f6a
-    tick(26);
     // 007F24  btst.b #$a, 22(a5)
     if (!(rd8(A5 + 0x16) & (1u << 2))) goto L_007F46;  // 007F2A  beq $7f46
-    tick(30);
     // 007F2E  btst.b #$6, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 6))) goto L_007EC8;  // 007F36  bne $7ec8
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 007F3A  move.w #$1, $112da.l
     goto L_007EC8;  // 007F42  bra $7ec8
 L_007F46:
-    tick(38);
     wr16(0x112E6, 0x1);  // 007F46  move.w #$1, $112e6.l
     call(wait_6_frames, 0x7F52);  // 007F4E  bsr $b768
-    tick(32);
     A0 = 0x1B69E;  // 007F52  lea.l $1b69e.l, a0
     A1 = 0x1B708;  // 007F58  lea.l $1b708.l, a1
     setW(D7, 0xF);  // 007F5E  move.w #$f, d7
 L_007F62:
-    tick(32);
     {  uint32_t v = rd16(A0); A0 += 2;  wr16(A1, v);  }  // 007F62  move.w (a0)+, (a1)
     A1 += 0x4;  // 007F64  addq.l #$4, a1
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_007F62;  // 007F66  dbf.w d7, $7f62
 L_007F6A:
-    tick(26);
     // 007F6A  btst.b #$a, 22(a5)
     if (!(rd8(A5 + 0x16) & (1u << 2))) goto L_007F6A;  // 007F70  beq $7f6a
 L_007F72:
-    tick(42);
     wr16(A5 + 0x96, 0xF);  // 007F72  move.w #$f, 150(a5)
     // 007F78  btst.b #$a, 22(a5)
     if ((rd8(A5 + 0x16) & (1u << 2))) goto L_007F72;  // 007F7E  bne $7f72
-    tick(18);
     call(wait_6_frames, 0x7F84);  // 007F80  bsr $b768
-    tick(18);
     call(wait_6_frames, 0x7F88);  // 007F84  bsr $b768
-    tick(18);
     call(wait_6_frames, 0x7F8C);  // 007F88  bsr $b768
-    tick(18);
     call(wait_6_frames, 0x7F90);  // 007F8C  bsr $b768
-    tick(56);
     wr16(A5 + 0x96, 0x800F);  // 007F90  move.w #$800f, 150(a5)
     A0 = rd32(0x1B5A8);  // 007F96  movea.l $1b5a8.l, a0
     A1 = 0x1B708;  // 007F9C  lea.l $1b708.l, a1
     setW(D7, 0xF);  // 007FA2  move.w #$f, d7
 L_007FA6:
-    tick(32);
     {  uint32_t v = rd16(A0); A0 += 2;  wr16(A1, v);  }  // 007FA6  move.w (a0)+, (a1)
     A1 += 0x4;  // 007FA8  addq.l #$4, a1
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_007FA6;  // 007FAA  dbf.w d7, $7fa6
-    tick(30);
     wr16(0x112E6, 0);  // 007FAE  clr.w $112e6.l
     goto L_007EC8;  // 007FB4  bra $7ec8
 L_008066:
-    tick(62);
     wr16(A5 + 0x9A, 0xC020);  // 008066  move.w #$c020, 154(a5)
     wr8(0x1140A, 0);  // 00806C  clr.b $1140a.l
     // 008072  tst.w $113ac.l
     if (rd16(v_demo_mode) == 0) goto L_008088;  // 008078  beq $8088
-    tick(38);
     wr16(v_selected_level, rd16(0x11408));  // 00807A  move.w $11408.l, $140dc.l
     goto L_0081D8;  // 008084  bra $81d8
 L_008088:
-    tick(30);
     // 008088  cmpi.w #$12, $112d4.l
     if (rd16(v_death_anim) != 0x12) goto L_0081D8;  // 008090  bne $81d8
-    tick(18);
     call(clear_level_bitmap_5000, 0x8098);  // 008094  bsr $8aec
-    tick(194);
     D0 = rd32(v_level_bitmap_ptr);  // 008098  move.l $1b5e8.l, d0
     A1 = 0x1BBA6;  // 00809E  lea.l $1bba6.l, a1
     wr16(A1 + 0x6, (D0 & 0xFFFF));  // 0080A4  move.w d0, 6(a1)
@@ -205,19 +134,14 @@ L_008088:
     wr16(0x1B608, 0);  // 0080CA  clr.w $1b608.l
     // 0080D0  tst.l $111cc.l
     if (rd32(v_infotrons_left) != 0) goto L_0080FA;  // 0080D6  bne $80fa
-    tick(30);
     A2 = 0x14A72;  // 0080D8  lea.l $14a72.l, a2
     call(draw_text, 0x80E2);  // 0080DE  bsr $b2a0
-    tick(30);
     A2 = 0x14ADC;  // 0080E2  lea.l $14adc.l, a2
     call(draw_text, 0x80EC);  // 0080E8  bsr $b2a0
-    tick(30);
     A2 = 0x14ABC;  // 0080EC  lea.l $14abc.l, a2
     call(draw_text, 0x80F6);  // 0080F2  bsr $b2a0
-    tick(10);
     goto L_0081A6;  // 0080F6  bra $81a6
 L_0080FA:
-    tick(90);
     D1 = 0x0;  // 0080FA  moveq.l #$0, d1
     setB(D1, rd8(v_infotrons_needed));  // 0080FC  move.b $12a26.l, d1
     { A7 -= 4; wr32(A7, D1);  }  // 008102  move.l d1, -(a7)
@@ -225,104 +149,79 @@ L_0080FA:
     A6 = 0x111C2;  // 00810A  lea.l $111c2.l, a6
     D4 = D1;  // 008110  move.l d1, d4
     call(number_to_decimal, 0x8118);  // 008112  jsr $100cc.l
-    tick(50);
     setB(D0, rd8(0x111C9));  // 008118  move.b $111c9.l, d0
     setB(D1, rd8(0x111CA));  // 00811E  move.b $111ca.l, d1
     // 008124  cmpi.b #$30, d0
     if ((D0 & 0xFF) != 0x30) goto L_008134;  // 008128  bne $8134
-    tick(22);
     D0 = 0x20;  // 00812A  moveq.l #$20, d0
     // 00812C  cmpi.b #$30, d1
     if ((D1 & 0xFF) != 0x30) goto L_008134;  // 008130  bne $8134
-    tick(4);
     D1 = 0x20;  // 008132  moveq.l #$20, d1
 L_008134:
-    tick(102);
     wr8(0x14A97, (D0 & 0xFF));  // 008134  move.b d0, $14a97.l
     wr8(0x14A98, (D1 & 0xFF));  // 00813A  move.b d1, $14a98.l
     wr8(0x14A99, rd8(0x111CB));  // 008140  move.b $111cb.l, $14a99.l
     A6 = 0x111C2;  // 00814A  lea.l $111c2.l, a6
     {  uint32_t v = rd32(A7); A7 += 4;  D4 = v;  }  // 008150  move.l (a7)+, d4
     call(number_to_decimal, 0x8156);  // 008152  bsr $100cc
-    tick(50);
     setB(D0, rd8(0x111C9));  // 008156  move.b $111c9.l, d0
     setB(D1, rd8(0x111CA));  // 00815C  move.b $111ca.l, d1
     // 008162  cmpi.b #$30, d0
     if ((D0 & 0xFF) != 0x30) goto L_008172;  // 008166  bne $8172
-    tick(22);
     D0 = 0x20;  // 008168  moveq.l #$20, d0
     // 00816A  cmpi.b #$30, d1
     if ((D1 & 0xFF) != 0x30) goto L_008172;  // 00816E  bne $8172
-    tick(4);
     D1 = 0x20;  // 008170  moveq.l #$20, d1
 L_008172:
-    tick(90);
     wr8(0x14AA7, (D0 & 0xFF));  // 008172  move.b d0, $14aa7.l
     wr8(0x14AA8, (D1 & 0xFF));  // 008178  move.b d1, $14aa8.l
     wr8(0x14AA9, rd8(0x111CB));  // 00817E  move.b $111cb.l, $14aa9.l
     A2 = 0x14A72;  // 008188  lea.l $14a72.l, a2
     call(draw_text, 0x8192);  // 00818E  bsr $b2a0
-    tick(30);
     A2 = 0x14A80;  // 008192  lea.l $14a80.l, a2
     call(draw_text, 0x819C);  // 008198  bsr $b2a0
-    tick(30);
     A2 = 0x14ABC;  // 00819C  lea.l $14abc.l, a2
     call(draw_text, 0x81A6);  // 0081A2  bsr $b2a0
 L_0081A6:
-    tick(8);
     setW(D7, 0x258);  // 0081A6  move.w #$258, d7
 L_0081AA:
-    tick(30);
     // 0081AA  cmpi.b #$32, $dff006.l
     if (rd8(0xDFF006) != 0x32) goto L_0081AA;  // 0081B2  bne $81aa
 L_0081B4:
-    tick(14);
     setW(D7, sub<2>(0x1, (D7 & 0xFFFF)));  // 0081B4  subq.w #$1, d7
     if (CC_EQ) goto L_0081B4;  // 0081B6  beq $81b4
-    tick(30);
     // 0081B8  btst.b #$7, $bfe001.l
     if (!(rd8(0xBFE001) & (1u << 7))) goto L_0081CC;  // 0081C0  beq $81cc
-    tick(30);
     // 0081C2  btst.b #$6, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 6))) goto L_0081AA;  // 0081CA  bne $81aa
 L_0081CC:
-    tick(38);
     wr8(0x1BCE4, 0x82);  // 0081CC  move.b #$82, $1bce4.l
     call(clear_level_bitmap_5000, 0x81D8);  // 0081D4  bsr $8aec
 L_0081D8:
-    tick(26);
     // 0081D8  tst.w $112d2.l
     if (rd16(v_level_completed) != 0) goto L_008214;  // 0081DE  bne $8214
-    tick(62);
     setW(D0, rd16(v_selected_level));  // 0081E0  move.w $140dc.l, d0
     setW(D0, ((D0 & 0xFFFF) + 0x1));  // 0081E6  addq.w #$1, d0
     A0 = rd32(v_player_record);  // 0081E8  movea.l $113d6.l, a0
     // 0081EE  cmp.w 20(a0), d0
     if ((D0 & 0xFFFF) >= rd16(A0 + 0x14)) goto L_008348;  // 0081F2  bcc $8348
-    tick(22);
     // 0081F6  cmp.w 2(a0), d0
     if ((D0 & 0xFFFF) == rd16(A0 + 0x2)) goto L_008348;  // 0081FA  beq $8348
-    tick(22);
     // 0081FE  cmp.w 4(a0), d0
     if ((D0 & 0xFFFF) == rd16(A0 + 0x4)) goto L_008348;  // 008202  beq $8348
-    tick(42);
     cmp<2>(rd16(A0 + 0x6), (D0 & 0xFFFF));  // 008206  cmp.w 6(a0), d0
     wr8(0x1140A, (CC_NE ? 0xFF : 0x00));  // 00820A  sne.b $1140a.l
     goto L_008348;  // 008210  bra $8348
 L_008214:
-    tick(46);
     A0 = rd32(v_player_record);  // 008214  movea.l $113d6.l, a0
     // 00821A  cmpi.b #$f, 1(a0)
     if (rd8(A0 + 0x1) != 0xF) goto L_008232;  // 008220  bne $8232
-    tick(50);
     wr16(v_selected_level, (rd16(v_selected_level) + 0x1));  // 008222  addq.w #$1, $140dc.l
     wr8(0x1140A, (CC_T ? 0xFF : 0x00));  // 008228  st.b $1140a.l
     goto L_008348;  // 00822E  bra $8348
 L_008232:
-    tick(26);
     // 008232  tst.w $113a4.l
     if (rd16(0x113A4) == 0) goto L_00827E;  // 008238  beq $827e
-    tick(218);
     A0 = rd32(v_player_record);  // 00823A  movea.l $113d6.l, a0
     wr16(0x113A4, 0);  // 008240  clr.w $113a4.l
     wr16(A0 + 0x2, rd16(A0 + 0x4));  // 008246  move.w 4(a0), 2(a0)
@@ -333,40 +232,29 @@ L_008232:
     wr32(0x112FC, 0);  // 00826A  clr.l $112fc.l
     // 008270  tst.w 2(a0)
     if (rd16(A0 + 0x2) != 0) goto L_008348;  // 008274  bne $8348
-    tick(18);
     call(game_completed, 0x827C);  // 008278  bsr $83ee
-    tick(10);
     goto L_00829C;  // 00827C  bra $829c
 L_00827E:
-    tick(30);
     // 00827E  cmpi.w #$6f, $140dc.l
     if (rd16(v_selected_level) != 0x6F) goto L_00828E;  // 008286  bne $828e
-    tick(18);
     call(game_completed, 0x828C);  // 008288  bsr $83ee
-    tick(10);
     goto L_00829C;  // 00828C  bra $829c
 L_00828E:
-    tick(30);
     // 00828E  cmpi.w #$6e, $140dc.l
     if (rd16(v_selected_level) != 0x6E) goto L_00829C;  // 008296  bne $829c
-    tick(18);
     call(level_110_completed, 0x829C);  // 008298  bsr $83b0
 L_00829C:
-    tick(78);
     wr16(v_selected_level, (rd16(v_selected_level) + 0x2));  // 00829C  addq.w #$2, $140dc.l
     A0 = rd32(v_player_record);  // 0082A2  movea.l $113d6.l, a0
     setW(D0, rd16(v_selected_level));  // 0082A8  move.w $140dc.l, d0
     // 0082AE  cmp.w 20(a0), d0
     if (int16_t((D0 & 0xFFFF)) <= int16_t(rd16(A0 + 0x14))) goto L_0082C0;  // 0082B2  ble $82c0
-    tick(34);
     wr16(A0 + 0x14, rd16(v_selected_level));  // 0082B4  move.w $140dc.l, 20(a0)
     goto L_008342;  // 0082BC  bra $8342
 L_0082C0:
-    tick(26);
     setW(D0, ((D0 & 0xFFFF) - 0x1));  // 0082C0  subq.w #$1, d0
     // 0082C2  cmp.w 2(a0), d0
     if ((D0 & 0xFFFF) != rd16(A0 + 0x2)) goto L_0082F4;  // 0082C6  bne $82f4
-    tick(166);
     wr16(A0 + 0x2, rd16(A0 + 0x4));  // 0082C8  move.w 4(a0), 2(a0)
     wr16(A0 + 0x4, rd16(A0 + 0x6));  // 0082CE  move.w 6(a0), 4(a0)
     wr16(A0 + 0x6, 0);  // 0082D4  clr.w 6(a0)
@@ -375,104 +263,71 @@ L_0082C0:
     wr32(0x112FC, 0);  // 0082EC  clr.l $112fc.l
     goto L_00832C;  // 0082F2  bra $832c
 L_0082F4:
-    tick(22);
     // 0082F4  cmp.w 4(a0), d0
     if ((D0 & 0xFFFF) != rd16(A0 + 0x4)) goto L_008316;  // 0082F8  bne $8316
-    tick(110);
     wr16(A0 + 0x4, rd16(A0 + 0x6));  // 0082FA  move.w 6(a0), 4(a0)
     wr16(A0 + 0x6, 0);  // 008300  clr.w 6(a0)
     wr32(0x112F8, rd32(0x112FC));  // 008304  move.l $112fc.l, $112f8.l
     wr32(0x112FC, 0);  // 00830E  clr.l $112fc.l
     goto L_00832C;  // 008314  bra $832c
 L_008316:
-    tick(42);
     cmp<2>(rd16(A0 + 0x6), (D0 & 0xFFFF));  // 008316  cmp.w 6(a0), d0
     wr8(0x1140A, (CC_NE ? 0xFF : 0x00));  // 00831A  sne.b $1140a.l
     if (CC_NE) goto L_008342;  // 008320  bne $8342
-    tick(44);
     wr16(A0 + 0x6, 0);  // 008322  clr.w 6(a0)
     wr32(0x112FC, 0);  // 008326  clr.l $112fc.l
 L_00832C:
-    tick(26);
     // 00832C  cmpi.b #$1, 1(a0)
     if (rd8(A0 + 0x1) != 0x1) goto L_008342;  // 008332  bne $8342
-    tick(22);
     // 008334  tst.w 2(a0)
     if (rd16(A0 + 0x2) != 0) goto L_008342;  // 008338  bne $8342
-    tick(38);
     wr16(v_selected_level, (rd16(v_selected_level) - 0x1));  // 00833A  subq.w #$1, $140dc.l
     call(level_110_completed, 0x8342);  // 008340  bsr $83b0
 L_008342:
-    tick(20);
     wr16(v_selected_level, (rd16(v_selected_level) - 0x1));  // 008342  subq.w #$1, $140dc.l
 L_008348:
-    tick(58);
     wr8(0x1B7C0, 0x2);  // 008348  move.b #$2, $1b7c0.l
     wr8(0x1B890, 0x2);  // 008350  move.b #$2, $1b890.l
     call(set_menu_bitplanes, 0x835C);  // 008358  bsr $9366
-    tick(26);
     // 00835C  tst.w $112de.l
     if (rd16(0x112DE) != 0) goto L_008370;  // 008362  bne $8370
-    tick(26);
     // 008364  tst.b $1140a.l
     if (rd8(0x1140A) != 0) goto L_008370;  // 00836A  bne $8370
-    tick(18);
     call(add_level_time_to_player, 0x8370);  // 00836C  bsr $aa3e
 L_008370:
-    tick(18);
     call(draw_player_stats, 0x8374);  // 008370  bsr $ad10
-    tick(18);
     call(sort_positions, 0x8378);  // 008374  bsr $aaa8
-    tick(18);
     call(format_positions, 0x837C);  // 008378  bsr $abbe
-    tick(18);
     call(draw_positions_list, 0x8380);  // 00837C  bsr $93ea
-    tick(18);
     call(reset_level_state, 0x8384);  // 008380  bsr $b3da
-    tick(18);
     call(init_mouse_counters, 0x8388);  // 008384  bsr $91c4
-    tick(18);
     call(sort_positions, 0x838C);  // 008388  bsr $aaa8
-    tick(18);
     call(draw_positions_list, 0x8390);  // 00838C  bsr $93ea
-    tick(18);
     call(draw_positions_scroll, 0x8394);  // 008390  bsr $94d6
-    tick(18);
     call(draw_player_list, 0x8398);  // 008394  bsr $951a
-    tick(18);
     call(draw_level_list_from_player, 0x839C);  // 008398  bsr $961e
-    tick(18);
     call(draw_hall_of_fame, 0x83A0);  // 00839C  bsr $975c
-    tick(18);
     call(format_positions, 0x83A4);  // 0083A0  bsr $abbe
-    tick(18);
     call(reset_level_state, 0x83A8);  // 0083A4  bsr $b3da
-    tick(18);
     call(save_hiscores, 0x83AC);  // 0083A8  bsr $b078
-    tick(10);
     goto L_007E40;  // 0083AC  bra $7e40
 }
 
 void game_outro_step() {
-    tick(50);
     wr16(0x1131A, 0);  // 007FB8  clr.w $1131a.l
     // 007FBE  cmpi.w #$2, $11376.l
     if (rd16(0x11376) == 0x2) goto L_007FD0;  // 007FC6  beq $7fd0
-    tick(36);
     wr16(0x11376, (rd16(0x11376) + 0x1));  // 007FC8  addq.w #$1, $11376.l
     return;  // 007FCE  rts 
 L_007FD0:
-    tick(80);
     wr16(0x11376, 0);  // 007FD0  clr.w $11376.l
     A0 = v_gfx_frame_ptrs;  // 007FD6  lea.l $1a85e.l, a0
     A1 = 0x1154C;  // 007FDC  lea.l $1154c.l, a1
     A1 += rd32(0x11372);  // 007FE2  adda.l $11372.l, a1
     A0 += rd32(A1);  // 007FE8  adda.l (a1), a0
 L_007FEA:
-    tick(26);
     // 007FEA  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_007FEA;  // 007FF0  bne $7fea
-    tick(162);
     wr32(A5 + 0x50, rd32(A0));  // 007FF2  move.l (a0), 80(a5)
     wr32(A5 + 0x54, rd32(v_murphy_screen));  // 007FF6  move.l $11398.l, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 007FFE  move.w #$26, 100(a5)
@@ -482,64 +337,50 @@ L_007FEA:
     wr16(A5 + 0x58, 0x1001);  // 008014  move.w #$1001, 88(a5)
     // 00801A  tst.w $11380.l
     if (rd16(0x11380) != 0) goto L_008046;  // 008020  bne $8046
-    tick(60);
     { A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 008022  movem.l regs(c000), -(a7)
     D0 = 0x5;  // 008026  moveq.l #$5, d0
     D1 = 0x46;  // 008028  move.l #$46, d1
     call(sound_effect_lock, 0x8034);  // 00802E  jsr $10b56.l
-    tick(64);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; A7 = ea; }  // 008034  movem.l (a7)+, regs(0003)
     wr16(0x11380, 0x1);  // 008038  move.w #$1, $11380.l
     wr16(A5 + 0x96, 0x5);  // 008040  move.w #$5, 150(a5)
 L_008046:
-    tick(66);
     wr32(0x11372, (rd32(0x11372) + 0x4));  // 008046  addq.l #$4, $11372.l
     // 00804C  cmpi.l #$28, $11372.l
     if (rd32(0x11372) == 0x28) goto L_00805C;  // 008056  beq $805c
-    tick(16);
     return;  // 00805A  rts 
 L_00805C:
-    tick(36);
     wr16(v_level_completed, 0x2);  // 00805C  move.w #$2, $112d2.l
     return;  // 008064  rts 
 }
 
 void level_110_completed() {
-    tick(42);
     A0 = rd32(v_player_record);  // 0083B0  movea.l $113d6.l, a0
     // 0083B6  tst.w 2(a0)
     if (rd16(A0 + 0x2) == 0) goto L_0083CA;  // 0083BA  beq $83ca
-    tick(48);
     wr8(A0 + 0x1, 0x1);  // 0083BC  move.b #$1, 1(a0)
     wr16(A0 + 0x14, 0xDE);  // 0083C2  move.w #$de, 20(a0)
     return;  // 0083C8  rts 
 L_0083CA:
-    tick(70);
     wr16(v_selected_level, (rd16(v_selected_level) + 0x1));  // 0083CA  addq.w #$1, $140dc.l
     wr8(A0 + 0x1, 0xF);  // 0083D0  move.b #$f, 1(a0)
     wr16(A0 + 0x14, 0x3E7);  // 0083D6  move.w #$3e7, 20(a0)
     call(add_level_time_to_player, 0x83E0);  // 0083DC  bsr $aa3e
-    tick(18);
     call(update_hall_of_fame, 0x83E4);  // 0083E0  bsr $aee2
-    tick(36);
     wr16(0x112DE, 0x1);  // 0083E4  move.w #$1, $112de.l
     return;  // 0083EC  rts 
 }
 
 void game_completed() {
-    tick(50);
     wr8(A0 + 0x1, 0xF);  // 0083EE  move.b #$f, 1(a0)
     wr16(A0 + 0x14, 0x3E7);  // 0083F4  move.w #$3e7, 20(a0)
     call(add_level_time_to_player, 0x83FE);  // 0083FA  bsr $aa3e
-    tick(18);
     call(update_hall_of_fame, 0x8402);  // 0083FE  bsr $aee2
-    tick(36);
     wr16(0x112DE, 0x1);  // 008402  move.w #$1, $112de.l
     return;  // 00840A  rts 
 }
 
 void init_hardware_base() {
-    tick(88);
     A5 = 0xDFF000;  // 00840C  movea.l #$dff000, a5
     { uint32_t v = rd8(0xBFE001); btst(v, 1); wr8(0xBFE001, v | (1u << 1)); }  // 008412  bset.b #$1, $bfe001.l
     wr32(0x1B5F8, rd32(v_level_bitmap_ptr));  // 00841A  move.l $1b5e8.l, $1b5f8.l
@@ -547,74 +388,56 @@ void init_hardware_base() {
 }
 
 void clear_irq_vectors() {
-    tick(48);
     A5 = 0xDFF000;  // 008426  movea.l #$dff000, a5
     wr16(A5 + 0x9A, 0x7FFF);  // 00842C  move.w #$7fff, 154(a5)
     A0 = sxw(0x64);  // 008432  movea.w #$64, a0
     A1 = 0x08444;  // 008436  lea.l $8444(pc), a1
     D0 = 0x6;  // 00843A  moveq.l #$6, d0
 L_00843C:
-    tick(24);
     {  wr32(A0, A1); A0 += 4; }  // 00843C  move.l a1, (a0)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00843C;  // 00843E  dbf.w d0, $843c
-    tick(16);
     return;  // 008442  rts 
 }
 
 void irq_rte() {
-    tick(20);
     return;  // 008444  rte 
 }
 
 void relocate_pointer_table() {
-    tick(12);
     A0 = 0x1B5A0;  // 008446  lea.l $1b5a0.l, a0
 L_00844C:
-    tick(66);
     {  uint32_t v = rd32(A0); A0 += 4;  D0 = v;  }  // 00844C  move.l (a0)+, d0
     wr32(A0, (rd32(A0) + D0));  // 00844E  add.l d0, (a0)
     // 008450  cmpi.l #$ffffffff, 4(a0)
     if (rd32(A0 + 0x4) != 0xFFFFFFFF) goto L_00844C;  // 008458  bne $844c
-    tick(16);
     return;  // 00845A  rts 
 }
 
 void load_graphics_and_hiscores() {
-    tick(30);
     A0 = 0x78000;  // 00845C  movea.l #$78000, a0
     call(native_diskInit, 0x8466);  // 008462  bsr $1035e
-    tick(52);
     D0 = 0x0;  // 008466  moveq.l #$0, d0
     setW(D1, 0x12C);  // 008468  move.w #$12c, d1
     setW(D2, logic<2>(0xCD));  // 00846C  move.w #$cd, d2
     A0 = 0x1EE00;  // 008470  movea.l #$1ee00, a0
     call(native_loadFile, 0x847C);  // 008476  jsr $10404.l
-    tick(18);
     call(native_diskMotorOff, 0x8480);  // 00847C  bsr $103c2
-    tick(20);
     call(native_diskDelay, 0x8486);  // 008480  jsr $10a56.l
-    tick(40);
     A0 = rd32(0x1B5CC);  // 008486  movea.l $1b5cc.l, a0
     A1 = 0x13270;  // 00848C  lea.l $13270.l, a1
     setW(D7, 0xC23);  // 008492  move.w #$c23, d7
 L_008496:
-    tick(24);
     {  uint32_t v = logic<1>(rd8(A0)); A0 += 1;  wr8(A1, v); A1 += 1; }  // 008496  move.b (a0)+, (a1)+
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_008496;  // 008498  dbf.w d7, $8496
-    tick(30);
     A0 = 0x78000;  // 00849C  movea.l #$78000, a0
     call(native_diskInit, 0x84A6);  // 0084A2  bsr $1035e
-    tick(50);
     D0 = 0x0;  // 0084A6  moveq.l #$0, d0
     setW(D1, 0xFA);  // 0084A8  move.w #$fa, d1
     setW(D2, logic<2>(0x2));  // 0084AC  move.w #$2, d2
     A0 = v_hiscore_file;  // 0084B0  movea.l #$1bd94, a0
     call(native_loadFile, 0x84BA);  // 0084B6  bsr $10404
-    tick(18);
     call(native_diskMotorOff, 0x84BE);  // 0084BA  bsr $103c2
-    tick(20);
     call(native_diskDelay, 0x84C4);  // 0084BE  jsr $10a56.l
-    tick(80);
     A0 = 0x0898A;  // 0084C4  lea.l $898a(pc), a0
     D0 = 0x0;  // 0084C8  moveq.l #$0, d0
     setW(D0, rd16(0x07E08));  // 0084CA  move.w $7e08.l, d0
@@ -622,100 +445,78 @@ L_008496:
     D0 = (D0 - A0);  // 0084D6  sub.l a0, d0
     // 0084D8  cmpi.l #$4a23, d0
     if (D0 != 0x4A23) goto L_0084E6;  // 0084DE  bne $84e6
-    tick(20);
     A0 = rd32(v_level_bitmap_ptr);  // 0084E0  movea.l $1b5e8.l, a0
 L_0084E6:
-    tick(20);
     D0 = rd32(0x1B5F4);  // 0084E6  move.l $1b5f4.l, d0
 L_0084EC:
-    tick(38);
     wr32(A0, 0);  // 0084EC  clr.l (a0)+
     A0 += 4;
     D0 = sub<4>(0x1, D0);  // 0084EE  subq.l #$1, d0
     if (CC_NE) goto L_0084EC;  // 0084F0  bne $84ec
-    tick(16);
     return;  // 0084F2  rts 
 }
 
 void copylock_removed() {
-    tick(36);
     wr16(0x000BE, 0);  // 0084F4  clr.w $be.l
     logic<2>(0);
     return;  // 0084FA  rts 
 }
 
 void unpack_hiscore_file() {
-    tick(50);
     A0 = v_hiscore_file;  // 00898A  lea.l $1bd94.l, a0
     A1 = 0x13056;  // 008990  lea.l $13056.l, a1
     setW(D7, 0x1B7);  // 008996  move.w #$1b7, d7
     call(copy_bytes, 0x899C);  // 00899A  bsr $89c2
-    tick(38);
     A1 = 0x140FA;  // 00899C  lea.l $140fa.l, a1
     setW(D7, 0xC7);  // 0089A2  move.w #$c7, d7
     call(copy_bytes, 0x89A8);  // 0089A6  bsr $89c2
-    tick(38);
     A1 = 0x141D2;  // 0089A8  lea.l $141d2.l, a1
     setW(D7, 0x1B7);  // 0089AE  move.w #$1b7, d7
     call(copy_bytes, 0x89B4);  // 0089B2  bsr $89c2
-    tick(38);
     A1 = 0x13F30;  // 0089B4  lea.l $13f30.l, a1
     setW(D7, 0x35);  // 0089BA  move.w #$35, d7
     call(copy_bytes, 0x89C0);  // 0089BE  bsr $89c2
-    tick(16);
     return;  // 0089C0  rts 
 }
 
 void copy_bytes() {
 L_0089C2:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 0089C2  move.b (a0)+, (a1)+
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_0089C2;  // 0089C4  dbf.w d7, $89c2
-    tick(16);
     return;  // 0089C8  rts 
 }
 
 void set_game_palette() {
-    tick(26);
     // 0089CA  tst.w $1bd8e.l
     if (rd16(0x1BD8E) != 0) goto L_0089E8;  // 0089D0  bne $89e8
-    tick(36);
     A0 = rd32(0x1B5A8);  // 0089D2  movea.l $1b5a8.l, a0
     A1 = 0x1B708;  // 0089D8  lea.l $1b708.l, a1
     D0 = 0xF;  // 0089DE  moveq.l #$f, d0
 L_0089E0:
-    tick(28);
     {  uint32_t v = rd16(A0); A0 += 2;  wr16(A1, v);  }  // 0089E0  move.w (a0)+, (a1)
     A1 += 0x4;  // 0089E2  addq.w #$4, a1
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_0089E0;  // 0089E4  dbf.w d0, $89e0
 L_0089E8:
-    tick(98);
     wr32(0x113FE, (rd32(0x113FE) + 0x4));  // 0089E8  addq.l #$4, $113fe.l
     A0 = 0x1B67E;  // 0089EE  lea.l $1b67e.l, a0
     A0 += rd32(0x113FE);  // 0089F4  adda.l $113fe.l, a0
     A0 = rd32(A0);  // 0089FA  movea.l (a0), a0
     // 0089FC  cmpa.l #$0, a0
     if (A0 != 0x0) goto L_008A10;  // 008A02  bne $8a10
-    tick(40);
     wr32(0x113FE, 0);  // 008A04  clr.l $113fe.l
     A0 = 0x1B60E;  // 008A0A  movea.l #$1b60e, a0
 L_008A10:
-    tick(16);
     D0 = 0x7;  // 008A10  moveq.l #$7, d0
     A1 = 0x1B77C;  // 008A12  lea.l $1b77c.l, a1
 L_008A18:
-    tick(32);
     {  uint32_t v = rd16(A0); A0 += 2;  wr16(A1, v);  }  // 008A18  move.w (a0)+, (a1)
     A1 += 0x4;  // 008A1A  addq.l #$4, a1
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_008A18;  // 008A1C  dbf.w d0, $8a18
-    tick(16);
     return;  // 008A20  rts 
 }
 
 void show_end_screen() {
-    tick(18);
     call(clear_level_bitmap_5000, 0x8A26);  // 008A22  bsr $8aec
-    tick(190);
     D0 = rd32(v_level_bitmap_ptr);  // 008A26  move.l $1b5e8.l, d0
     A1 = 0x1BBA6;  // 008A2C  lea.l $1bba6.l, a1
     wr16(A1 + 0x6, (D0 & 0xFFFF));  // 008A32  move.w d0, 6(a1)
@@ -727,78 +528,59 @@ void show_end_screen() {
     wr16(0x1B608, 0);  // 008A56  clr.w $1b608.l
     A2 = 0x1451A;  // 008A5C  lea.l $1451a.l, a2
     call(draw_text, 0x8A66);  // 008A62  bsr $b2a0
-    tick(30);
     A2 = 0x14530;  // 008A66  lea.l $14530.l, a2
     call(draw_text, 0x8A70);  // 008A6C  bsr $b2a0
-    tick(30);
     A2 = 0x14564;  // 008A70  lea.l $14564.l, a2
     call(draw_text, 0x8A7A);  // 008A76  bsr $b2a0
-    tick(30);
     A2 = 0x145B6;  // 008A7A  lea.l $145b6.l, a2
     call(draw_text, 0x8A84);  // 008A80  bsr $b2a0
-    tick(30);
     A2 = 0x145EC;  // 008A84  lea.l $145ec.l, a2
     call(draw_text, 0x8A8E);  // 008A8A  bsr $b2a0
-    tick(30);
     A2 = 0x14622;  // 008A8E  lea.l $14622.l, a2
     call(draw_text, 0x8A98);  // 008A94  bsr $b2a0
-    tick(30);
     A2 = 0x14650;  // 008A98  lea.l $14650.l, a2
     call(draw_text, 0x8AA2);  // 008A9E  bsr $b2a0
-    tick(30);
     A2 = 0x14680;  // 008AA2  lea.l $14680.l, a2
     call(draw_text, 0x8AAC);  // 008AA8  bsr $b2a0
-    tick(18);
     call(wait_button_click, 0x8AB0);  // 008AAC  bsr $8ab8
-    tick(36);
     wr16(0x1BCE4, 0);  // 008AB0  clr.w $1bce4.l
     return;  // 008AB6  rts 
 }
 
 void wait_button_click() {
 L_008AB8:
-    tick(38);
     setB(D0, rd8(0xBFE001));  // 008AB8  move.b $bfe001.l, d0
     setB(D0, (~(D0 & 0xFF)));  // 008ABE  not.b d0
     setB(D0, logic<1>((D0 & 0xFF) & 0xC0));  // 008AC0  andi.b #$c0, d0
     if (CC_NE) goto L_008AB8;  // 008AC4  bne $8ab8
-    tick(18);
     call(wait_6_frames, 0x8ACA);  // 008AC6  bsr $b768
 L_008ACA:
-    tick(38);
     setB(D0, rd8(0xBFE001));  // 008ACA  move.b $bfe001.l, d0
     setB(D0, (~(D0 & 0xFF)));  // 008AD0  not.b d0
     setB(D0, logic<1>((D0 & 0xFF) & 0xC0));  // 008AD2  andi.b #$c0, d0
     if (CC_EQ) goto L_008ACA;  // 008AD6  beq $8aca
-    tick(18);
     call(wait_6_frames, 0x8ADC);  // 008AD8  bsr $b768
 L_008ADC:
-    tick(38);
     setB(D0, rd8(0xBFE001));  // 008ADC  move.b $bfe001.l, d0
     setB(D0, (~(D0 & 0xFF)));  // 008AE2  not.b d0
     setB(D0, logic<1>((D0 & 0xFF) & 0xC0));  // 008AE4  andi.b #$c0, d0
     if (CC_NE) goto L_008ADC;  // 008AE8  bne $8adc
-    tick(16);
     return;  // 008AEA  rts 
 }
 
 void clear_level_bitmap_5000() {
-    tick(20);
     A0 = rd32(v_level_bitmap_ptr);  // 008AEC  movea.l $1b5e8.l, a0
     { clear_5000_bytes(); return; }
 }
 
 void clear_5000_bytes() {
-    tick(20);
     A1 = A0;  // 008AF2  movea.l a0, a1
     A1 += 0x5000;  // 008AF4  adda.l #$5000, a1
 L_008AFA:
-    tick(36);
     wr32(A0, 0);  // 008AFA  clr.l (a0)+
     A0 += 4;
     // 008AFC  cmpa.l a0, a1
     if (A1 != A0) goto L_008AFA;  // 008AFE  bne $8afa
-    tick(16);
     return;  // 008B00  rts 
 }
 
@@ -806,87 +588,66 @@ L_008AFA:
 // переводятся в interleaved (через буфер $52000 и блиттер), если ещё не
 // переведены ($1BD8E).
 void convert_tile_sheets() {
-    tick(26);
     // 008B02  tst.w $1bd8e.l
     if (rd16(0x1BD8E) == 0) goto L_008B0C;  // 008B08  beq $8b0c
-    tick(16);
     return;  // 008B0A  rts 
 L_008B0C:
-    tick(18);
     call(copy_sheet1_to_buffer, 0x8B0E);  // 008B0C  bsr $8b36
-    tick(58);
     A4 = rd32(v_level_bitmap_ptr);  // 008B0E  movea.l $1b5e8.l, a4
     A6 = rd32(v_tile_gfx_ptr);  // 008B14  movea.l $1b5a4.l, a6
     call(blit_buffer_to_sheet, 0x8B1E);  // 008B1A  bsr $8b96
-    tick(18);
     call(copy_sheet2_to_buffer, 0x8B20);  // 008B1E  bsr $8b4a
-    tick(74);
     A4 = rd32(v_level_bitmap_ptr);  // 008B20  movea.l $1b5e8.l, a4
     A6 = rd32(v_tile_gfx_ptr);  // 008B26  movea.l $1b5a4.l, a6
     A6 += 0x9880;  // 008B2C  adda.l #$9880, a6
     call(blit_buffer_to_sheet, 0x8B34);  // 008B32  bsr $8b96
-    tick(16);
     return;  // 008B34  rts 
 }
 
 void copy_sheet1_to_buffer() {
-    tick(62);
     A0 = rd32(v_tile_gfx_ptr);  // 008B36  movea.l $1b5a4.l, a0
     A2 = A0;  // 008B3C  movea.l a0, a2
     A1 = rd32(v_level_bitmap_ptr);  // 008B3E  movea.l $1b5e8.l, a1
     setW(D2, 0xF3);  // 008B44  move.w #$f3, d2
     goto L_008B62;  // 008B48  bra $8b62
 L_008B62:
-    tick(18);
     call(interleave_line, 0x8B64);  // 008B62  bsr $8b72
-    tick(32);
     A2 += 0x28;  // 008B64  adda.l #$28, a2
     A0 = A2;  // 008B6A  movea.l a2, a0
     setW(D2, D2 - 1); if ((D2 & 0xFFFF) != 0xFFFF) goto L_008B62;  // 008B6C  dbf.w d2, $8b62
-    tick(16);
     return;  // 008B70  rts 
 }
 
 void copy_sheet2_to_buffer() {
-    tick(68);
     A0 = rd32(v_tile_gfx_ptr);  // 008B4A  movea.l $1b5a4.l, a0
     A0 += 0x9880;  // 008B50  adda.l #$9880, a0
     A2 = A0;  // 008B56  movea.l a0, a2
     A1 = rd32(v_level_bitmap_ptr);  // 008B58  movea.l $1b5e8.l, a1
     setW(D2, 0xF3);  // 008B5E  move.w #$f3, d2
 L_008B62:
-    tick(18);
     call(interleave_line, 0x8B64);  // 008B62  bsr $8b72
-    tick(32);
     A2 += 0x28;  // 008B64  adda.l #$28, a2
     A0 = A2;  // 008B6A  movea.l a2, a0
     setW(D2, D2 - 1); if ((D2 & 0xFFFF) != 0xFFFF) goto L_008B62;  // 008B6C  dbf.w d2, $8b62
-    tick(16);
     return;  // 008B70  rts 
 }
 
 void interleave_line() {
-    tick(8);
     D0 = 0x3;  // 008B72  moveq.l #$3, d0
     D1 = 0x9;  // 008B74  moveq.l #$9, d1
 L_008B76:
-    tick(32);
     {  uint32_t v = rd32(A0); A0 += 4;  wr32(A1, v); A1 += 4; }  // 008B76  move.l (a0)+, (a1)+
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_008B76;  // 008B78  dbf.w d1, $8b76
-    tick(70);
     A0 -= 0x28;  // 008B7C  suba.l #$28, a0
     A0 += rd32(0x1B5F0);  // 008B82  adda.l $1b5f0.l, a0
     A1 += 0x50;  // 008B88  adda.l #$50, a1
     D1 = 0x9;  // 008B8E  moveq.l #$9, d1
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_008B76;  // 008B90  dbf.w d0, $8b76
-    tick(16);
     return;  // 008B94  rts 
 }
 
 void blit_buffer_to_sheet() {
-    tick(18);
     call(wait_blitter, 0x8B9A);  // 008B96  bsr $f8a8
-    tick(152);
     wr32(A5 + 0x50, A4);  // 008B9A  move.l a4, 80(a5)
     wr32(A5 + 0x54, A6);  // 008B9E  move.l a6, 84(a5)
     wr16(A5 + 0x42, 0);  // 008BA2  clr.w 66(a5)
@@ -901,24 +662,19 @@ void blit_buffer_to_sheet() {
 // Уровень из файла (60x24 байт, буфер $12468) раскладывается в карту $11928:
 // каждая клетка — слово (старший байт — состояние, младший — тип).
 void level_bytes_to_map() {
-    tick(32);
     A0 = v_level_buffer;  // 008BC8  lea.l $12468.l, a0
     A1 = 0x11929;  // 008BCE  lea.l $11929.l, a1
     setW(D0, 0x59F);  // 008BD4  move.w #$59f, d0
 L_008BD8:
-    tick(28);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v);  }  // 008BD8  move.b (a0)+, (a1)
     A1 += 0x2;  // 008BDA  addq.w #$2, a1
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_008BD8;  // 008BDC  dbf.w d0, $8bd8
-    tick(20);
     A0 = v_level_buffer;  // 008BE0  lea.l $12468.l, a0
     setW(D0, 0x59F);  // 008BE6  move.w #$59f, d0
 L_008BEA:
-    tick(24);
     wr8(A0, 0);  // 008BEA  clr.b (a0)+
     A0 += 1;
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_008BEA;  // 008BEC  dbf.w d0, $8bea
-    tick(16);
     return;  // 008BF0  rts 
 }
 
@@ -926,7 +682,6 @@ L_008BEA:
 // количество в $111CC), сник-снаки $1821C, оранжевые диски $189F0,
 // жёлтые диски $191C0.
 void build_object_lists() {
-    tick(88);
     A0 = v_map;  // 008BF2  lea.l $11928.l, a0
     A1 = v_zonk_list;  // 008BF8  lea.l $14d60.l, a1
     A2 = v_infotron_list;  // 008BFE  lea.l $167be.l, a2
@@ -938,63 +693,47 @@ void build_object_lists() {
     D3 = 0x0;  // 008C1A  moveq.l #$0, d3
     D4 = 0x0;  // 008C1C  moveq.l #$0, d4
 L_008C1E:
-    tick(34);
     {  uint32_t v = rd16(A0); A0 += 2;  setW(D2, v);  }  // 008C1E  move.w (a0)+, d2
     // 008C20  cmp.w $113ba.l, d2
     if ((D2 & 0xFFFF) == rd16(c_tile_zonk)) goto L_008C4A;  // 008C26  beq $8c4a
-    tick(26);
     // 008C28  cmp.w $113c0.l, d2
     if ((D2 & 0xFFFF) == rd16(c_tile_infotron)) goto L_008C50;  // 008C2E  beq $8c50
-    tick(26);
     // 008C30  cmp.w $113d2.l, d2
     if ((D2 & 0xFFFF) == rd16(c_tile_sniksnak)) goto L_008C58;  // 008C36  beq $8c58
-    tick(26);
     // 008C38  cmp.w $113c8.l, d2
     if ((D2 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_008C5E;  // 008C3E  beq $8c5e
-    tick(26);
     // 008C40  cmp.w $113d4.l, d2
     if ((D2 & 0xFFFF) == rd16(c_tile_yellow_disk)) goto L_008C64;  // 008C46  beq $8c64
-    tick(10);
     goto L_008C68;  // 008C48  bra $8c68
 L_008C4A:
-    tick(26);
     wr16(A1, (D3 & 0xFFFF));  // 008C4A  move.w d3, (a1)
     A1 += 0x4;  // 008C4C  addq.l #$4, a1
     goto L_008C68;  // 008C4E  bra $8c68
 L_008C50:
-    tick(34);
     wr16(A2, (D3 & 0xFFFF));  // 008C50  move.w d3, (a2)
     A2 += 0x4;  // 008C52  addq.l #$4, a2
     D4 = (D4 + 0x1);  // 008C54  addq.l #$1, d4
     goto L_008C68;  // 008C56  bra $8c68
 L_008C58:
-    tick(26);
     wr16(A3, (D3 & 0xFFFF));  // 008C58  move.w d3, (a3)
     A3 += 0x8;  // 008C5A  addq.l #$8, a3
     goto L_008C68;  // 008C5C  bra $8c68
 L_008C5E:
-    tick(26);
     wr16(A4, (D3 & 0xFFFF));  // 008C5E  move.w d3, (a4)
     A4 += 0x6;  // 008C60  addq.l #$6, a4
     goto L_008C68;  // 008C62  bra $8c68
 L_008C64:
-    tick(16);
     wr16(A6, (D3 & 0xFFFF));  // 008C64  move.w d3, (a6)
     A6 += 0x4;  // 008C66  addq.l #$4, a6
 L_008C68:
-    tick(16);
     setW(D3, ((D3 & 0xFFFF) + 0x4));  // 008C68  addq.w #$4, d3
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_008C1E;  // 008C6A  dbf.w d0, $8c1e
-    tick(16);
     D0 = 0x3B;  // 008C6E  moveq.l #$3b, d0
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_008C1E;  // 008C70  dbf.w d1, $8c1e
-    tick(26);
     // 008C74  tst.b $12a26.l
     if (rd8(v_infotrons_needed) != 0) goto L_008C82;  // 008C7A  bne $8c82
-    tick(20);
     wr32(v_infotrons_left, D4);  // 008C7C  move.l d4, $111cc.l
 L_008C82:
-    tick(16);
     return;  // 008C82  rts 
 }
 
@@ -1002,7 +741,6 @@ L_008C82:
 // список $18604; красные диски -> список $12468; баги ($19) -> тип 2 (база)
 // и список $12738; варианты чипов -> 5, варианты железа -> 6.
 void convert_special_tiles() {
-    tick(60);
     A0 = v_map;  // 008C84  lea.l $11928.l, a0
     D0 = 0x3B;  // 008C8A  moveq.l #$3b, d0
     D1 = 0x17;  // 008C8C  moveq.l #$17, d1
@@ -1011,52 +749,39 @@ void convert_special_tiles() {
     A2 = v_level_buffer;  // 008C96  lea.l $12468.l, a2
     A3 = v_bug_list;  // 008C9C  lea.l $12738.l, a3
 L_008CA2:
-    tick(26);
     {  uint32_t v = rd16(A0); A0 += 2;  setW(D2, v);  }  // 008CA2  move.w (a0)+, d2
     // 008CA4  cmpi.w #$18, d2
     if ((D2 & 0xFFFF) == 0x18) goto L_008CE2;  // 008CA8  beq $8ce2
-    tick(18);
     // 008CAA  cmpi.w #$14, d2
     if ((D2 & 0xFFFF) == 0x14) goto L_008CEE;  // 008CAE  beq $8cee
-    tick(18);
     // 008CB0  cmpi.w #$19, d2
     if ((D2 & 0xFFFF) == 0x19) goto L_008CF8;  // 008CB4  beq $8cf8
-    tick(18);
     // 008CB6  cmpi.w #$1a, d2
     if ((D2 & 0xFFFF) == 0x1A) goto L_008D08;  // 008CBA  beq $8d08
-    tick(18);
     // 008CBC  cmpi.w #$1b, d2
     if ((D2 & 0xFFFF) == 0x1B) goto L_008D08;  // 008CC0  beq $8d08
-    tick(18);
     // 008CC2  cmpi.w #$26, d2
     if ((D2 & 0xFFFF) == 0x26) goto L_008D08;  // 008CC6  beq $8d08
-    tick(18);
     // 008CC8  cmpi.w #$27, d2
     if ((D2 & 0xFFFF) == 0x27) goto L_008D08;  // 008CCC  beq $8d08
-    tick(18);
     // 008CCE  cmpi.w #$1c, d2
     if (int16_t((D2 & 0xFFFF)) < 28) goto L_008D0E;  // 008CD2  blt $8d0e
-    tick(18);
     // 008CD4  cmpi.w #$25, d2
     if (int16_t((D2 & 0xFFFF)) > 37) goto L_008D0E;  // 008CD8  bgt $8d0e
-    tick(26);
     wr16(A0 - 0x2, 0x6);  // 008CDA  move.w #$6, -2(a0)
     goto L_008D0E;  // 008CE0  bra $8d0e
 L_008CE2:
-    tick(42);
     wr8(A0 - 0x1, 0x11);  // 008CE2  move.b #$11, -1(a0)
     wr16(A1, (D3 & 0xFFFF));  // 008CE8  move.w d3, (a1)
     A1 += 0x8;  // 008CEA  addq.l #$8, a1
     goto L_008D0E;  // 008CEC  bra $8d0e
 L_008CEE:
-    tick(38);
     setW(D4, (D3 & 0xFFFF));  // 008CEE  move.w d3, d4
     setW(D4, ((D4 & 0xFFFF) >> 1));  // 008CF0  lsr.w #$1, d4
     wr16(A2, (D4 & 0xFFFF));  // 008CF2  move.w d4, (a2)
     A2 += 0x2;  // 008CF4  addq.l #$2, a2
     goto L_008D0E;  // 008CF6  bra $8d0e
 L_008CF8:
-    tick(54);
     wr16(A0 - 0x2, 0x2);  // 008CF8  move.w #$2, -2(a0)
     setW(D4, (D3 & 0xFFFF));  // 008CFE  move.w d3, d4
     setW(D4, ((D4 & 0xFFFF) >> 1));  // 008D00  lsr.w #$1, d4
@@ -1064,47 +789,35 @@ L_008CF8:
     A3 += 0x2;  // 008D04  addq.l #$2, a3
     goto L_008D0E;  // 008D06  bra $8d0e
 L_008D08:
-    tick(16);
     wr16(A0 - 0x2, 0x5);  // 008D08  move.w #$5, -2(a0)
 L_008D0E:
-    tick(16);
     setW(D3, ((D3 & 0xFFFF) + 0x4));  // 008D0E  addq.w #$4, d3
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_008CA2;  // 008D10  dbf.w d0, $8ca2
-    tick(16);
     D0 = 0x3B;  // 008D14  moveq.l #$3b, d0
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_008CA2;  // 008D16  dbf.w d1, $8ca2
-    tick(16);
     return;  // 008D1A  rts 
 }
 
 void init_scroll_position() {
-    tick(86);
     wr16(v_view_cell_x, rd16(0x12A08));  // 008D1C  move.w $12a08.l, $11340.l
     wr16(v_view_cell_y, rd16(0x12A0A));  // 008D26  move.w $12a0a.l, $11342.l
     // 008D30  cmpi.w #$28, $11340.l
     if (rd16(v_view_cell_x) != 0x28) goto L_008D42;  // 008D38  bne $8d42
-    tick(20);
     wr16(v_view_cell_x, 0x27);  // 008D3A  move.w #$27, $11340.l
 L_008D42:
-    tick(30);
     // 008D42  cmpi.w #$c, $11342.l
     if (rd16(v_view_cell_y) != 0xC) goto L_008D54;  // 008D4A  bne $8d54
-    tick(20);
     wr16(v_view_cell_y, 0xB);  // 008D4C  move.w #$b, $11342.l
 L_008D54:
-    tick(16);
     A0 = v_map;  // 008D54  lea.l $11928.l, a0
     setW(D0, 0);  // 008D5A  clr.w d0
 L_008D5C:
-    tick(22);
     {  uint32_t s = 0x3;  uint32_t d = rd16(A0); A0 += 2; cmp<2>(s, d); }  // 008D5C  cmpi.w #$3, (a0)+
     if (CC_EQ) goto L_008D6A;  // 008D60  beq $8d6a
-    tick(22);
     setW(D0, ((D0 & 0xFFFF) + 0x1));  // 008D62  addq.w #$1, d0
     // 008D64  cmpi.w #$59f, d0
     if ((D0 & 0xFFFF) != 0x59F) goto L_008D5C;  // 008D68  bne $8d5c
 L_008D6A:
-    tick(316);
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 008D6A  lsl.w #$1, d0
     setW(D1, rd16(v_view_cell_y));  // 008D6C  move.w $11342.l, d1
     D1 = mulu(0x78, D1);  // 008D72  mulu.w #$78, d1
@@ -1117,81 +830,62 @@ L_008D6A:
     A0 += sxw((D0 & 0xFFFF));  // 008D92  adda.w d0, a0
     setW(D0, 0x0);  // 008D94  move.w #$0, d0
 L_008D98:
-    tick(22);
     {  uint32_t s = 0x3;  uint32_t d = rd16(A0); A0 += 2; cmp<2>(s, d); }  // 008D98  cmpi.w #$3, (a0)+
     if (CC_EQ) goto L_008DA6;  // 008D9C  beq $8da6
-    tick(22);
     setW(D0, ((D0 & 0xFFFF) + 0x1));  // 008D9E  addq.w #$1, d0
     // 008DA0  cmpi.w #$3c, d0
     if ((D0 & 0xFFFF) != 0x3C) goto L_008D98;  // 008DA4  bne $8d98
 L_008DA6:
-    tick(58);
     setW(D0, ((D0 & 0xFFFF) - rd16(v_view_cell_x)));  // 008DA6  sub.w $11340.l, d0
     wr16(v_murphy_screen_x, (D0 & 0xFFFF));  // 008DAC  move.w d0, $1133c.l
     // 008DB2  tst.w $11342.l
     if (rd16(v_view_cell_y) != 0) goto L_008DC8;  // 008DB8  bne $8dc8
-    tick(30);
     // 008DBA  cmpi.w #$6, $1133e.l
     if (int16_t(rd16(v_murphy_screen_y)) <= 6) goto L_008E16;  // 008DC2  ble $8e16
-    tick(10);
     goto L_008DDE;  // 008DC6  bra $8dde
 L_008DC8:
-    tick(30);
     // 008DC8  cmpi.w #$b, $11342.l
     if (rd16(v_view_cell_y) != 0xB) goto L_008DDE;  // 008DD0  bne $8dde
-    tick(30);
     // 008DD2  cmpi.w #$6, $1133e.l
     if (int16_t(rd16(v_murphy_screen_y)) >= 6) goto L_008E16;  // 008DDA  bge $8e16
 L_008DDE:
-    tick(30);
     // 008DDE  cmpi.w #$6, $11342.l
     if (int16_t(rd16(v_view_cell_y)) >= 6) goto L_008E00;  // 008DE6  bge $8e00
-    tick(70);
     setW(D0, rd16(v_murphy_screen_y));  // 008DEA  move.w $1133e.l, d0
     setW(D0, ((D0 & 0xFFFF) - 0x6));  // 008DF0  subq.w #$6, d0
     wr16(v_view_cell_y, (rd16(v_view_cell_y) + (D0 & 0xFFFF)));  // 008DF2  add.w d0, $11342.l
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) - (D0 & 0xFFFF)));  // 008DF8  sub.w d0, $1133e.l
     goto L_008E16;  // 008DFE  bra $8e16
 L_008E00:
-    tick(64);
     setW(D0, 0x6);  // 008E00  move.w #$6, d0
     setW(D0, ((D0 & 0xFFFF) - rd16(v_murphy_screen_y)));  // 008E04  sub.w $1133e.l, d0
     wr16(v_view_cell_y, (rd16(v_view_cell_y) - (D0 & 0xFFFF)));  // 008E0A  sub.w d0, $11342.l
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) + (D0 & 0xFFFF)));  // 008E10  add.w d0, $1133e.l
 L_008E16:
-    tick(26);
     // 008E16  tst.w $11340.l
     if (rd16(v_view_cell_x) != 0) goto L_008E2C;  // 008E1C  bne $8e2c
-    tick(30);
     // 008E1E  cmpi.w #$b, $1133c.l
     if (int16_t(rd16(v_murphy_screen_x)) <= 11) goto L_008E7C;  // 008E26  ble $8e7c
-    tick(10);
     goto L_008E42;  // 008E2A  bra $8e42
 L_008E2C:
-    tick(30);
     // 008E2C  cmpi.w #$27, $11340.l
     if (rd16(v_view_cell_x) != 0x27) goto L_008E42;  // 008E34  bne $8e42
-    tick(30);
     // 008E36  cmpi.w #$a, $1133c.l
     if (int16_t(rd16(v_murphy_screen_x)) >= 10) goto L_008E7C;  // 008E3E  bge $8e7c
 L_008E42:
-    tick(30);
     // 008E42  cmpi.w #$13, $11340.l
     if (int16_t(rd16(v_view_cell_x)) >= 19) goto L_008E66;  // 008E4A  bge $8e66
-    tick(74);
     setW(D0, rd16(v_murphy_screen_x));  // 008E4E  move.w $1133c.l, d0
     setW(D0, ((D0 & 0xFFFF) - 0xA));  // 008E54  subi.w #$a, d0
     wr16(v_view_cell_x, (rd16(v_view_cell_x) + (D0 & 0xFFFF)));  // 008E58  add.w d0, $11340.l
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) - (D0 & 0xFFFF)));  // 008E5E  sub.w d0, $1133c.l
     goto L_008E7C;  // 008E64  bra $8e7c
 L_008E66:
-    tick(64);
     setW(D0, 0xA);  // 008E66  move.w #$a, d0
     setW(D0, ((D0 & 0xFFFF) - rd16(v_murphy_screen_x)));  // 008E6A  sub.w $1133c.l, d0
     wr16(v_view_cell_x, (rd16(v_view_cell_x) - (D0 & 0xFFFF)));  // 008E70  sub.w d0, $11340.l
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) + (D0 & 0xFFFF)));  // 008E76  add.w d0, $1133c.l
 L_008E7C:
-    tick(236);
     setW(D0, rd16(v_view_cell_x));  // 008E7C  move.w $11340.l, d0
     setW(D0, (((D0 & 0xFFFF) << 4) & 0xFFFF));  // 008E82  lsl.w #$4, d0
     wr16(v_scroll_x, (D0 & 0xFFFF));  // 008E84  move.w d0, $11344.l
@@ -1209,7 +903,6 @@ L_008E7C:
     setW(D1, ((D1 & 0xFFFF) + (D0 & 0xFFFF)));  // 008EBC  add.w d0, d1
     D2 = (D2 + D1);  // 008EBE  add.l d1, d2
 L_008EC0:
-    tick(68);
     D2 = ((D2 << 16) | (D2 >> 16));  // 008EC0  swap.w d2
     wr16(A0 + 0x2, (D2 & 0xFFFF));  // 008EC2  move.w d2, 2(a0)
     D2 = ((D2 << 16) | (D2 >> 16));  // 008EC6  swap.w d2
@@ -1217,19 +910,16 @@ L_008EC0:
     A0 += 0x8;  // 008ECC  addq.l #$8, a0
     D2 = (D2 + 0x78);  // 008ECE  addi.l #$78, d2
     setW(D3, D3 - 1); if ((D3 & 0xFFFF) != 0xFFFF) goto L_008EC0;  // 008ED4  dbf.w d3, $8ec0
-    tick(56);
     wr8(0x1B6D9, 0x88);  // 008ED8  move.b #$88, $1b6d9.l
     wr16(v_scroll_x, (rd16(v_scroll_x) + 0x7));  // 008EE0  addq.w #$7, $11344.l
     return;  // 008EE6  rts 
 }
 
 void set_panel_bitplanes() {
-    tick(40);
     A0 = 0x1B7C2;  // 008EE8  lea.l $1b7c2.l, a0
     setW(D0, 0x3);  // 008EEE  move.w #$3, d0
     D1 = rd32(0x1B5C0);  // 008EF2  move.l $1b5c0.l, d1
 L_008EF8:
-    tick(74);
     wr16(A0 + 0x6, (D1 & 0xFFFF));  // 008EF8  move.w d1, 6(a0)
     D1 = ((D1 << 16) | (D1 >> 16));  // 008EFC  swap.w d1
     wr16(A0 + 0x2, (D1 & 0xFFFF));  // 008EFE  move.w d1, 2(a0)
@@ -1237,19 +927,16 @@ L_008EF8:
     D1 = (D1 + rd32(0x1B60A));  // 008F04  add.l $1b60a.l, d1
     A0 += 0x8;  // 008F0A  addq.l #$8, a0
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_008EF8;  // 008F0C  dbf.w d0, $8ef8
-    tick(16);
     return;  // 008F10  rts 
 }
 
 void start_game_copper() {
-    tick(56);
     wr32(A5 + 0x80, 0x1B6BE);  // 008F12  move.l #$1b6be, 128(a5)
     wr16(A5 + 0x9A, 0x4000);  // 008F1A  move.w #$4000, 154(a5)
     return;  // 008F20  rts 
 }
 
 void init_gfx_pointers() {
-    tick(1224);
     wr32(0x1129A, rd32(v_gfx_frame_ptrs));  // 008F22  move.l $1a85e.l, $1129a.l
     wr32(0x1129A, (rd32(0x1129A) + 0x3C0C));  // 008F2C  addi.l #$3c0c, $1129a.l
     wr32(0x112A6, rd32(0x1129A));  // 008F36  move.l $1129a.l, $112a6.l
@@ -1288,117 +975,94 @@ void init_gfx_pointers() {
 }
 
 void build_murphy_anim_tables() {
-    tick(50);
     A1 = 0x11578;  // 009070  lea.l $11578.l, a1
     A2 = 0x11598;  // 009076  lea.l $11598.l, a2
     setW(D7, 0x7);  // 00907C  move.w #$7, d7
     call(copy_frame_pointers, 0x9084);  // 009080  bsr $9140
-    tick(50);
     A1 = 0x115B8;  // 009084  lea.l $115b8.l, a1
     A2 = 0x115D8;  // 00908A  lea.l $115d8.l, a2
     setW(D7, 0x7);  // 009090  move.w #$7, d7
     call(copy_frame_pointers, 0x9098);  // 009094  bsr $9140
-    tick(50);
     A1 = 0x115F8;  // 009098  lea.l $115f8.l, a1
     A2 = 0x11618;  // 00909E  lea.l $11618.l, a2
     setW(D7, 0x7);  // 0090A4  move.w #$7, d7
     call(copy_frame_pointers, 0x90AC);  // 0090A8  bsr $9140
-    tick(50);
     A1 = 0x11638;  // 0090AC  lea.l $11638.l, a1
     A2 = 0x11658;  // 0090B2  lea.l $11658.l, a2
     setW(D7, 0x7);  // 0090B8  move.w #$7, d7
     call(copy_frame_pointers, 0x90C0);  // 0090BC  bsr $9140
-    tick(50);
     A1 = 0x11678;  // 0090C0  lea.l $11678.l, a1
     A2 = 0x11698;  // 0090C6  lea.l $11698.l, a2
     setW(D7, 0x7);  // 0090CC  move.w #$7, d7
     call(copy_frame_pointers, 0x90D2);  // 0090D0  bsr $9140
-    tick(50);
     A1 = 0x116B8;  // 0090D2  lea.l $116b8.l, a1
     A2 = 0x116D8;  // 0090D8  lea.l $116d8.l, a2
     setW(D7, 0x7);  // 0090DE  move.w #$7, d7
     call(copy_frame_pointers, 0x90E4);  // 0090E2  bsr $9140
-    tick(50);
     A1 = 0x116F8;  // 0090E4  lea.l $116f8.l, a1
     A2 = 0x11718;  // 0090EA  lea.l $11718.l, a2
     setW(D7, 0x7);  // 0090F0  move.w #$7, d7
     call(copy_frame_pointers, 0x90F6);  // 0090F4  bsr $9140
-    tick(50);
     A1 = 0x11738;  // 0090F6  lea.l $11738.l, a1
     A2 = 0x11758;  // 0090FC  lea.l $11758.l, a2
     setW(D7, 0x7);  // 009102  move.w #$7, d7
     call(copy_frame_pointers, 0x9108);  // 009106  bsr $9140
-    tick(50);
     A1 = 0x11778;  // 009108  lea.l $11778.l, a1
     A2 = 0x11798;  // 00910E  lea.l $11798.l, a2
     setW(D7, 0x7);  // 009114  move.w #$7, d7
     call(copy_frame_pointers, 0x911A);  // 009118  bsr $9140
-    tick(50);
     A1 = 0x1183E;  // 00911A  lea.l $1183e.l, a1
     A2 = 0x1180E;  // 009120  lea.l $1180e.l, a2
     setW(D7, 0xB);  // 009126  move.w #$b, d7
     call(copy_frame_pointers, 0x912C);  // 00912A  bsr $9140
-    tick(50);
     A1 = 0x1189E;  // 00912C  lea.l $1189e.l, a1
     A2 = 0x1186E;  // 009132  lea.l $1186e.l, a2
     setW(D7, 0xB);  // 009138  move.w #$b, d7
     call(copy_frame_pointers, 0x913E);  // 00913C  bsr $9140
-    tick(16);
     return;  // 00913E  rts 
 }
 
 void copy_frame_pointers() {
 L_009140:
-    tick(62);
     A0 = v_gfx_frame_ptrs;  // 009140  lea.l $1a85e.l, a0
     {  uint32_t v = rd32(A1); A1 += 4;  D0 = v;  }  // 009146  move.l (a1)+, d0
     A0 += D0;  // 009148  adda.l d0, a0
     {  wr32(A2, rd32(A0)); A2 += 4; }  // 00914A  move.l (a0), (a2)+
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_009140;  // 00914C  dbf.w d7, $9140
-    tick(16);
     return;  // 009150  rts 
 }
 
 void draw_level_title() {
-    tick(28);
     A0 = 0x12A0E;  // 009152  lea.l $12a0e.l, a0
     A1 = 0x1439C;  // 009158  lea.l $1439c.l, a1
     D0 = 0x16;  // 00915E  moveq.l #$16, d0
 L_009160:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 009160  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_009160;  // 009162  dbf.w d0, $9160
-    tick(86);
     A2 = 0x14398;  // 009166  lea.l $14398.l, a2
     wr32(0x1B604, rd32(0x1B5C0));  // 00916C  move.l $1b5c0.l, $1b604.l
     wr16(0x1B608, 0x1);  // 009176  move.w #$1, $1b608.l
     call(draw_text, 0x9182);  // 00917E  bsr $b2a0
-    tick(16);
     return;  // 009182  rts 
 }
 
 void draw_player_name() {
-    tick(48);
     A0 = rd32(v_player_record);  // 009184  movea.l $113d6.l, a0
     A1 = 0x1141F;  // 00918A  lea.l $1141f.l, a1
     setW(D0, 0x7);  // 009190  move.w #$7, d0
     A0 += 0x8;  // 009194  addq.l #$8, a0
 L_009196:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 009196  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_009196;  // 009198  dbf.w d0, $9196
-    tick(122);
     A2 = 0x1141A;  // 00919C  lea.l $1141a.l, a2
     wr32(0x1B604, rd32(0x1B5C0));  // 0091A2  move.l $1b5c0.l, $1b604.l
     wr32(0x1B604, (rd32(0x1B604) - 0x252));  // 0091AC  subi.l #$252, $1b604.l
     wr16(0x1B608, 0x1);  // 0091B6  move.w #$1, $1b608.l
     call(draw_text, 0x91C2);  // 0091BE  bsr $b2a0
-    tick(16);
     return;  // 0091C2  rts 
 }
 
 void init_mouse_counters() {
-    tick(90);
     setW(D0, rd16(A5 + 0xA));  // 0091C4  move.w 10(a5), d0
     setW(D1, (D0 & 0xFFFF));  // 0091C8  move.w d0, d1
     setW(D1, ((D1 & 0xFFFF) >> 8));  // 0091CA  lsr.w #$8, d1
@@ -1410,7 +1074,6 @@ void init_mouse_counters() {
 }
 
 void set_pointer_sprite() {
-    tick(52);
     wr16(0x1B89C, (D0 & 0xFFFF));  // 0091E2  move.w d0, $1b89c.l
     D0 = ((D0 << 16) | (D0 >> 16));  // 0091E8  swap.w d0
     wr16(0x1B898, (D0 & 0xFFFF));  // 0091EA  move.w d0, $1b898.l
@@ -1419,10 +1082,8 @@ void set_pointer_sprite() {
 
 void update_mouse_pointer() {
 L_0091F2:
-    tick(22);
     // 0091F2  tst.b 6(a5)
     if (rd8(A5 + 0x6) != 0) goto L_0091F2;  // 0091F6  bne $91f2
-    tick(272);
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 0091F8  movem.l regs(fffe), -(a7)
     setW(D0, rd16(0xDFF00A));  // 0091FC  move.w $dff00a.l, d0
     setW(D1, (D0 & 0xFFFF));  // 009202  move.w d0, d1
@@ -1438,113 +1099,85 @@ L_0091F2:
     setB(D2, ((D2 & 0xFF) - (D0 & 0xFF)));  // 009228  sub.b d0, d2
     // 00922A  tst.b d2
     if ((D2 & 0xFF) == 0) goto L_00925A;  // 00922C  beq $925a
-    tick(18);
     setB(D4, (D2 & 0xFF));  // 009230  move.b d2, d4
     // 009232  tst.b d2
     if (int8_t((D2 & 0xFF)) >= 0) goto L_00923A;  // 009234  bpl $923a
-    tick(4);
     setB(D2, (0 - (D2 & 0xFF)));  // 009238  neg.b d2
 L_00923A:
-    tick(18);
     // 00923A  cmpi.b #$7f, d2
     if (int8_t((D2 & 0xFF)) > 127) goto L_00924E;  // 00923E  bgt $924e
-    tick(34);
     setW(D4, (sxb(D4) & 0xFFFF));  // 009242  ext.w d4
     wr16(0x112EC, (rd16(0x112EC) - (D4 & 0xFFFF)));  // 009244  sub.w d4, $112ec.l
     goto L_00925A;  // 00924A  bra $925a
 L_00924E:
-    tick(32);
     setB(D4, ((D4 & 0xFF) - 0xFF));  // 00924E  subi.b #$ff, d4
     setW(D4, (sxb(D4) & 0xFFFF));  // 009252  ext.w d4
     wr16(0x112EC, (rd16(0x112EC) - (D4 & 0xFFFF)));  // 009254  sub.w d4, $112ec.l
 L_00925A:
-    tick(18);
     setB(D3, ((D3 & 0xFF) - (D1 & 0xFF)));  // 00925A  sub.b d1, d3
     // 00925C  tst.b d3
     if ((D3 & 0xFF) == 0) goto L_00928C;  // 00925E  beq $928c
-    tick(18);
     setB(D4, (D3 & 0xFF));  // 009262  move.b d3, d4
     // 009264  tst.b d3
     if (int8_t((D3 & 0xFF)) >= 0) goto L_00926C;  // 009266  bpl $926c
-    tick(4);
     setB(D3, (0 - (D3 & 0xFF)));  // 00926A  neg.b d3
 L_00926C:
-    tick(18);
     // 00926C  cmpi.b #$7f, d3
     if (int8_t((D3 & 0xFF)) > 127) goto L_009280;  // 009270  bgt $9280
-    tick(34);
     setW(D4, (sxb(D4) & 0xFFFF));  // 009274  ext.w d4
     wr16(0x112EE, (rd16(0x112EE) - (D4 & 0xFFFF)));  // 009276  sub.w d4, $112ee.l
     goto L_00928C;  // 00927C  bra $928c
 L_009280:
-    tick(32);
     setB(D4, ((D4 & 0xFF) - 0xFF));  // 009280  subi.b #$ff, d4
     setW(D4, (sxb(D4) & 0xFFFF));  // 009284  ext.w d4
     wr16(0x112EE, (rd16(0x112EE) - (D4 & 0xFFFF)));  // 009286  sub.w d4, $112ee.l
 L_00928C:
-    tick(62);
     setW(D0, rd16(0x112EC));  // 00928C  move.w $112ec.l, d0
     setW(D0, asr<2>((D0 & 0xFFFF), 1));  // 009292  asr.w #$1, d0
     setW(D1, rd16(0x112EE));  // 009294  move.w $112ee.l, d1
     setW(D1, asr<2>((D1 & 0xFFFF), 1));  // 00929A  asr.w #$1, d1
     // 00929C  tst.w d0
     if (int16_t((D0 & 0xFFFF)) >= 0) goto L_0092AE;  // 00929E  bpl $92ae
-    tick(28);
     setW(D0, 0x0);  // 0092A2  move.w #$0, d0
     wr16(0x112EC, 0x0);  // 0092A6  move.w #$0, $112ec.l
 L_0092AE:
-    tick(18);
     // 0092AE  cmpi.w #$140, d0
     if (int16_t((D0 & 0xFFFF)) < 320) goto L_0092C2;  // 0092B2  blt $92c2
-    tick(28);
     setW(D0, 0x13F);  // 0092B6  move.w #$13f, d0
     wr16(0x112EC, 0x27E);  // 0092BA  move.w #$27e, $112ec.l
 L_0092C2:
-    tick(14);
     // 0092C2  tst.w d1
     if (int16_t((D1 & 0xFFFF)) >= 0) goto L_0092D4;  // 0092C4  bpl $92d4
-    tick(28);
     setW(D1, 0x0);  // 0092C8  move.w #$0, d1
     wr16(0x112EE, 0x0);  // 0092CC  move.w #$0, $112ee.l
 L_0092D4:
-    tick(18);
     // 0092D4  cmpi.w #$e6, d1
     if (int16_t((D1 & 0xFFFF)) < 230) goto L_0092E8;  // 0092D8  blt $92e8
-    tick(28);
     setW(D1, 0xE5);  // 0092DC  move.w #$e5, d1
     wr16(0x112EE, 0x1CA);  // 0092E0  move.w #$1ca, $112ee.l
 L_0092E8:
-    tick(62);
     wr16(0x112F0, (D0 & 0xFFFF));  // 0092E8  move.w d0, $112f0.l
     wr16(0x112F2, (D1 & 0xFFFF));  // 0092EE  move.w d1, $112f2.l
     // 0092F4  cmpi.w #$c5, $112f2.l
     if (int16_t(rd16(0x112F2)) < 197) goto L_00931E;  // 0092FC  blt $931e
-    tick(30);
     // 0092FE  cmpi.w #$d4, $112f2.l
     if (int16_t(rd16(0x112F2)) >= 212) goto L_009312;  // 009306  bge $9312
-    tick(30);
     wr8(0x1BCED, 0x2);  // 009308  move.b #$2, $1bced.l
     goto L_009324;  // 009310  bra $9324
 L_009312:
-    tick(30);
     wr8(0x1BCED, 0x6);  // 009312  move.b #$6, $1bced.l
     goto L_009324;  // 00931A  bra $9324
 L_00931E:
-    tick(20);
     wr8(0x1BCED, 0);  // 00931E  clr.b $1bced.l
 L_009324:
-    tick(28);
     setW(D0, ((D0 & 0xFFFF) + 0x80));  // 009324  addi.w #$80, d0
     // 009328  btst.l #$0, d0
     if (!(D0 & (1u << 0))) goto L_00933C;  // 00932C  beq $933c
-    tick(34);
     { uint32_t v = rd8(0x1BCED); btst(v, 0); wr8(0x1BCED, v | (1u << 0)); }  // 009330  bset.b #$0, $1bced.l
     goto L_009344;  // 009338  bra $9344
 L_00933C:
-    tick(24);
     { uint32_t v = rd8(0x1BCED); btst(v, 0); wr8(0x1BCED, v & ~(1u << 0)); }  // 00933C  bclr.b #$0, $1bced.l
 L_009344:
-    tick(220);
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 009344  lsr.w #$1, d0
     wr8(0x1BCEB, (D0 & 0xFF));  // 009346  move.b d0, $1bceb.l
     setW(D1, ((D1 & 0xFFFF) + 0x2C));  // 00934C  addi.w #$2c, d1
@@ -1556,12 +1189,10 @@ L_009344:
 }
 
 void set_menu_bitplanes() {
-    tick(40);
     A0 = 0x1B8FE;  // 009366  lea.l $1b8fe.l, a0
     D0 = rd32(0x1B5F8);  // 00936C  move.l $1b5f8.l, d0
     setW(D7, 0x2);  // 009372  move.w #$2, d7
 L_009376:
-    tick(74);
     wr16(A0 + 0x6, (D0 & 0xFFFF));  // 009376  move.w d0, 6(a0)
     D0 = ((D0 << 16) | (D0 >> 16));  // 00937A  swap.w d0
     wr16(A0 + 0x2, (D0 & 0xFFFF));  // 00937C  move.w d0, 2(a0)
@@ -1569,7 +1200,6 @@ L_009376:
     A0 = A0 + 0x8;  // 009382  lea.l 8(a0), a0
     D0 = (D0 + rd32(0x1B600));  // 009386  add.l $1b600.l, d0
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_009376;  // 00938C  dbf.w d7, $9376
-    tick(64);
     A0 = rd32(0x1B5A0);  // 009390  movea.l $1b5a0.l, a0
     A1 = rd32(0x1B5F8);  // 009396  movea.l $1b5f8.l, a1
     D4 = rd32(0x1B5FC);  // 00939C  move.l $1b5fc.l, d4
@@ -1579,51 +1209,40 @@ L_009376:
 
 void unpack_rle_picture() {
 L_0093A4:
-    tick(34);
     setB(D1, rd8(A0));  // 0093A4  move.b (a0), d1
     setB(D1, ((D1 & 0xFF) & 0x80));  // 0093A6  andi.b #$80, d1
     // 0093AA  cmpi.b #$80, d1
     if ((D1 & 0xFF) == 0x80) goto L_0093CA;  // 0093AE  beq $93ca
-    tick(28);
     D1 = 0x0;  // 0093B0  moveq.l #$0, d1
     setB(D1, rd8(A0));  // 0093B2  move.b (a0), d1
     D1 = (D1 - 0x1);  // 0093B4  subq.l #$1, d1
     A0 += 0x1;  // 0093B6  addq.l #$1, a0
 L_0093B8:
-    tick(36);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 0093B8  move.b (a0)+, (a1)+
     D0 = (D0 + 0x1);  // 0093BA  addq.l #$1, d0
     // 0093BC  cmp.l d4, d0
     if (D0 == D4) goto L_0093E8;  // 0093BE  beq $93e8
-    tick(12);
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_0093B8;  // 0093C2  dbf.w d1, $93b8
-    tick(10);
     goto L_0093A4;  // 0093C6  bra $93a4
 L_0093CA:
-    tick(36);
     D1 = 0x0;  // 0093CA  moveq.l #$0, d1
     setB(D1, rd8(A0));  // 0093CC  move.b (a0), d1
     setB(D1, ((D1 & 0xFF) & 0x7F));  // 0093CE  andi.b #$7f, d1
     setB(D2, rd8(A0 + 0x1));  // 0093D2  move.b 1(a0), d2
     setW(D1, ((D1 & 0xFFFF) - 0x1));  // 0093D6  subq.w #$1, d1
 L_0093D8:
-    tick(32);
     {  wr8(A1, (D2 & 0xFF)); A1 += 1; }  // 0093D8  move.b d2, (a1)+
     D0 = (D0 + 0x1);  // 0093DA  addq.l #$1, d0
     // 0093DC  cmp.l d4, d0
     if (D0 == D4) goto L_0093E8;  // 0093DE  beq $93e8
-    tick(12);
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_0093D8;  // 0093E0  dbf.w d1, $93d8
-    tick(18);
     A0 += 0x2;  // 0093E4  addq.l #$2, a0
     goto L_0093A4;  // 0093E6  bra $93a4
 L_0093E8:
-    tick(16);
     return;  // 0093E8  rts 
 }
 
 void draw_positions_list() {
-    tick(154);
     wr16(0x1B608, 0);  // 0093EA  clr.w $1b608.l
     wr32(0x1B604, rd32(0x1B5F8));  // 0093F0  move.l $1b5f8.l, $1b604.l
     D0 = 0x0;  // 0093FA  moveq.l #$0, d0
@@ -1632,91 +1251,72 @@ void draw_positions_list() {
     A0 = 0x13056;  // 009406  lea.l $13056.l, a0
     A0 += D0;  // 00940C  adda.l d0, a0
     call(copy_text_line_22, 0x9412);  // 00940E  bsr $9982
-    tick(58);
     A2 = 0x140C0;  // 009412  lea.l $140c0.l, a2
     wr16(A2, 0x70);  // 009418  move.w #$70, (a2)
     wr16(A2 + 0x2, 0x85);  // 00941C  move.w #$85, 2(a2)
     call(draw_text, 0x9426);  // 009422  bsr $b2a0
-    tick(26);
     A0 = A0 - 0x16;  // 009426  lea.l -22(a0), a0
     call(copy_text_line_22, 0x942E);  // 00942A  bsr $9982
-    tick(46);
     wr16(A2, 0x70);  // 00942E  move.w #$70, (a2)
     wr16(A2 + 0x2, 0x7C);  // 009432  move.w #$7c, 2(a2)
     call(draw_text, 0x943C);  // 009438  bsr $b2a0
-    tick(26);
     A0 = A0 - 0x16;  // 00943C  lea.l -22(a0), a0
     call(copy_text_line_22, 0x9444);  // 009440  bsr $9982
-    tick(46);
     wr16(A2, 0x70);  // 009444  move.w #$70, (a2)
     wr16(A2 + 0x2, 0x73);  // 009448  move.w #$73, 2(a2)
     call(draw_text, 0x9452);  // 00944E  bsr $b2a0
-    tick(26);
     A0 = A0 + 0x42;  // 009452  lea.l 66(a0), a0
     call(copy_text_line_22, 0x945A);  // 009456  bsr $9982
-    tick(46);
     wr16(A2, 0x70);  // 00945A  move.w #$70, (a2)
     wr16(A2 + 0x2, 0x8E);  // 00945E  move.w #$8e, 2(a2)
     call(draw_text, 0x9468);  // 009464  bsr $b2a0
-    tick(26);
     A0 = A0 + 0x16;  // 009468  lea.l 22(a0), a0
     call(copy_text_line_22, 0x9470);  // 00946C  bsr $9982
-    tick(46);
     wr16(A2, 0x70);  // 009470  move.w #$70, (a2)
     wr16(A2 + 0x2, 0x97);  // 009474  move.w #$97, 2(a2)
     call(draw_text, 0x947E);  // 00947A  bsr $b2a0
-    tick(16);
     return;  // 00947E  rts 
 }
 
 void draw_level_number() {
-    tick(50);
     D4 = 0x0;  // 009480  moveq.l #$0, d4
     setW(D4, rd16(0x11300));  // 009482  move.w $11300.l, d4
     A6 = 0x111DE;  // 009488  lea.l $111de.l, a6
     call(number_to_decimal, 0x9492);  // 00948E  bsr $100cc
-    tick(66);
     D0 = 0x0;  // 009492  moveq.l #$0, d0
     setB(D0, rd8(0x111E7));  // 009494  move.b $111e7.l, d0
     A0 = rd32(0x1B5C0);  // 00949A  movea.l $1b5c0.l, a0
     A0 = A0 + 0x3EC;  // 0094A0  lea.l 1004(a0), a0
     call(draw_panel_digit, 0x94A8);  // 0094A4  bsr $b7f0
-    tick(66);
     D0 = 0x0;  // 0094A8  moveq.l #$0, d0
     setB(D0, rd8(0x111E6));  // 0094AA  move.b $111e6.l, d0
     A0 = rd32(0x1B5C0);  // 0094B0  movea.l $1b5c0.l, a0
     A0 = A0 + 0x3EB;  // 0094B6  lea.l 1003(a0), a0
     call(draw_panel_digit, 0x94BE);  // 0094BA  bsr $b7f0
-    tick(66);
     D0 = 0x0;  // 0094BE  moveq.l #$0, d0
     setB(D0, rd8(0x111E5));  // 0094C0  move.b $111e5.l, d0
     A0 = rd32(0x1B5C0);  // 0094C6  movea.l $1b5c0.l, a0
     A0 = A0 + 0x3EA;  // 0094CC  lea.l 1002(a0), a0
     call(draw_panel_digit, 0x94D4);  // 0094D0  bsr $b7f0
-    tick(16);
     return;  // 0094D4  rts 
 }
 
 void draw_positions_scroll() {
-    tick(54);
     A6 = 0x111D2;  // 0094D6  lea.l $111d2.l, a6
     D4 = 0x0;  // 0094DC  moveq.l #$0, d4
     setW(D4, rd16(0x13028));  // 0094DE  move.w $13028.l, d4
     setW(D4, ((D4 & 0xFFFF) + 0x1));  // 0094E4  addq.w #$1, d4
     call(number_to_decimal, 0x94EA);  // 0094E6  bsr $100cc
-    tick(142);
     wr16(0x1B608, 0);  // 0094EA  clr.w $1b608.l
     A2 = 0x144F8;  // 0094F0  lea.l $144f8.l, a2
     wr32(0x1B604, rd32(0x1B5F8));  // 0094F6  move.l $1b5f8.l, $1b604.l
     wr8(0x144FC, rd8(0x111DA));  // 009500  move.b $111da.l, $144fc.l
     wr8(0x144FD, rd8(0x111DB));  // 00950A  move.b $111db.l, $144fd.l
     call(draw_text, 0x9518);  // 009514  bsr $b2a0
-    tick(16);
     return;  // 009518  rts 
 }
 
 void draw_player_list() {
-    tick(342);
     wr16(0x1B608, 0);  // 00951A  clr.w $1b608.l
     wr32(0x1B604, rd32(0x1B5F8));  // 009520  move.l $1b5f8.l, $1b604.l
     D0 = 0x0;  // 00952A  moveq.l #$0, d0
@@ -1732,82 +1332,63 @@ void draw_player_list() {
     A0 += D1;  // 009552  adda.l d1, a0
     // 009554  tst.b (a0)
     if (rd8(A0) != 0) goto L_009564;  // 009556  bne $9564
-    tick(18);
     call(show_message, 0x955C);  // 009558  bsr $b12a
-    tick(38);
     wr32(v_player_record, 0);  // 00955C  clr.l $113d6.l
     goto L_00956E;  // 009562  bra $956e
 L_009564:
-    tick(38);
     wr32(v_player_record, A0);  // 009564  move.l a0, $113d6.l
     call(draw_player_stats, 0x956E);  // 00956A  bsr $ad10
 L_00956E:
-    tick(134);
     { uint32_t ea = A7; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 00956E  movem.l (a7)+, regs(7ffc)
     call(copy_text_line_b, 0x9576);  // 009572  bsr $9996
-    tick(58);
     A2 = 0x1438A;  // 009576  lea.l $1438a.l, a2
     wr16(A2, 0x70);  // 00957C  move.w #$70, (a2)
     wr16(A2 + 0x2, 0xBD);  // 009580  move.w #$bd, 2(a2)
     call(draw_text, 0x958A);  // 009586  bsr $b2a0
-    tick(26);
     A0 = A0 - 0xA;  // 00958A  lea.l -10(a0), a0
     call(copy_text_line_b, 0x9592);  // 00958E  bsr $9996
-    tick(46);
     wr16(A2, 0x70);  // 009592  move.w #$70, (a2)
     wr16(A2 + 0x2, 0xB4);  // 009596  move.w #$b4, 2(a2)
     call(draw_text, 0x95A0);  // 00959C  bsr $b2a0
-    tick(26);
     A0 = A0 + 0x14;  // 0095A0  lea.l 20(a0), a0
     call(copy_text_line_b, 0x95A8);  // 0095A4  bsr $9996
-    tick(46);
     wr16(A2, 0x70);  // 0095A8  move.w #$70, (a2)
     wr16(A2 + 0x2, 0xC6);  // 0095AC  move.w #$c6, 2(a2)
     call(draw_text, 0x95B6);  // 0095B2  bsr $b2a0
-    tick(16);
     return;  // 0095B6  rts 
 }
 
 void draw_level_list() {
-    tick(86);
     wr16(0x1B608, 0);  // 0095B8  clr.w $1b608.l
     wr32(0x1B604, rd32(0x1B5F8));  // 0095BE  move.l $1b5f8.l, $1b604.l
     // 0095C8  tst.l $113d6.l
     if (rd32(v_player_record) == 0) { draw_level_list_from_player(); return; }  // 0095CE  beq $961e
-    tick(26);
     // 0095D2  tst.w $140de.l
     if (rd16(0x140DE) != 0) { draw_level_list_from_player(); return; }  // 0095D8  bne $961e
-    tick(94);
     wr16(v_selected_level, 0);  // 0095DC  clr.w $140dc.l
     A0 = rd32(v_player_record);  // 0095E2  movea.l $113d6.l, a0
     wr16(v_selected_level, rd16(A0 + 0x14));  // 0095E8  move.w 20(a0), $140dc.l
     // 0095F0  cmpi.w #$de, $140dc.l
     if (int16_t(rd16(v_selected_level)) < 222) goto L_009618;  // 0095F8  blt $9618
-    tick(30);
     // 0095FA  cmpi.w #$de, $140dc.l
     if (int16_t(rd16(v_selected_level)) > 222) goto L_00960E;  // 009602  bgt $960e
-    tick(30);
     wr16(v_selected_level, 0x6F);  // 009604  move.w #$6f, $140dc.l
     { draw_level_list_from_player(); return; }  // 00960C  bra $961e
 L_00960E:
-    tick(30);
     wr16(v_selected_level, 0x70);  // 00960E  move.w #$70, $140dc.l
     { draw_level_list_from_player(); return; }  // 009616  bra $961e
 L_009618:
-    tick(20);
     wr16(v_selected_level, (rd16(v_selected_level) - 0x1));  // 009618  subq.w #$1, $140dc.l
     { draw_level_list_from_player(); return; }
 }
 
 void draw_level_list_from_player() {
-    tick(86);
     wr16(0x140DE, 0x1);  // 00961E  move.w #$1, $140de.l
     D4 = 0x0;  // 009626  moveq.l #$0, d4
     A0 = rd32(v_player_record);  // 009628  movea.l $113d6.l, a0
     setW(D4, rd16(A0 + 0x2));  // 00962E  move.w 2(a0), d4
     A6 = 0x111D2;  // 009632  lea.l $111d2.l, a6
     call(number_to_decimal, 0x963C);  // 009638  bsr $100cc
-    tick(150);
     wr8(0x112F5, rd8(0x111D9));  // 00963C  move.b $111d9.l, $112f5.l
     wr8(0x112F6, rd8(0x111DA));  // 009646  move.b $111da.l, $112f6.l
     wr8(0x112F7, rd8(0x111DB));  // 009650  move.b $111db.l, $112f7.l
@@ -1816,7 +1397,6 @@ void draw_level_list_from_player() {
     setW(D4, rd16(A0 + 0x4));  // 009662  move.w 4(a0), d4
     A6 = 0x111D2;  // 009666  lea.l $111d2.l, a6
     call(number_to_decimal, 0x9670);  // 00966C  bsr $100cc
-    tick(150);
     wr8(0x112F9, rd8(0x111D9));  // 009670  move.b $111d9.l, $112f9.l
     wr8(0x112FA, rd8(0x111DA));  // 00967A  move.b $111da.l, $112fa.l
     wr8(0x112FB, rd8(0x111DB));  // 009684  move.b $111db.l, $112fb.l
@@ -1825,7 +1405,6 @@ void draw_level_list_from_player() {
     setW(D4, rd16(A0 + 0x6));  // 009696  move.w 6(a0), d4
     A6 = 0x111D2;  // 00969A  lea.l $111d2.l, a6
     call(number_to_decimal, 0x96A4);  // 0096A0  bsr $100cc
-    tick(186);
     wr8(0x112FD, rd8(0x111D9));  // 0096A4  move.b $111d9.l, $112fd.l
     wr8(0x112FE, rd8(0x111DA));  // 0096AE  move.b $111da.l, $112fe.l
     wr8(0x112FF, rd8(0x111DB));  // 0096B8  move.b $111db.l, $112ff.l
@@ -1836,93 +1415,73 @@ void draw_level_list_from_player() {
     A0 = 0x13270;  // 0096D0  lea.l $13270.l, a0
     A0 += D0;  // 0096D6  adda.l d0, a0
     call(copy_text_line_c, 0x96DC);  // 0096D8  bsr $99aa
-    tick(58);
     A2 = 0x143B4;  // 0096DC  lea.l $143b4.l, a2
     wr16(A2, 0x148);  // 0096E2  move.w #$148, (a2)
     wr16(A2 + 0x2, 0xBD);  // 0096E6  move.w #$bd, 2(a2)
     call(draw_text, 0x96F0);  // 0096EC  bsr $b2a0
-    tick(58);
     A6 = 0x1B9D4;  // 0096F0  lea.l $1b9d4.l, a6
     setW(D7, 0x1);  // 0096F6  move.w #$1, d7
     wr16(0x11302, 0x2);  // 0096FA  move.w #$2, $11302.l
     call(draw_game_parameters, 0x9706);  // 009702  bsr $9806
-    tick(26);
     A0 = A0 - 0x1C;  // 009706  lea.l -28(a0), a0
     call(copy_text_line_c, 0x970E);  // 00970A  bsr $99aa
-    tick(46);
     wr16(A2, 0x148);  // 00970E  move.w #$148, (a2)
     wr16(A2 + 0x2, 0xB4);  // 009712  move.w #$b4, 2(a2)
     call(draw_text, 0x971C);  // 009718  bsr $b2a0
-    tick(54);
     A6 = 0x1B964;  // 00971C  lea.l $1b964.l, a6
     setW(D7, 0);  // 009722  clr.w d7
     wr16(0x11302, 0x1);  // 009724  move.w #$1, $11302.l
     call(draw_game_parameters, 0x9730);  // 00972C  bsr $9806
-    tick(26);
     A0 = A0 + 0x38;  // 009730  lea.l 56(a0), a0
     call(copy_text_line_c, 0x9738);  // 009734  bsr $99aa
-    tick(46);
     wr16(A2, 0x148);  // 009738  move.w #$148, (a2)
     wr16(A2 + 0x2, 0xC6);  // 00973C  move.w #$c6, 2(a2)
     call(draw_text, 0x9746);  // 009742  bsr $b2a0
-    tick(54);
     A6 = 0x1BA44;  // 009746  lea.l $1ba44.l, a6
     setW(D7, 0);  // 00974C  clr.w d7
     wr16(0x11302, 0x3);  // 00974E  move.w #$3, $11302.l
     call(draw_game_parameters, 0x975A);  // 009756  bsr $9806
-    tick(16);
     return;  // 00975A  rts 
 }
 
 void draw_hall_of_fame() {
-    tick(32);
     setW(D0, 0x11);  // 00975C  move.w #$11, d0
     A0 = 0x13F30;  // 009760  lea.l $13f30.l, a0
     A1 = 0x13F6A;  // 009766  lea.l $13f6a.l, a1
 L_00976C:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 00976C  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00976C;  // 00976E  dbf.w d0, $976c
-    tick(106);
     wr16(0x13F68, 0x3A);  // 009772  move.w #$3a, $13f68.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00977A  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 009784  clr.w $1b608.l
     A2 = 0x13F66;  // 00978A  lea.l $13f66.l, a2
     call(draw_text, 0x9794);  // 009790  bsr $b2a0
-    tick(32);
     setW(D0, 0x11);  // 009794  move.w #$11, d0
     A0 = 0x13F42;  // 009798  lea.l $13f42.l, a0
     A1 = 0x13F6A;  // 00979E  lea.l $13f6a.l, a1
 L_0097A4:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 0097A4  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_0097A4;  // 0097A6  dbf.w d0, $97a4
-    tick(106);
     wr16(0x13F68, 0x43);  // 0097AA  move.w #$43, $13f68.l
     wr32(0x1B604, rd32(0x1B5F8));  // 0097B2  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 0097BC  clr.w $1b608.l
     A2 = 0x13F66;  // 0097C2  lea.l $13f66.l, a2
     call(draw_text, 0x97CC);  // 0097C8  bsr $b2a0
-    tick(32);
     setW(D0, 0x11);  // 0097CC  move.w #$11, d0
     A0 = 0x13F54;  // 0097D0  lea.l $13f54.l, a0
     A1 = 0x13F6A;  // 0097D6  lea.l $13f6a.l, a1
 L_0097DC:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 0097DC  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_0097DC;  // 0097DE  dbf.w d0, $97dc
-    tick(106);
     wr16(0x13F68, 0x4C);  // 0097E2  move.w #$4c, $13f68.l
     wr32(0x1B604, rd32(0x1B5F8));  // 0097EA  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 0097F4  clr.w $1b608.l
     A2 = 0x13F66;  // 0097FA  lea.l $13f66.l, a2
     call(draw_text, 0x9804);  // 009800  bsr $b2a0
-    tick(16);
     return;  // 009804  rts 
 }
 
 void draw_game_parameters() {
-    tick(206);
     D3 = 0x0;  // 009806  moveq.l #$0, d3
     D4 = 0x0;  // 009808  moveq.l #$0, d4
     D5 = 0x0;  // 00980A  moveq.l #$0, d5
@@ -1932,7 +1491,6 @@ void draw_game_parameters() {
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 009818  movem.l regs(fffe), -(a7)
     A6 = 0x111D2;  // 00981C  lea.l $111d2.l, a6
     call(number_to_decimal, 0x9826);  // 009822  bsr $100cc
-    tick(262);
     A0 = A1;  // 009826  movea.l a1, a0
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 009828  movem.l (a7)+, regs(7fff)
     wr8(0x140E1, rd8(0x111D9));  // 00982C  move.b $111d9.l, $140e1.l
@@ -1941,38 +1499,29 @@ void draw_game_parameters() {
     wr8(0x140E0, 0);  // 00984A  clr.b $140e0.l
     // 009850  cmpi.b #$2d, (a0)
     if (rd8(A0) != 0x2D) goto L_009898;  // 009854  bne $9898
-    tick(54);
     { A7 -= 4; wr32(A7, A0);  }  // 009856  move.l a0, -(a7)
     A0 = rd32(v_player_record);  // 009858  movea.l $113d6.l, a0
     // 00985E  tst.b 1(a0)
     if (rd8(A0 + 0x1) != 0) goto L_009882;  // 009862  bne $9882
-    tick(30);
     // 009864  cmpi.w #$6f, $140dc.l
     if (int16_t(rd16(v_selected_level)) < 111) goto L_009894;  // 00986C  blt $9894
-    tick(26);
     // 00986E  cmpi.w #$70, 20(a0)
     if (int16_t(rd16(A0 + 0x14)) < 112) goto L_009894;  // 009874  blt $9894
-    tick(38);
     wr8(A0 + 0x1, 0x1);  // 009876  move.b #$1, 1(a0)
     { uint32_t v = rd32(A7); A7 += 4; A0 = v; }  // 00987C  movea.l (a7)+, a0
     goto L_0098F2;  // 00987E  bra $98f2
 L_009882:
-    tick(26);
     // 009882  cmpi.b #$f, 1(a0)
     if (rd8(A0 + 0x1) != 0xF) goto L_009890;  // 009888  bne $9890
-    tick(22);
     { uint32_t v = rd32(A7); A7 += 4; A0 = v; }  // 00988A  movea.l (a7)+, a0
     goto L_00993A;  // 00988C  bra $993a
 L_009890:
-    tick(22);
     { uint32_t v = rd32(A7); A7 += 4; A0 = v; }  // 009890  movea.l (a7)+, a0
     goto L_0098F2;  // 009892  bra $98f2
 L_009894:
-    tick(22);
     { uint32_t v = rd32(A7); A7 += 4; A0 = v; }  // 009894  movea.l (a7)+, a0
     goto L_009916;  // 009896  bra $9916
 L_009898:
-    tick(140);
     wr8(0x140E5, rd8(A0));  // 009898  move.b (a0), $140e5.l
     wr8(0x140E6, rd8(A0 + 0x1));  // 00989E  move.b 1(a0), $140e6.l
     wr8(0x140E7, rd8(A0 + 0x2));  // 0098A6  move.b 2(a0), $140e7.l
@@ -1980,142 +1529,106 @@ L_009898:
     D4 = rd32(0x140E4);  // 0098B4  move.l $140e4.l, d4
     // 0098BA  cmp.l $112f4.l, d4
     if (D4 == rd32(0x112F4)) goto L_00995E;  // 0098C0  beq $995e
-    tick(32);
     // 0098C4  cmp.l $112f8.l, d4
     if (D4 == rd32(0x112F8)) goto L_00995E;  // 0098CA  beq $995e
-    tick(32);
     // 0098CE  cmp.l $112fc.l, d4
     if (D4 == rd32(0x112FC)) goto L_00995E;  // 0098D4  beq $995e
-    tick(32);
     // 0098D8  cmp.l $140e0.l, d4
     if (D4 == rd32(0x140E0)) goto L_0098F2;  // 0098DE  beq $98f2
-    tick(32);
     // 0098E0  cmp.l $140e0.l, d4
     if (int32_t(D4) > int32_t(rd32(0x140E0))) goto L_009916;  // 0098E6  bgt $9916
-    tick(32);
     // 0098E8  cmp.l $140e0.l, d4
     if (int32_t(D4) < int32_t(rd32(0x140E0))) goto L_00993A;  // 0098EE  blt $993a
-    tick(16);
     return;  // 0098F0  rts 
 L_0098F2:
-    tick(14);
     // 0098F2  tst.w d7
     if ((D7 & 0xFFFF) == 0) goto L_0098FE;  // 0098F4  beq $98fe
-    tick(20);
     wr16(0x1139E, 0x1);  // 0098F6  move.w #$1, $1139e.l
 L_0098FE:
-    tick(16);
     setW(D7, 0x6);  // 0098FE  move.w #$6, d7
     setW(D6, 0x990);  // 009902  move.w #$990, d6
 L_009906:
-    tick(36);
     wr16(A6, (D6 & 0xFFFF));  // 009906  move.w d6, (a6)
     A6 = A6 + 0x10;  // 009908  lea.l 16(a6), a6
     setW(D6, ((D6 & 0xFFFF) + 0x110));  // 00990C  addi.w #$110, d6
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_009906;  // 009910  dbf.w d7, $9906
-    tick(16);
     return;  // 009914  rts 
 L_009916:
-    tick(14);
     // 009916  tst.w d7
     if ((D7 & 0xFFFF) == 0) goto L_009922;  // 009918  beq $9922
-    tick(20);
     wr16(0x1139E, 0x2);  // 00991A  move.w #$2, $1139e.l
 L_009922:
-    tick(16);
     setW(D7, 0x6);  // 009922  move.w #$6, d7
     setW(D6, 0x900);  // 009926  move.w #$900, d6
 L_00992A:
-    tick(36);
     wr16(A6, (D6 & 0xFFFF));  // 00992A  move.w d6, (a6)
     A6 = A6 + 0x10;  // 00992C  lea.l 16(a6), a6
     setW(D6, ((D6 & 0xFFFF) + 0x100));  // 009930  addi.w #$100, d6
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00992A;  // 009934  dbf.w d7, $992a
-    tick(16);
     return;  // 009938  rts 
 L_00993A:
-    tick(14);
     // 00993A  tst.w d7
     if ((D7 & 0xFFFF) == 0) goto L_009946;  // 00993C  beq $9946
-    tick(20);
     wr16(0x1139E, 0x3);  // 00993E  move.w #$3, $1139e.l
 L_009946:
-    tick(16);
     setW(D7, 0x6);  // 009946  move.w #$6, d7
     setW(D6, 0x90);  // 00994A  move.w #$90, d6
 L_00994E:
-    tick(36);
     wr16(A6, (D6 & 0xFFFF));  // 00994E  move.w d6, (a6)
     A6 = A6 + 0x10;  // 009950  lea.l 16(a6), a6
     setW(D6, ((D6 & 0xFFFF) + 0x10));  // 009954  addi.w #$10, d6
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00994E;  // 009958  dbf.w d7, $994e
-    tick(16);
     return;  // 00995C  rts 
 L_00995E:
-    tick(14);
     // 00995E  tst.w d7
     if ((D7 & 0xFFFF) == 0) goto L_00996A;  // 009960  beq $996a
-    tick(20);
     wr16(0x1139E, 0x4);  // 009962  move.w #$4, $1139e.l
 L_00996A:
-    tick(16);
     setW(D7, 0x6);  // 00996A  move.w #$6, d7
     setW(D6, 0x909);  // 00996E  move.w #$909, d6
 L_009972:
-    tick(36);
     wr16(A6, (D6 & 0xFFFF));  // 009972  move.w d6, (a6)
     A6 = A6 + 0x10;  // 009974  lea.l 16(a6), a6
     setW(D6, ((D6 & 0xFFFF) + 0x101));  // 009978  addi.w #$101, d6
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_009972;  // 00997C  dbf.w d7, $9972
-    tick(16);
     return;  // 009980  rts 
 }
 
 void copy_text_line_22() {
-    tick(28);
     { A7 -= 4; wr32(A7, A0);  }  // 009982  move.l a0, -(a7)
     A1 = 0x140C4;  // 009984  lea.l $140c4.l, a1
     D0 = 0x15;  // 00998A  moveq.l #$15, d0
 L_00998C:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 00998C  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00998C;  // 00998E  dbf.w d0, $998c
-    tick(28);
     { uint32_t v = rd32(A7); A7 += 4; A0 = v; }  // 009992  movea.l (a7)+, a0
     return;  // 009994  rts 
 }
 
 void copy_text_line_b() {
-    tick(28);
     { A7 -= 4; wr32(A7, A0);  }  // 009996  move.l a0, -(a7)
     A1 = 0x1438E;  // 009998  lea.l $1438e.l, a1
     D0 = 0x7;  // 00999E  moveq.l #$7, d0
 L_0099A0:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 0099A0  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_0099A0;  // 0099A2  dbf.w d0, $99a0
-    tick(28);
     { uint32_t v = rd32(A7); A7 += 4; A0 = v; }  // 0099A6  movea.l (a7)+, a0
     return;  // 0099A8  rts 
 }
 
 void copy_text_line_c() {
-    tick(32);
     { A7 -= 4; wr32(A7, A0);  }  // 0099AA  move.l a0, -(a7)
     A1 = 0x143B8;  // 0099AC  lea.l $143b8.l, a1
     setW(D0, 0x1A);  // 0099B2  move.w #$1a, d0
 L_0099B6:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 0099B6  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_0099B6;  // 0099B8  dbf.w d0, $99b6
-    tick(28);
     { uint32_t v = rd32(A7); A7 += 4; A0 = v; }  // 0099BC  movea.l (a7)+, a0
     return;  // 0099BE  rts 
 }
 
 void main_menu() {
 L_0099C0:
-    tick(172);
     wr16(A5 + 0x96, 0x8380);  // 0099C0  move.w #$8380, 150(a5)
     wr32(A5 + 0x80, 0x1B896);  // 0099C6  move.l #$1b896, 128(a5)
     wr32(0x0006C, 0x10ABA);  // 0099CE  move.l #$10aba, $6c.w
@@ -2126,100 +1639,69 @@ L_0099C0:
     wr8(0x1B7C0, 0x42);  // 0099EE  move.b #$42, $1b7c0.l
     wr8(0x1B890, 0x42);  // 0099F6  move.b #$42, $1b890.l
 L_0099FE:
-    tick(18);
     call(update_mouse_pointer, 0x9A02);  // 0099FE  bsr $91f2
-    tick(30);
     // 009A02  btst.b #$6, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 6))) goto L_009A12;  // 009A0A  bne $9a12
-    tick(18);
     call(menu_mouse_click, 0x9A12);  // 009A0E  bsr $9bd6
 L_009A12:
-    tick(26);
     // 009A12  tst.w $113a0.l
     if (rd16(0x113A0) != 0) goto L_009A3E;  // 009A18  bne $9a3e
-    tick(26);
     // 009A1A  tst.w $113a2.l
     if (rd16(0x113A2) == 0) goto L_009A34;  // 009A20  beq $9a34
-    tick(54);
     wr16(0x113A2, 0);  // 009A24  clr.w $113a2.l
     wr32(A5 + 0x80, 0x1B896);  // 009A2A  move.l #$1b896, 128(a5)
     goto L_0099FE;  // 009A32  bra $99fe
 L_009A34:
-    tick(30);
     // 009A34  btst.b #$7, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 7))) goto L_0099FE;  // 009A3C  bne $99fe
 L_009A3E:
-    tick(50);
     wr16(0x113A0, 0);  // 009A3E  clr.w $113a0.l
     D4 = 0x0;  // 009A44  moveq.l #$0, d4
     // 009A46  tst.w $113ac.l
     if (rd16(v_demo_mode) != 0) goto L_009B0A;  // 009A4C  bne $9b0a
-    tick(30);
     // 009A50  tst.l $113d6.l
     if (rd32(v_player_record) != 0) goto L_009A7A;  // 009A56  bne $9a7a
-    tick(18);
     call(clear_message_line, 0x9A5C);  // 009A58  bsr $b108
-    tick(86);
     wr32(0x1B604, rd32(0x1B5F8));  // 009A5C  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 009A66  clr.w $1b608.l
     A2 = 0x144BE;  // 009A6C  lea.l $144be.l, a2
     call(draw_text, 0x9A76);  // 009A72  bsr $b2a0
-    tick(10);
     goto L_0099FE;  // 009A76  bra $99fe
 L_009A7A:
-    tick(50);
     A0 = rd32(v_player_record);  // 009A7A  movea.l $113d6.l, a0
     // 009A80  cmpi.w #$6f, $140dc.l
     if (int16_t(rd16(v_selected_level)) < 111) goto L_009AF2;  // 009A88  blt $9af2
-    tick(26);
     // 009A8C  cmpi.b #$1, 1(a0)
     if (rd8(A0 + 0x1) == 0x1) goto L_009AD8;  // 009A92  beq $9ad8
-    tick(26);
     // 009A94  cmpi.b #$f, 1(a0)
     if (rd8(A0 + 0x1) != 0xF) goto L_0099FE;  // 009A9A  bne $99fe
-    tick(30);
     // 009A9E  cmpi.w #$6f, $140dc.l
     if (rd16(v_selected_level) == 0x6F) goto L_0099FE;  // 009AA6  beq $99fe
-    tick(30);
     // 009AAA  cmpi.w #$70, $140dc.l
     if (rd16(v_selected_level) != 0x70) goto L_009AF2;  // 009AB2  bne $9af2
-    tick(18);
     call(show_end_screen, 0x9AB8);  // 009AB4  bsr $8a22
-    tick(18);
     call(set_menu_bitplanes, 0x9ABC);  // 009AB8  bsr $9366
-    tick(18);
     call(sort_positions, 0x9AC0);  // 009ABC  bsr $aaa8
-    tick(18);
     call(draw_positions_list, 0x9AC4);  // 009AC0  bsr $93ea
-    tick(18);
     call(draw_positions_scroll, 0x9AC8);  // 009AC4  bsr $94d6
-    tick(18);
     call(draw_player_list, 0x9ACC);  // 009AC8  bsr $951a
-    tick(18);
     call(draw_level_list, 0x9AD0);  // 009ACC  bsr $95b8
-    tick(18);
     call(draw_hall_of_fame, 0x9AD4);  // 009AD0  bsr $975c
-    tick(10);
     goto L_0099C0;  // 009AD4  bra $99c0
 L_009AD8:
-    tick(30);
     // 009AD8  cmpi.w #$70, $140dc.l
     if (rd16(v_selected_level) == 0x70) goto L_0099FE;  // 009AE0  beq $99fe
-    tick(42);
     setW(D4, rd16(A0 + 0x2));  // 009AE4  move.w 2(a0), d4
     wr16(0x113A4, 0x1);  // 009AE8  move.w #$1, $113a4.l
     goto L_009B0A;  // 009AF0  bra $9b0a
 L_009AF2:
-    tick(42);
     setW(D5, rd16(v_selected_level));  // 009AF2  move.w $140dc.l, d5
     setW(D5, ((D5 & 0xFFFF) + 0x1));  // 009AF8  addq.w #$1, d5
     // 009AFA  cmp.w 20(a0), d5
     if (int16_t((D5 & 0xFFFF)) > int16_t(rd16(A0 + 0x14))) goto L_009BB4;  // 009AFE  bgt $9bb4
-    tick(20);
     setW(D4, rd16(v_selected_level));  // 009B02  move.w $140dc.l, d4
     setW(D4, ((D4 & 0xFFFF) + 0x1));  // 009B08  addq.w #$1, d4
 L_009B0A:
-    tick(102);
     wr16(0x11300, (D4 & 0xFFFF));  // 009B0A  move.w d4, $11300.l
     setW(D5, (D4 & 0xFFFF));  // 009B10  move.w d4, d5
     setW(D5, ((D5 & 0xFFFF) - 0x1));  // 009B12  subq.w #$1, d5
@@ -2228,218 +1710,159 @@ L_009B0A:
     wr32(0x1BD46, rd32(0x1BCEA));  // 009B1A  move.l $1bcea.l, $1bd46.l
     D0 = 0x1BD46;  // 009B24  move.l #$1bd46, d0
     call(set_pointer_sprite, 0x9B2E);  // 009B2A  bsr $91e2
-    tick(26);
     logic<2>(rd16(v_demo_mode));  // 009B2E  tst.w $113ac.l
     if (CC_EQ) goto L_009B52;  // 009B34  beq $9b52
-    tick(40);
     A0 = rd32(0x1B5C4);  // 009B38  movea.l $1b5c4.l, a0
     A1 = v_level_buffer;  // 009B3E  lea.l $12468.l, a1
     setW(D7, 0x5FF);  // 009B44  move.w #$5ff, d7
 L_009B48:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 009B48  move.b (a0)+, (a1)+
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_009B48;  // 009B4A  dbf.w d7, $9b48
-    tick(10);
     goto L_009B96;  // 009B4E  bra $9b96
 L_009B52:
-    tick(30);
     A0 = 0x78000;  // 009B52  movea.l #$78000, a0
     call(native_diskInit, 0x9B5C);  // 009B58  bsr $1035e
-    tick(46);
     D0 = 0x0;  // 009B5C  moveq.l #$0, d0
     setW(D1, (D5 & 0xFFFF));  // 009B5E  move.w d5, d1
     setW(D2, logic<2>(0x2));  // 009B60  move.w #$2, d2
     A0 = 0x70000;  // 009B64  movea.l #$70000, a0
     call(native_loadFile, 0x9B6E);  // 009B6A  bsr $10404
-    tick(18);
     call(native_diskMotorOff, 0x9B72);  // 009B6E  bsr $103c2
-    tick(20);
     call(native_diskDelay, 0x9B78);  // 009B72  jsr $10a56.l
-    tick(28);
     A0 = 0x70000;  // 009B78  lea.l $70000.l, a0
     A1 = v_level_buffer;  // 009B7E  lea.l $12468.l, a1
     D7 = 0x5F;  // 009B84  moveq.l #$5f, d7
 L_009B86:
-    tick(92);
     {  uint32_t v = rd32(A0); A0 += 4;  wr32(A1, v); A1 += 4; }  // 009B86  move.l (a0)+, (a1)+
     {  uint32_t v = rd32(A0); A0 += 4;  wr32(A1, v); A1 += 4; }  // 009B88  move.l (a0)+, (a1)+
     {  uint32_t v = rd32(A0); A0 += 4;  wr32(A1, v); A1 += 4; }  // 009B8A  move.l (a0)+, (a1)+
     {  uint32_t v = rd32(A0); A0 += 4;  wr32(A1, v); A1 += 4; }  // 009B8C  move.l (a0)+, (a1)+
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_009B86;  // 009B8E  dbf.w d7, $9b86
-    tick(18);
     call(save_hiscores, 0x9B96);  // 009B92  bsr $b078
 L_009B96:
-    tick(66);
     wr32(0x1BCEA, rd32(0x1BD46));  // 009B96  move.l $1bd46.l, $1bcea.l
     D0 = 0x1BCEA;  // 009BA0  move.l #$1bcea, d0
     call(set_pointer_sprite, 0x9BAA);  // 009BA6  bsr $91e2
-    tick(36);
     wr8(0x1BAA8, 0x2);  // 009BAA  move.b #$2, $1baa8.l
     return;  // 009BB2  rts 
 L_009BB4:
-    tick(18);
     call(clear_message_line, 0x9BB8);  // 009BB4  bsr $b108
-    tick(86);
     wr32(0x1B604, rd32(0x1B5F8));  // 009BB8  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 009BC2  clr.w $1b608.l
     A2 = 0x144D6;  // 009BC8  lea.l $144d6.l, a2
     call(draw_text, 0x9BD2);  // 009BCE  bsr $b2a0
-    tick(10);
     goto L_0099FE;  // 009BD2  bra $99fe
 }
 
 void menu_mouse_click() {
-    tick(18);
     call(clear_message_line, 0x9BDA);  // 009BD6  bsr $b108
-    tick(16);
     A0 = 0x1B422;  // 009BDA  lea.l $1b422.l, a0
     D0 = 0xE;  // 009BE0  moveq.l #$e, d0
 L_009BE2:
-    tick(42);
     setW(D1, rd16(0x112F0));  // 009BE2  move.w $112f0.l, d1
     setW(D1, (((D1 & 0xFFFF) << 1) & 0xFFFF));  // 009BE8  lsl.w #$1, d1
     // 009BEA  cmp.w (a0), d1
     if (int16_t((D1 & 0xFFFF)) < int16_t(rd16(A0))) goto L_009C0C;  // 009BEC  blt $9c0c
-    tick(22);
     // 009BEE  cmp.w 2(a0), d1
     if (int16_t((D1 & 0xFFFF)) > int16_t(rd16(A0 + 0x2))) goto L_009C0C;  // 009BF2  bgt $9c0c
-    tick(38);
     setW(D1, rd16(0x112F2));  // 009BF4  move.w $112f2.l, d1
     // 009BFA  cmp.w 4(a0), d1
     if (int16_t((D1 & 0xFFFF)) < int16_t(rd16(A0 + 0x4))) goto L_009C0C;  // 009BFE  blt $9c0c
-    tick(22);
     // 009C00  cmp.w 6(a0), d1
     if (int16_t((D1 & 0xFFFF)) > int16_t(rd16(A0 + 0x6))) goto L_009C0C;  // 009C04  bgt $9c0c
-    tick(24);
     A0 = rd32(A0 + 0x8);  // 009C06  movea.l 8(a0), a0
     callAddress(A0); return;  // 009C0A  jmp (a0)
 L_009C0C:
-    tick(20);
     A0 = A0 + 0xC;  // 009C0C  lea.l 12(a0), a0
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_009BE2;  // 009C10  dbf.w d0, $9be2
-    tick(16);
     return;  // 009C14  rts 
 }
 
 void menu_positions_up() {
-    tick(26);
     // 009C16  tst.w $13028.l
     if (rd16(0x13028) == 0) goto L_009C32;  // 009C1C  beq $9c32
-    tick(18);
     call(wait_6_frames, 0x9C24);  // 009C20  bsr $b768
-    tick(38);
     wr16(0x13028, (rd16(0x13028) - 0x1));  // 009C24  subq.w #$1, $13028.l
     call(draw_positions_list, 0x9C2E);  // 009C2A  bsr $93ea
-    tick(18);
     call(draw_positions_scroll, 0x9C32);  // 009C2E  bsr $94d6
 L_009C32:
-    tick(16);
     return;  // 009C32  rts 
 }
 
 void menu_positions_down() {
-    tick(30);
     // 009C34  cmpi.w #$13, $13028.l
     if (rd16(0x13028) == 0x13) goto L_009C52;  // 009C3C  beq $9c52
-    tick(18);
     call(wait_6_frames, 0x9C44);  // 009C40  bsr $b768
-    tick(38);
     wr16(0x13028, (rd16(0x13028) + 0x1));  // 009C44  addq.w #$1, $13028.l
     call(draw_positions_list, 0x9C4E);  // 009C4A  bsr $93ea
-    tick(18);
     call(draw_positions_scroll, 0x9C52);  // 009C4E  bsr $94d6
 L_009C52:
-    tick(16);
     return;  // 009C52  rts 
 }
 
 void menu_player_up() {
-    tick(18);
     call(wait_6_frames, 0x9C58);  // 009C54  bsr $b768
-    tick(26);
     // 009C58  tst.w $140e8.l
     if (rd16(0x140E8) == 0) goto L_009C76;  // 009C5E  beq $9c76
-    tick(38);
     wr16(0x140E8, (rd16(0x140E8) - 0x1));  // 009C62  subq.w #$1, $140e8.l
     call(draw_player_list, 0x9C6C);  // 009C68  bsr $951a
-    tick(38);
     wr16(0x140DE, 0);  // 009C6C  clr.w $140de.l
     call(draw_level_list, 0x9C76);  // 009C72  bsr $95b8
 L_009C76:
-    tick(16);
     return;  // 009C76  rts 
 }
 
 void menu_player_down() {
-    tick(18);
     call(wait_6_frames, 0x9C7C);  // 009C78  bsr $b768
-    tick(30);
     // 009C7C  cmpi.w #$13, $140e8.l
     if (rd16(0x140E8) == 0x13) goto L_009C9C;  // 009C84  beq $9c9c
-    tick(38);
     wr16(0x140E8, (rd16(0x140E8) + 0x1));  // 009C88  addq.w #$1, $140e8.l
     call(draw_player_list, 0x9C92);  // 009C8E  bsr $951a
-    tick(38);
     wr16(0x140DE, 0);  // 009C92  clr.w $140de.l
     call(draw_level_list, 0x9C9C);  // 009C98  bsr $95b8
 L_009C9C:
-    tick(16);
     return;  // 009C9C  rts 
 }
 
 void menu_levels_up() {
-    tick(18);
     call(wait_6_frames, 0x9CA2);  // 009C9E  bsr $b768
-    tick(26);
     // 009CA2  tst.w $140dc.l
     if (rd16(v_selected_level) == 0) goto L_009CB4;  // 009CA8  beq $9cb4
-    tick(38);
     wr16(v_selected_level, (rd16(v_selected_level) - 0x1));  // 009CAA  subq.w #$1, $140dc.l
     call(draw_level_list_from_player, 0x9CB4);  // 009CB0  bsr $961e
 L_009CB4:
-    tick(16);
     return;  // 009CB4  rts 
 }
 
 void menu_levels_down() {
-    tick(18);
     call(wait_6_frames, 0x9CBA);  // 009CB6  bsr $b768
-    tick(30);
     // 009CBA  cmpi.w #$70, $140dc.l
     if (rd16(v_selected_level) == 0x70) goto L_009CCE;  // 009CC2  beq $9cce
-    tick(38);
     wr16(v_selected_level, (rd16(v_selected_level) + 0x1));  // 009CC4  addq.w #$1, $140dc.l
     call(draw_level_list_from_player, 0x9CCE);  // 009CCA  bsr $961e
 L_009CCE:
-    tick(16);
     return;  // 009CCE  rts 
 }
 
 void menu_new_player() {
-    tick(16);
     D0 = 0x7;  // 009CD0  moveq.l #$7, d0
     A0 = 0x11410;  // 009CD2  lea.l $11410.l, a0
 L_009CD8:
-    tick(24);
     wr8(A0, 0);  // 009CD8  clr.b (a0)+
     A0 += 1;
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_009CD8;  // 009CDA  dbf.w d0, $9cd8
-    tick(16);
     D0 = 0x7;  // 009CDE  moveq.l #$7, d0
     A0 = 0x1141E;  // 009CE0  lea.l $1141e.l, a0
 L_009CE6:
-    tick(24);
     wr8(A0, 0);  // 009CE6  clr.b (a0)+
     A0 += 1;
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_009CE6;  // 009CE8  dbf.w d0, $9ce6
-    tick(126);
     wr16(0x143D4, 0x158);  // 009CEC  move.w #$158, $143d4.l
     wr16(0x143D6, 0x92);  // 009CF4  move.w #$92, $143d6.l
     A2 = 0x143D4;  // 009CFC  lea.l $143d4.l, a2
     wr32(0x1B604, rd32(0x1B5F8));  // 009D02  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 009D0C  clr.w $1b608.l
     call(draw_text, 0x9D16);  // 009D12  bsr $b2a0
-    tick(50);
     D0 = 0x0;  // 009D16  moveq.l #$0, d0
     D4 = 0x0;  // 009D18  moveq.l #$0, d4
     D5 = 0x0;  // 009D1A  moveq.l #$0, d5
@@ -2448,33 +1871,22 @@ L_009CE6:
     A2 = 0x11410;  // 009D20  lea.l $11410.l, a2
     call(install_keyboard_irq, 0x9D2A);  // 009D26  bsr $101d4
 L_009D2A:
-    tick(18);
     call(read_keyboard, 0x9D2E);  // 009D2A  bsr $10318
-    tick(10);
     if (CC_CC) goto L_009D2A;  // 009D2E  bcc $9d2a
-    tick(18);
     // 009D30  cmpi.b #$41, d5
     if ((D5 & 0xFF) == 0x41) goto L_009D52;  // 009D34  beq $9d52
-    tick(18);
     // 009D36  cmpi.b #$44, d5
     if ((D5 & 0xFF) == 0x44) goto L_009D4A;  // 009D3A  beq $9d4a
-    tick(18);
     // 009D3E  cmpi.b #$8, d4
     if ((D4 & 0xFF) == 0x8) goto L_009D2A;  // 009D42  beq $9d2a
-    tick(18);
     call(name_entry_add_char, 0x9D46);  // 009D44  bsr $9d8e
-    tick(10);
     goto L_009D2A;  // 009D46  bra $9d2a
 L_009D4A:
-    tick(18);
     call(remove_keyboard_irq, 0x9D4E);  // 009D4A  bsr $101fa
-    tick(10);
     goto L_00A6D6;  // 009D4E  bra $a6d6
 L_009D52:
-    tick(14);
     // 009D52  tst.b d4
     if ((D4 & 0xFF) == 0) goto L_009D2A;  // 009D54  beq $9d2a
-    tick(216);
     setB(D4, ((D4 & 0xFF) - 0x1));  // 009D58  subq.b #$1, d4
     wr8(A2, 0);  // 009D5A  clr.b (a2)
     A2 -= 0x1;  // 009D5C  subq.l #$1, a2
@@ -2493,39 +1905,27 @@ L_009D52:
     { uint32_t v = rd32(A7); A7 += 4; A2 = v; }  // 009D8A  movea.l (a7)+, a2
     goto L_009D2A;  // 009D8C  bra $9d2a
 L_00A6D6:
-    tick(18);
     call(clear_message_line, 0xA6DA);  // 00A6D6  bsr $b108
-    tick(18);
     call(name_length, 0xA6DC);  // 00A6DA  bsr $a6f2
-    tick(18);
     call(check_player_name, 0xA6DE);  // 00A6DC  bsr $a73a
-    tick(18);
     call(find_free_player_slot, 0xA6E2);  // 00A6DE  bsr $a896
-    tick(38);
     wr16(0x140DE, 0);  // 00A6E2  clr.w $140de.l
     call(draw_level_list, 0xA6EC);  // 00A6E8  bsr $95b8
-    tick(18);
     call(save_hiscores, 0xA6F0);  // 00A6EC  bsr $b078
-    tick(16);
     return;  // 00A6F0  rts 
 }
 
 void name_entry_add_char() {
-    tick(12);
     A0 = 0x1B4D6;  // 009D8E  lea.l $1b4d6.l, a0
 L_009D94:
-    tick(18);
     // 009D94  tst.b (a0)
     if (rd8(A0) == 0) goto L_009DD8;  // 009D96  beq $9dd8
-    tick(22);
     setB(D1, rd8(A0));  // 009D98  move.b (a0), d1
     // 009D9A  cmp.b d5, d1
     if ((D1 & 0xFF) == (D5 & 0xFF)) goto L_009DA2;  // 009D9C  beq $9da2
-    tick(18);
     A0 += 0x2;  // 009D9E  addq.l #$2, a0
     goto L_009D94;  // 009DA0  bra $9d94
 L_009DA2:
-    tick(278);
     wr8(0x112E5, rd8(A0));  // 009DA2  move.b (a0), $112e5.l
     wr8(0x112E4, rd8(A0 + 0x1));  // 009DA8  move.b 1(a0), $112e4.l
     setW(D4, ((D4 & 0xFFFF) + 0x1));  // 009DB0  addq.w #$1, d4
@@ -2535,18 +1935,14 @@ L_009DA2:
     A2 = 0x1140C;  // 009DC4  lea.l $1140c.l, a2
     wr16(0x1B608, 0);  // 009DCA  clr.w $1b608.l
     call(draw_text, 0x9DD4);  // 009DD0  bsr $b2a0
-    tick(132);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 009DD4  movem.l (a7)+, regs(7fff)
 L_009DD8:
-    tick(16);
     return;  // 009DD8  rts 
 }
 
 void menu_delete_player() {
-    tick(30);
     // 009DDA  tst.l $113d6.l
     if (rd32(v_player_record) == 0) goto L_009E64;  // 009DE0  beq $9e64
-    tick(100);
     A0 = 0x140FC;  // 009DE4  lea.l $140fc.l, a0
     A1 = 0x14498;  // 009DEA  lea.l $14498.l, a1
     D0 = 0x0;  // 009DF0  moveq.l #$0, d0
@@ -2555,101 +1951,73 @@ void menu_delete_player() {
     A0 += D0;  // 009DFC  adda.l d0, a0
     setW(D0, 0x7);  // 009DFE  move.w #$7, d0
 L_009E02:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 009E02  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_009E02;  // 009E04  dbf.w d0, $9e02
-    tick(86);
     wr16(0x1B608, 0);  // 009E08  clr.w $1b608.l
     wr32(0x1B604, rd32(0x1B5F8));  // 009E0E  move.l $1b5f8.l, $1b604.l
     A2 = 0x1448C;  // 009E18  lea.l $1448c.l, a2
     call(draw_text, 0x9E22);  // 009E1E  bsr $b2a0
-    tick(18);
     call(wait_6_frames, 0x9E26);  // 009E22  bsr $b768
-    tick(18);
     call(wait_click_and_release, 0x9E2A);  // 009E26  bsr $a68a
-    tick(14);
     // 009E2A  tst.l d7
     if (D7 != 0) goto L_009E64;  // 009E2C  bne $9e64
-    tick(24);
     setW(D1, 0x13);  // 009E2E  move.w #$13, d1
     setW(D3, 0);  // 009E32  clr.w d3
     A1 = 0x140FC;  // 009E34  lea.l $140fc.l, a1
 L_009E3A:
-    tick(40);
     A0 = rd32(v_player_record);  // 009E3A  movea.l $113d6.l, a0
     A0 += 0x8;  // 009E40  addq.l #$8, a0
     D0 = 0x0;  // 009E42  moveq.l #$0, d0
     setW(D2, 0x7);  // 009E44  move.w #$7, d2
 L_009E48:
-    tick(26);
     setB(D3, rd8(A0));  // 009E48  move.b (a0), d3
     // 009E4A  cmp.b (a1), d3
     if ((D3 & 0xFF) != rd8(A1)) goto L_009E50;  // 009E4C  bne $9e50
-    tick(4);
     setW(D0, ((D0 & 0xFFFF) + 0x1));  // 009E4E  addq.w #$1, d0
 L_009E50:
-    tick(28);
     A0 += 0x1;  // 009E50  addq.l #$1, a0
     A1 += 0x1;  // 009E52  addq.l #$1, a1
     setW(D2, D2 - 1); if ((D2 & 0xFFFF) != 0xFFFF) goto L_009E48;  // 009E54  dbf.w d2, $9e48
-    tick(18);
     // 009E58  cmpi.w #$8, d0
     if ((D0 & 0xFFFF) == 0x8) goto L_009E66;  // 009E5C  beq $9e66
-    tick(20);
     A1 += 0x2;  // 009E5E  addq.l #$2, a1
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_009E3A;  // 009E60  dbf.w d1, $9e3a
 L_009E64:
-    tick(16);
     return;  // 009E64  rts 
 L_009E66:
-    tick(36);
     A0 = rd32(v_player_record);  // 009E66  movea.l $113d6.l, a0
     A1 = A1 - 0x8;  // 009E6C  lea.l -8(a1), a1
     setW(D0, 0x7);  // 009E70  move.w #$7, d0
 L_009E74:
-    tick(24);
     {  wr8(A1, 0x2D); A1 += 1; }  // 009E74  move.b #$2d, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_009E74;  // 009E78  dbf.w d0, $9e74
-    tick(8);
     setW(D0, 0x15);  // 009E7C  move.w #$15, d0
 L_009E80:
-    tick(24);
     wr8(A0, 0);  // 009E80  clr.b (a0)+
     A0 += 1;
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_009E80;  // 009E82  dbf.w d0, $9e80
-    tick(94);
     wr32(v_player_record, 0);  // 009E86  clr.l $113d6.l
     wr32(0x113DA, 0);  // 009E8C  clr.l $113da.l
     wr16(0x140DE, 0);  // 009E92  clr.w $140de.l
     call(sort_positions, 0x9E9C);  // 009E98  bsr $aaa8
-    tick(18);
     call(format_positions, 0x9EA0);  // 009E9C  bsr $abbe
-    tick(18);
     call(draw_player_stats, 0x9EA4);  // 009EA0  bsr $ad10
-    tick(18);
     call(draw_positions_list, 0x9EA8);  // 009EA4  bsr $93ea
-    tick(18);
     call(draw_player_list, 0x9EAC);  // 009EA8  bsr $951a
-    tick(18);
     call(save_hiscores, 0x9EB0);  // 009EAC  bsr $b078
-    tick(16);
     return;  // 009EB0  rts 
 }
 
 void menu_skip_level() {
-    tick(30);
     // 009EB2  cmpi.w #$6f, $140dc.l
     if (int16_t(rd16(v_selected_level)) >= 111) goto L_009FB4;  // 009EBA  bge $9fb4
-    tick(42);
     A0 = rd32(v_player_record);  // 009EBE  movea.l $113d6.l, a0
     // 009EC4  tst.w 6(a0)
     if (rd16(A0 + 0x6) != 0) goto L_009FB4;  // 009EC8  bne $9fb4
-    tick(42);
     setW(D0, rd16(A0 + 0x14));  // 009ECC  move.w 20(a0), d0
     setW(D0, ((D0 & 0xFFFF) - 0x1));  // 009ED0  subq.w #$1, d0
     // 009ED2  cmp.w $140dc.l, d0
     if ((D0 & 0xFFFF) != rd16(v_selected_level)) goto L_009FB4;  // 009ED8  bne $9fb4
-    tick(214);
     A0 = 0x13270;  // 009EDC  lea.l $13270.l, a0
     A1 = 0x144B5;  // 009EE2  lea.l $144b5.l, a1
     D0 = 0x0;  // 009EE8  moveq.l #$0, d0
@@ -2663,14 +2031,10 @@ void menu_skip_level() {
     wr16(0x1B608, 0);  // 009F06  clr.w $1b608.l
     A2 = 0x144A6;  // 009F0C  lea.l $144a6.l, a2
     call(draw_text, 0x9F16);  // 009F12  bsr $b2a0
-    tick(18);
     call(wait_6_frames, 0x9F1A);  // 009F16  bsr $b768
-    tick(18);
     call(wait_click_and_release, 0x9F1E);  // 009F1A  bsr $a68a
-    tick(14);
     // 009F1E  tst.l d7
     if (D7 != 0) goto L_009F96;  // 009F20  bne $9f96
-    tick(198);
     A0 = 0x13270;  // 009F22  lea.l $13270.l, a0
     D0 = 0x0;  // 009F28  moveq.l #$0, d0
     setW(D0, rd16(v_selected_level));  // 009F2A  move.w $140dc.l, d0
@@ -2682,69 +2046,51 @@ void menu_skip_level() {
     wr8(0x113E7, 0);  // 009F4C  clr.b $113e7.l
     A4 = 0x113E4;  // 009F52  lea.l $113e4.l, a4
     call(parse_decimal, 0x9F5C);  // 009F58  bsr $10098
-    tick(36);
     A1 = rd32(v_player_record);  // 009F5C  movea.l $113d6.l, a1
     A1 += 0x2;  // 009F62  addq.l #$2, a1
     setW(D1, 0x2);  // 009F64  move.w #$2, d1
 L_009F68:
-    tick(18);
     // 009F68  tst.w (a1)
     if (rd16(A1) == 0) goto L_009F98;  // 009F6A  beq $9f98
-    tick(20);
     A1 += 0x2;  // 009F6C  addq.l #$2, a1
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_009F68;  // 009F6E  dbf.w d1, $9f68
-    tick(86);
     wr32(0x1B604, rd32(0x1B5F8));  // 009F72  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 009F7C  clr.w $1b608.l
     A2 = 0x1441E;  // 009F82  lea.l $1441e.l, a2
     call(draw_text, 0x9F8C);  // 009F88  bsr $b2a0
 L_009F8C:
-    tick(30);
     // 009F8C  btst.b #$6, $bfe001.l
     if (!(rd8(0xBFE001) & (1u << 6))) goto L_009F8C;  // 009F94  beq $9f8c
 L_009F96:
-    tick(16);
     return;  // 009F96  rts 
 L_009F98:
-    tick(82);
     wr16(A1, (D0 & 0xFFFF));  // 009F98  move.w d0, (a1)
     A0 = rd32(v_player_record);  // 009F9A  movea.l $113d6.l, a0
     wr16(A0 + 0x14, (rd16(A0 + 0x14) + 0x1));  // 009FA0  addq.w #$1, 20(a0)
     wr16(v_selected_level, (rd16(v_selected_level) + 0x1));  // 009FA4  addq.w #$1, $140dc.l
     call(draw_level_list, 0x9FAE);  // 009FAA  bsr $95b8
-    tick(18);
     call(save_hiscores, 0x9FB2);  // 009FAE  bsr $b078
-    tick(16);
     return;  // 009FB2  rts 
 L_009FB4:
-    tick(18);
     call(clear_message_line, 0x9FB8);  // 009FB4  bsr $b108
-    tick(86);
     A2 = 0x14476;  // 009FB8  lea.l $14476.l, a2
     wr32(0x1B604, rd32(0x1B5F8));  // 009FBE  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 009FC8  clr.w $1b608.l
     call(draw_text, 0x9FD2);  // 009FCE  bsr $b2a0
-    tick(16);
     return;  // 009FD2  rts 
 }
 
 void menu_statistics() {
-    tick(30);
     // 009FD4  tst.l $113d6.l
     if (rd32(v_player_record) != 0) goto L_009FFC;  // 009FDA  bne $9ffc
-    tick(18);
     call(clear_message_line, 0x9FE0);  // 009FDC  bsr $b108
-    tick(86);
     wr32(0x1B604, rd32(0x1B5F8));  // 009FE0  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 009FEA  clr.w $1b608.l
     A2 = 0x144BE;  // 009FF0  lea.l $144be.l, a2
     call(draw_text, 0x9FFA);  // 009FF6  bsr $b2a0
-    tick(16);
     return;  // 009FFA  rts 
 L_009FFC:
-    tick(18);
     call(clear_level_bitmap_5000, 0xA000);  // 009FFC  bsr $8aec
-    tick(194);
     D0 = rd32(v_level_bitmap_ptr);  // 00A000  move.l $1b5e8.l, d0
     A1 = 0x1BBA6;  // 00A006  lea.l $1bba6.l, a1
     wr16(A1 + 0x6, (D0 & 0xFFFF));  // 00A00C  move.w d0, 6(a1)
@@ -2756,104 +2102,76 @@ L_009FFC:
     wr16(0x1B608, 0);  // 00A032  clr.w $1b608.l
     A2 = 0x146A6;  // 00A038  lea.l $146a6.l, a2
     call(draw_text, 0xA042);  // 00A03E  bsr $b2a0
-    tick(30);
     A2 = 0x146CE;  // 00A042  lea.l $146ce.l, a2
     call(draw_text, 0xA04C);  // 00A048  bsr $b2a0
-    tick(30);
     A2 = 0x146EE;  // 00A04C  lea.l $146ee.l, a2
     call(draw_text, 0xA056);  // 00A052  bsr $b2a0
-    tick(18);
     call(compute_statistics, 0xA05A);  // 00A056  bsr $a15c
-    tick(50);
     A0 = 0x14502;  // 00A05A  lea.l $14502.l, a0
     A1 = 0x14BFF;  // 00A060  lea.l $14bff.l, a1
     setW(D0, 0x2);  // 00A066  move.w #$2, d0
     call(copy_bytes_d0, 0xA06E);  // 00A06A  bsr $a154
-    tick(50);
     A0 = 0x14506;  // 00A06E  lea.l $14506.l, a0
     A1 = 0x14BD8;  // 00A074  lea.l $14bd8.l, a1
     setW(D0, 0x7);  // 00A07A  move.w #$7, d0
     call(copy_bytes_d0, 0xA082);  // 00A07E  bsr $a154
-    tick(50);
     A0 = 0x1450E;  // 00A082  lea.l $1450e.l, a0
     A1 = 0x14C1B;  // 00A088  lea.l $14c1b.l, a1
     setW(D0, 0x2);  // 00A08E  move.w #$2, d0
     call(copy_bytes_d0, 0xA096);  // 00A092  bsr $a154
-    tick(34);
     A1 = 0x14C1B;  // 00A096  lea.l $14c1b.l, a1
     // 00A09C  cmpi.b #$30, (a1)
     if (rd8(A1) != 0x30) goto L_00A0A6;  // 00A0A0  bne $a0a6
-    tick(12);
     wr8(A1, 0x20);  // 00A0A2  move.b #$20, (a1)
 L_00A0A6:
-    tick(50);
     A0 = 0x14512;  // 00A0A6  lea.l $14512.l, a0
     A1 = 0x14C1F;  // 00A0AC  lea.l $14c1f.l, a1
     setW(D0, 0x1);  // 00A0B2  move.w #$1, d0
     call(copy_bytes_d0, 0xA0BA);  // 00A0B6  bsr $a154
-    tick(50);
     A0 = 0x14514;  // 00A0BA  lea.l $14514.l, a0
     A1 = 0x14C22;  // 00A0C0  lea.l $14c22.l, a1
     setW(D0, 0x1);  // 00A0C6  move.w #$1, d0
     call(copy_bytes_d0, 0xA0CE);  // 00A0CA  bsr $a154
-    tick(30);
     A2 = 0x14B26;  // 00A0CE  lea.l $14b26.l, a2
     call(draw_text, 0xA0D8);  // 00A0D4  bsr $b2a0
-    tick(30);
     A2 = 0x14B4C;  // 00A0D8  lea.l $14b4c.l, a2
     call(draw_text, 0xA0E2);  // 00A0DE  bsr $b2a0
-    tick(30);
     A2 = 0x14BA2;  // 00A0E2  lea.l $14ba2.l, a2
     call(draw_text, 0xA0EC);  // 00A0E8  bsr $b2a0
-    tick(30);
     A2 = 0x14BC0;  // 00A0EC  lea.l $14bc0.l, a2
     call(draw_text, 0xA0F6);  // 00A0F2  bsr $b2a0
-    tick(30);
     A2 = 0x14BE2;  // 00A0F6  lea.l $14be2.l, a2
     call(draw_text, 0xA100);  // 00A0FC  bsr $b2a0
-    tick(30);
     A2 = 0x14C04;  // 00A100  lea.l $14c04.l, a2
     call(draw_text, 0xA10A);  // 00A106  bsr $b2a0
-    tick(30);
     // 00A10A  cmpi.w #$1, $112dc.l
     if (rd16(0x112DC) != 0x1) goto L_00A12A;  // 00A112  bne $a12a
-    tick(30);
     A2 = 0x14CDC;  // 00A114  lea.l $14cdc.l, a2
     call(draw_text, 0xA11E);  // 00A11A  bsr $b2a0
-    tick(30);
     A2 = 0x14D00;  // 00A11E  lea.l $14d00.l, a2
     call(draw_text, 0xA128);  // 00A124  bsr $b2a0
-    tick(10);
     goto L_00A148;  // 00A128  bra $a148
 L_00A12A:
-    tick(30);
     A2 = 0x14C26;  // 00A12A  lea.l $14c26.l, a2
     call(draw_text, 0xA134);  // 00A130  bsr $b2a0
-    tick(30);
     // 00A134  cmpi.w #$2, $112dc.l
     if (rd16(0x112DC) != 0x2) goto L_00A148;  // 00A13C  bne $a148
-    tick(30);
     A2 = 0x14D2C;  // 00A13E  lea.l $14d2c.l, a2
     call(draw_text, 0xA148);  // 00A144  bsr $b2a0
 L_00A148:
-    tick(18);
     call(return_to_menu, 0xA14C);  // 00A148  bsr $a48c
-    tick(36);
     wr16(0x112DC, 0);  // 00A14C  clr.w $112dc.l
     return;  // 00A152  rts 
 }
 
 void copy_bytes_d0() {
 L_00A154:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 00A154  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A154;  // 00A156  dbf.w d0, $a154
-    tick(16);
     return;  // 00A15A  rts 
 }
 
 void compute_statistics() {
-    tick(82);
     D0 = 0x0;  // 00A15C  moveq.l #$0, d0
     D1 = 0x0;  // 00A15E  moveq.l #$0, d1
     D2 = 0x0;  // 00A160  moveq.l #$0, d2
@@ -2865,7 +2183,6 @@ void compute_statistics() {
     A0 = rd32(v_player_record);  // 00A16C  movea.l $113d6.l, a0
     setW(D0, rd16(A0 + 0x14));  // 00A172  move.w 20(a0), d0
     call(clamp_level_index, 0xA17A);  // 00A176  bsr $a3ae
-    tick(100);
     setW(D1, rd16(A0 + 0x10));  // 00A17A  move.w 16(a0), d1
     setB(D2, rd8(A0 + 0x12));  // 00A17E  move.b 18(a0), d2
     setB(D3, rd8(A0 + 0x13));  // 00A182  move.b 19(a0), d3
@@ -2873,13 +2190,10 @@ void compute_statistics() {
     setW(D2, ((D2 & 0xFFFF) + (D1 & 0xFFFF)));  // 00A18A  add.w d1, d2
     // 00A18C  cmpi.w #$1e, d3
     if (int16_t((D3 & 0xFFFF)) < 30) goto L_00A194;  // 00A190  blt $a194
-    tick(4);
     setW(D2, ((D2 & 0xFFFF) + 0x1));  // 00A192  addq.w #$1, d2
 L_00A194:
-    tick(14);
     // 00A194  cmp.w d0, d2
     if (int16_t((D2 & 0xFFFF)) < int16_t((D0 & 0xFFFF))) goto L_00A39C;  // 00A196  blt $a39c
-    tick(220);
     setW(D5, (D2 & 0xFFFF));  // 00A19A  move.w d2, d5
     D2 = divu((D0 & 0xFFFF), D2);  // 00A19C  divu.w d0, d2
     setW(D6, (D2 & 0xFFFF));  // 00A19E  move.w d2, d6
@@ -2887,23 +2201,18 @@ L_00A194:
     setW(D5, ((D5 & 0xFFFF) - (D0 & 0xFFFF)));  // 00A1A2  sub.w d0, d5
     setW(D0, rd16(A0 + 0x14));  // 00A1A4  move.w 20(a0), d0
     call(clamp_level_index, 0xA1AC);  // 00A1A8  bsr $a3ae
-    tick(158);
     D0 = divu(0xA, D0);  // 00A1AC  divu.w #$a, d0
     // 00A1B0  tst.w d0
     if ((D0 & 0xFFFF) == 0) goto L_00A1C0;  // 00A1B2  beq $a1c0
-    tick(158);
     D5 = divu((D0 & 0xFFFF), D5);  // 00A1B4  divu.w d0, d5
     // 00A1B6  cmpi.w #$a, d5
     if (int16_t((D5 & 0xFFFF)) < 10) goto L_00A1C0;  // 00A1BA  blt $a1c0
-    tick(8);
     setW(D5, 0x9);  // 00A1BC  move.w #$9, d5
 L_00A1C0:
-    tick(50);
     setW(D4, (D6 & 0xFFFF));  // 00A1C0  move.w d6, d4
     wr16(0x14516, (D6 & 0xFFFF));  // 00A1C2  move.w d6, $14516.l
     A6 = 0x111D2;  // 00A1C8  lea.l $111d2.l, a6
     call(number_to_decimal, 0xA1D2);  // 00A1CE  bsr $100cc
-    tick(118);
     A0 = 0x14C49;  // 00A1D2  lea.l $14c49.l, a0
     wr8(A0, 0x20);  // 00A1D8  move.b #$20, (a0)
     wr8(A0 + 0x1, 0x20);  // 00A1DC  move.b #$20, 1(a0)
@@ -2912,24 +2221,19 @@ L_00A1C0:
     wr8(A0 + 0x4, 0x20);  // 00A1EE  move.b #$20, 4(a0)
     // 00A1F4  cmpi.b #$30, $111d9.l
     if (rd8(0x111D9) == 0x30) goto L_00A20E;  // 00A1FC  beq $a20e
-    tick(54);
     wr8(A0, rd8(0x111D9));  // 00A1FE  move.b $111d9.l, (a0)
     wr8(A0 + 0x1, rd8(0x111DA));  // 00A204  move.b $111da.l, 1(a0)
     goto L_00A220;  // 00A20C  bra $a220
 L_00A20E:
-    tick(30);
     // 00A20E  cmpi.b #$30, $111da.l
     if (rd8(0x111DA) == 0x30) goto L_00A220;  // 00A216  beq $a220
-    tick(24);
     wr8(A0 + 0x1, rd8(0x111DA));  // 00A218  move.b $111da.l, 1(a0)
 L_00A220:
-    tick(74);
     wr8(A0 + 0x2, rd8(0x111DB));  // 00A220  move.b $111db.l, 2(a0)
     setW(D4, (D5 & 0xFFFF));  // 00A228  move.w d5, d4
     wr16(0x14518, (D5 & 0xFFFF));  // 00A22A  move.w d5, $14518.l
     A6 = 0x111D2;  // 00A230  lea.l $111d2.l, a6
     call(number_to_decimal, 0xA23A);  // 00A236  bsr $100cc
-    tick(102);
     A0 = 0x14C49;  // 00A23A  lea.l $14c49.l, a0
     wr8(A0 + 0x3, 0x2E);  // 00A240  move.b #$2e, 3(a0)
     wr8(A0 + 0x4, rd8(0x111DB));  // 00A246  move.b $111db.l, 4(a0)
@@ -2937,7 +2241,6 @@ L_00A220:
     setW(D0, rd16(A0 + 0x14));  // 00A254  move.w 20(a0), d0
     // 00A258  cmpi.w #$3e7, d0
     if ((D0 & 0xFFFF) == 0x3E7) goto L_00A3A6;  // 00A25C  beq $a3a6
-    tick(318);
     setW(D0, rd16(0x14516));  // 00A260  move.w $14516.l, d0
     setW(D1, rd16(0x14518));  // 00A266  move.w $14518.l, d1
     D0 = mulu(0x6F, D0);  // 00A26C  mulu.w #$6f, d0
@@ -2949,7 +2252,6 @@ L_00A220:
     wr16(0x14516, (D4 & 0xFFFF));  // 00A27E  move.w d4, $14516.l
     A6 = 0x111D2;  // 00A284  lea.l $111d2.l, a6
     call(number_to_decimal, 0xA28E);  // 00A28A  bsr $100cc
-    tick(226);
     A0 = 0x14CAE;  // 00A28E  lea.l $14cae.l, a0
     wr8(A0, 0x20);  // 00A294  move.b #$20, (a0)
     wr8(A0 + 0x1, 0x20);  // 00A298  move.b #$20, 1(a0)
@@ -2963,14 +2265,11 @@ L_00A220:
     wr8(A0 + 0x4, rd8(0x111DB));  // 00A2CE  move.b $111db.l, 4(a0)
     // 00A2D6  cmpi.b #$30, (a0)
     if (rd8(A0) != 0x30) goto L_00A2EE;  // 00A2DA  bne $a2ee
-    tick(38);
     wr8(A0, 0x20);  // 00A2DC  move.b #$20, (a0)
     // 00A2E0  cmpi.b #$30, 1(a0)
     if (rd8(A0 + 0x1) != 0x30) goto L_00A2EE;  // 00A2E6  bne $a2ee
-    tick(16);
     wr8(A0 + 0x1, 0x20);  // 00A2E8  move.b #$20, 1(a0)
 L_00A2EE:
-    tick(380);
     D0 = 0x0;  // 00A2EE  moveq.l #$0, d0
     D1 = 0x0;  // 00A2F0  moveq.l #$0, d1
     D4 = 0x0;  // 00A2F2  moveq.l #$0, d4
@@ -2990,7 +2289,6 @@ L_00A2EE:
     wr8(A0 + 0x1, 0x30);  // 00A332  move.b #$30, 1(a0)
     A6 = 0x111D2;  // 00A338  lea.l $111d2.l, a6
     call(number_to_decimal, 0xA342);  // 00A33E  bsr $100cc
-    tick(98);
     A0 = 0x14CC3;  // 00A342  lea.l $14cc3.l, a0
     A1 = 0x111DA;  // 00A348  lea.l $111da.l, a1
     wr8(A0, rd8(A1 - 0x1));  // 00A34E  move.b -1(a1), (a0)
@@ -2998,49 +2296,38 @@ L_00A2EE:
     wr8(A0 + 0x2, rd8(A1 + 0x1));  // 00A356  move.b 1(a1), 2(a0)
     // 00A35C  cmpi.b #$30, (a0)
     if (rd8(A0) != 0x30) goto L_00A374;  // 00A360  bne $a374
-    tick(38);
     wr8(A0, 0x20);  // 00A362  move.b #$20, (a0)
     // 00A366  cmpi.b #$30, 1(a0)
     if (rd8(A0 + 0x1) != 0x30) goto L_00A374;  // 00A36C  bne $a374
-    tick(16);
     wr8(A0 + 0x1, 0x20);  // 00A36E  move.b #$20, 1(a0)
 L_00A374:
-    tick(50);
     D4 = 0x0;  // 00A374  moveq.l #$0, d4
     setW(D4, rd16(0x14516));  // 00A376  move.w $14516.l, d4
     A6 = 0x111D2;  // 00A37C  lea.l $111d2.l, a6
     call(number_to_decimal, 0xA386);  // 00A382  bsr $100cc
-    tick(72);
     A0 = 0x14CD1;  // 00A386  lea.l $14cd1.l, a0
     A1 = 0x111DA;  // 00A38C  lea.l $111da.l, a1
     wr8(A0, rd8(A1));  // 00A392  move.b (a1), (a0)
     wr8(A0 + 0x1, rd8(A1 + 0x1));  // 00A394  move.b 1(a1), 1(a0)
     return;  // 00A39A  rts 
 L_00A39C:
-    tick(36);
     wr16(0x112DC, 0x1);  // 00A39C  move.w #$1, $112dc.l
     return;  // 00A3A4  rts 
 L_00A3A6:
-    tick(20);
     wr16(0x112DC, 0x2);  // 00A3A6  move.w #$2, $112dc.l
     { clamp_level_index(); return; }
 }
 
 void clamp_level_index() {
-    tick(18);
     // 00A3AE  cmpi.w #$dd, d0
     if (int16_t((D0 & 0xFFFF)) < 221) goto L_00A3B8;  // 00A3B2  blt $a3b8
-    tick(8);
     setW(D0, 0x6F);  // 00A3B4  move.w #$6f, d0
 L_00A3B8:
-    tick(16);
     return;  // 00A3B8  rts 
 }
 
 void menu_info_screen() {
-    tick(18);
     call(clear_level_bitmap_5000, 0xA3BE);  // 00A3BA  bsr $8aec
-    tick(194);
     D0 = rd32(v_level_bitmap_ptr);  // 00A3BE  move.l $1b5e8.l, d0
     A1 = 0x1BBA6;  // 00A3C4  lea.l $1bba6.l, a1
     wr16(A1 + 0x6, (D0 & 0xFFFF));  // 00A3CA  move.w d0, 6(a1)
@@ -3052,92 +2339,65 @@ void menu_info_screen() {
     wr16(0x1B608, 0);  // 00A3F0  clr.w $1b608.l
     A2 = 0x146A6;  // 00A3F6  lea.l $146a6.l, a2
     call(draw_text, 0xA400);  // 00A3FC  bsr $b2a0
-    tick(30);
     A2 = 0x146CE;  // 00A400  lea.l $146ce.l, a2
     call(draw_text, 0xA40A);  // 00A406  bsr $b2a0
-    tick(30);
     A2 = 0x146EE;  // 00A40A  lea.l $146ee.l, a2
     call(draw_text, 0xA414);  // 00A410  bsr $b2a0
-    tick(30);
     A2 = 0x1470C;  // 00A414  lea.l $1470c.l, a2
     call(draw_text, 0xA41E);  // 00A41A  bsr $b2a0
-    tick(30);
     A2 = 0x14734;  // 00A41E  lea.l $14734.l, a2
     call(draw_text, 0xA428);  // 00A424  bsr $b2a0
-    tick(30);
     A2 = 0x1475A;  // 00A428  lea.l $1475a.l, a2
     call(draw_text, 0xA432);  // 00A42E  bsr $b2a0
-    tick(30);
     A2 = 0x14782;  // 00A432  lea.l $14782.l, a2
     call(draw_text, 0xA43C);  // 00A438  bsr $b2a0
-    tick(30);
     A2 = 0x147B6;  // 00A43C  lea.l $147b6.l, a2
     call(draw_text, 0xA446);  // 00A442  bsr $b2a0
-    tick(30);
     A2 = 0x147F8;  // 00A446  lea.l $147f8.l, a2
     call(draw_text, 0xA450);  // 00A44C  bsr $b2a0
-    tick(30);
     A2 = 0x14840;  // 00A450  lea.l $14840.l, a2
     call(draw_text, 0xA45A);  // 00A456  bsr $b2a0
-    tick(30);
     A2 = 0x14884;  // 00A45A  lea.l $14884.l, a2
     call(draw_text, 0xA464);  // 00A460  bsr $b2a0
-    tick(30);
     A2 = 0x148BE;  // 00A464  lea.l $148be.l, a2
     call(draw_text, 0xA46E);  // 00A46A  bsr $b2a0
-    tick(30);
     A2 = 0x148F0;  // 00A46E  lea.l $148f0.l, a2
     call(draw_text, 0xA478);  // 00A474  bsr $b2a0
-    tick(30);
     A2 = 0x14940;  // 00A478  lea.l $14940.l, a2
     call(draw_text, 0xA482);  // 00A47E  bsr $b2a0
-    tick(30);
     A2 = 0x14976;  // 00A482  lea.l $14976.l, a2
     call(draw_text, 0xA48C);  // 00A488  bsr $b2a0
     { return_to_menu(); return; }
 }
 
 void return_to_menu() {
-    tick(18);
     call(wait_button_click, 0xA490);  // 00A48C  bsr $8ab8
-    tick(58);
     wr32(A5 + 0x80, 0x1B896);  // 00A490  move.l #$1b896, 128(a5)
     wr16(A5 + 0x96, 0x100);  // 00A498  move.w #$100, 150(a5)
     call(set_menu_bitplanes, 0xA4A2);  // 00A49E  bsr $9366
-    tick(18);
     call(sort_positions, 0xA4A6);  // 00A4A2  bsr $aaa8
-    tick(18);
     call(draw_positions_list, 0xA4AA);  // 00A4A6  bsr $93ea
-    tick(18);
     call(draw_positions_scroll, 0xA4AE);  // 00A4AA  bsr $94d6
-    tick(18);
     call(draw_player_list, 0xA4B2);  // 00A4AE  bsr $951a
-    tick(18);
     call(draw_level_list, 0xA4B6);  // 00A4B2  bsr $95b8
-    tick(18);
     call(draw_hall_of_fame, 0xA4BA);  // 00A4B6  bsr $975c
-    tick(32);
     wr16(A5 + 0x96, 0x8100);  // 00A4BA  move.w #$8100, 150(a5)
     return;  // 00A4C0  rts 
 }
 
 void menu_ok_start_level() {
-    tick(36);
     wr16(0x113A0, 0x1);  // 00A4C2  move.w #$1, $113a0.l
     return;  // 00A4CA  rts 
 }
 
 void menu_gfx_tutor() {
-    tick(18);
     call(clear_tutor_screen, 0xA4D0);  // 00A4CC  bsr $a556
-    tick(90);
     A0 = rd32(0x1B5BC);  // 00A4D0  movea.l $1b5bc.l, a0
     A1 = rd32(v_level_bitmap_ptr);  // 00A4D6  movea.l $1b5e8.l, a1
     A1 += 0xF000;  // 00A4DC  adda.l #$f000, a1
     D4 = 0x14000;  // 00A4E2  move.l #$14000, d4
     D0 = 0x0;  // 00A4E8  moveq.l #$0, d0
     call(unpack_rle_picture, 0xA4EE);  // 00A4EA  bsr $93a4
-    tick(262);
     D0 = rd32(v_level_bitmap_ptr);  // 00A4EE  move.l $1b5e8.l, d0
     D0 = (D0 + 0xF000);  // 00A4F4  addi.l #$f000, d0
     A1 = 0x1BB56;  // 00A4FA  lea.l $1bb56.l, a1
@@ -3161,28 +2421,23 @@ void menu_gfx_tutor() {
     wr16(A1 + 0x1A, (D0 & 0xFFFF));  // 00A53C  move.w d0, 26(a1)
     wr32(A5 + 0x80, 0x1BAAE);  // 00A540  move.l #$1baae, 128(a5)
     call(wait_button_click, 0xA54C);  // 00A548  bsr $8ab8
-    tick(36);
     wr16(0x113A2, 0x1);  // 00A54C  move.w #$1, $113a2.l
     return;  // 00A554  rts 
 }
 
 void clear_tutor_screen() {
-    tick(48);
     A0 = rd32(v_level_bitmap_ptr);  // 00A556  movea.l $1b5e8.l, a0
     A0 += 0xF000;  // 00A55C  adda.l #$f000, a0
     D7 = 0x4FFF;  // 00A562  move.l #$4fff, d7
 L_00A568:
-    tick(32);
     wr32(A0, 0);  // 00A568  clr.l (a0)+
     A0 += 4;
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00A568;  // 00A56A  dbf.w d7, $a568
-    tick(16);
     return;  // 00A56E  rts 
 }
 
 // Демо: режим $113AC, уровень из PHIL_02, ввод из записи.
 void menu_demo() {
-    tick(124);
     wr16(v_demo_mode, 0x1);  // 00A570  move.w #$1, $113ac.l
     wr16(0x113A0, 0x1);  // 00A578  move.w #$1, $113a0.l
     wr16(0x112DE, 0x1);  // 00A580  move.w #$1, $112de.l
@@ -3195,33 +2450,22 @@ void menu_demo() {
 void menu_reload_disk() {
     goto L_00A59A;
 L_00A490:
-    tick(58);
     wr32(A5 + 0x80, 0x1B896);  // 00A490  move.l #$1b896, 128(a5)
     wr16(A5 + 0x96, 0x100);  // 00A498  move.w #$100, 150(a5)
     call(set_menu_bitplanes, 0xA4A2);  // 00A49E  bsr $9366
-    tick(18);
     call(sort_positions, 0xA4A6);  // 00A4A2  bsr $aaa8
-    tick(18);
     call(draw_positions_list, 0xA4AA);  // 00A4A6  bsr $93ea
-    tick(18);
     call(draw_positions_scroll, 0xA4AE);  // 00A4AA  bsr $94d6
-    tick(18);
     call(draw_player_list, 0xA4B2);  // 00A4AE  bsr $951a
-    tick(18);
     call(draw_level_list, 0xA4B6);  // 00A4B2  bsr $95b8
-    tick(18);
     call(draw_hall_of_fame, 0xA4BA);  // 00A4B6  bsr $975c
-    tick(32);
     wr16(A5 + 0x96, 0x8100);  // 00A4BA  move.w #$8100, 150(a5)
     return;  // 00A4C0  rts 
 L_00A59A:
-    tick(18);
     call(clear_level_bitmap_5000, 0xA59E);  // 00A59A  bsr $8aec
-    tick(52);
     A0 = rd32(v_level_bitmap_ptr);  // 00A59E  movea.l $1b5e8.l, a0
     A0 += sxw(0x1000);  // 00A5A4  adda.w #$1000, a0
     call(clear_5000_bytes, 0xA5AC);  // 00A5A8  bsr $8af2
-    tick(198);
     D0 = rd32(v_level_bitmap_ptr);  // 00A5AC  move.l $1b5e8.l, d0
     D0 = (D0 + 0x1000);  // 00A5B2  addi.l #$1000, d0
     A1 = 0x1BBA6;  // 00A5B8  lea.l $1bba6.l, a1
@@ -3235,140 +2479,101 @@ L_00A59A:
     wr16(0x1B608, 0);  // 00A5E2  clr.w $1b608.l
     A2 = 0x1499C;  // 00A5E8  lea.l $1499c.l, a2
     call(draw_text, 0xA5F2);  // 00A5EE  bsr $b2a0
-    tick(30);
     A2 = 0x149BC;  // 00A5F2  lea.l $149bc.l, a2
     call(draw_text, 0xA5FC);  // 00A5F8  bsr $b2a0
-    tick(30);
     A2 = 0x149D8;  // 00A5FC  lea.l $149d8.l, a2
     call(draw_text, 0xA606);  // 00A602  bsr $b2a0
-    tick(30);
     A2 = 0x149FE;  // 00A606  lea.l $149fe.l, a2
     call(draw_text, 0xA610);  // 00A60C  bsr $b2a0
-    tick(30);
     A2 = 0x14A26;  // 00A610  lea.l $14a26.l, a2
     call(draw_text, 0xA61A);  // 00A616  bsr $b2a0
-    tick(18);
     call(wait_6_frames, 0xA61E);  // 00A61A  bsr $b768
-    tick(18);
     call(wait_6_frames, 0xA622);  // 00A61E  bsr $b768
-    tick(18);
     call(wait_6_frames, 0xA626);  // 00A622  bsr $b768
-    tick(18);
     call(wait_6_frames, 0xA62A);  // 00A626  bsr $b768
 L_00A62A:
-    tick(30);
     // 00A62A  btst.b #$6, $bfe001.l
     if (!(rd8(0xBFE001) & (1u << 6))) goto L_00A62A;  // 00A632  beq $a62a
 L_00A634:
-    tick(30);
     // 00A634  btst.b #$a, $dff016.l
     if (!(rd8(0xDFF016) & (1u << 2))) goto L_00A684;  // 00A63C  beq $a684
-    tick(30);
     // 00A640  btst.b #$6, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 6))) goto L_00A634;  // 00A648  bne $a634
-    tick(18);
     call(music_stop, 0xA64E);  // 00A64A  bsr $10c1c
-    tick(52);
     A0 = rd32(v_level_bitmap_ptr);  // 00A64E  movea.l $1b5e8.l, a0
     A0 += sxw(0x1000);  // 00A654  adda.w #$1000, a0
     call(clear_5000_bytes, 0xA65C);  // 00A658  bsr $8af2
-    tick(30);
     A2 = 0x14A4E;  // 00A65C  lea.l $14a4e.l, a2
     call(draw_text, 0xA666);  // 00A662  bsr $b2a0
-    tick(18);
     call(load_graphics_and_hiscores, 0xA66A);  // 00A666  bsr $845c
-    tick(18);
     call(music_start, 0xA66E);  // 00A66A  bsr $10aaa
-    tick(18);
     call(unpack_hiscore_file, 0xA672);  // 00A66E  bsr $898a
-    tick(60);
     wr16(0x1BD8E, 0);  // 00A672  clr.w $1bd8e.l
     wr16(0x140E8, 0);  // 00A678  clr.w $140e8.l
     wr16(0x140DE, 0);  // 00A67E  clr.w $140de.l
 L_00A684:
-    tick(10);
     goto L_00A490;  // 00A684  bra $a490
 }
 
 void wait_click_and_release() {
 L_00A68A:
-    tick(30);
     // 00A68A  btst.b #$6, $bfe001.l
     if (!(rd8(0xBFE001) & (1u << 6))) goto L_00A68A;  // 00A692  beq $a68a
 L_00A694:
-    tick(18);
     call(update_mouse_pointer, 0xA698);  // 00A694  bsr $91f2
-    tick(30);
     // 00A698  btst.b #$6, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 6))) goto L_00A694;  // 00A6A0  bne $a694
-    tick(18);
     call(update_mouse_pointer, 0xA6A6);  // 00A6A2  bsr $91f2
-    tick(46);
     D0 = 0x0;  // 00A6A6  moveq.l #$0, d0
     setW(D0, rd16(0x112F0));  // 00A6A8  move.w $112f0.l, d0
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 00A6AE  lsl.w #$1, d0
     // 00A6B0  cmpi.w #$f0, d0
     if (int16_t((D0 & 0xFFFF)) < 240) goto L_00A6D2;  // 00A6B4  blt $a6d2
-    tick(18);
     // 00A6B6  cmpi.w #$106, d0
     if (int16_t((D0 & 0xFFFF)) > 262) goto L_00A6D2;  // 00A6BA  bgt $a6d2
-    tick(34);
     setW(D0, rd16(0x112F2));  // 00A6BC  move.w $112f2.l, d0
     // 00A6C2  cmpi.w #$ad, d0
     if (int16_t((D0 & 0xFFFF)) < 173) goto L_00A6D2;  // 00A6C6  blt $a6d2
-    tick(18);
     // 00A6C8  cmpi.w #$b8, d0
     if (int16_t((D0 & 0xFFFF)) > 184) goto L_00A6D2;  // 00A6CC  bgt $a6d2
-    tick(20);
     D7 = 0x0;  // 00A6CE  moveq.l #$0, d7
     return;  // 00A6D0  rts 
 L_00A6D2:
-    tick(20);
     D7 = 0xFFFFFFFF;  // 00A6D2  moveq.l #$ffffffff, d7
     return;  // 00A6D4  rts 
 }
 
 void name_length() {
-    tick(16);
     A0 = 0x11410;  // 00A6F2  lea.l $11410.l, a0
     D0 = 0x0;  // 00A6F8  moveq.l #$0, d0
 L_00A6FA:
-    tick(18);
     logic<1>(rd8(A0));  // 00A6FA  tst.b (a0)+
     A0 += 1;
     if (CC_EQ) goto L_00A706;  // 00A6FC  beq $a706
-    tick(14);
     setW(D0, ((D0 & 0xFFFF) + 0x1));  // 00A700  addq.w #$1, d0
     goto L_00A6FA;  // 00A702  bra $a6fa
 L_00A706:
-    tick(34);
     D1 = D0;  // 00A706  move.l d0, d1
     A0 = 0x11410;  // 00A708  lea.l $11410.l, a0
     A0 += D0;  // 00A70E  adda.l d0, a0
     A1 = 0x11427;  // 00A710  lea.l $11427.l, a1
 L_00A716:
-    tick(26);
     { A0 -= 1; uint32_t v = rd8(A0);  A1 -= 1; wr8(A1, v);  }  // 00A716  move.b -(a0), -(a1)
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A716;  // 00A718  dbf.w d0, $a716
-    tick(30);
     A0 = 0x1141E;  // 00A71C  lea.l $1141e.l, a0
     D2 = 0x9;  // 00A722  move.l #$9, d2
     D2 = (D2 - D1);  // 00A728  sub.l d1, d2
 L_00A72A:
-    tick(14);
     // 00A72A  tst.l d2
     if (D2 == 0) goto L_00A738;  // 00A72C  beq $a738
-    tick(30);
     D2 = (D2 - 0x1);  // 00A730  subq.l #$1, d2
     {  wr8(A0, 0x20); A0 += 1; }  // 00A732  move.b #$20, (a0)+
     goto L_00A72A;  // 00A736  bra $a72a
 L_00A738:
-    tick(16);
     return;  // 00A738  rts 
 }
 
 void check_player_name() {
-    tick(44);
     A0 = 0x1141F;  // 00A73A  lea.l $1141f.l, a0
     A1 = 0x14442;  // 00A740  lea.l $14442.l, a1
     setW(D0, 0x7);  // 00A746  move.w #$7, d0
@@ -3376,20 +2581,15 @@ void check_player_name() {
     setW(D2, 0);  // 00A74C  clr.w d2
     setW(D3, 0);  // 00A74E  clr.w d3
 L_00A750:
-    tick(30);
     {  uint32_t v = rd8(A0); A0 += 1;  setB(D2, v);  }  // 00A750  move.b (a0)+, d2
     {  uint32_t v = rd8(A1); A1 += 1;  setB(D3, v);  }  // 00A752  move.b (a1)+, d3
     // 00A754  cmp.b d2, d3
     if ((D3 & 0xFF) != (D2 & 0xFF)) goto L_00A75A;  // 00A756  bne $a75a
-    tick(4);
     setW(D1, ((D1 & 0xFFFF) + 0x1));  // 00A758  addq.w #$1, d1
 L_00A75A:
-    tick(12);
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A750;  // 00A75A  dbf.w d0, $a750
-    tick(18);
     // 00A75E  cmpi.w #$8, d1
     if ((D1 & 0xFFFF) == 0x8) goto L_00A846;  // 00A762  beq $a846
-    tick(44);
     A0 = 0x1141F;  // 00A766  lea.l $1141f.l, a0
     A1 = 0x14438;  // 00A76C  lea.l $14438.l, a1
     setW(D0, 0x7);  // 00A772  move.w #$7, d0
@@ -3397,146 +2597,108 @@ L_00A75A:
     setW(D2, 0);  // 00A778  clr.w d2
     setW(D3, 0);  // 00A77A  clr.w d3
 L_00A77C:
-    tick(30);
     {  uint32_t v = rd8(A0); A0 += 1;  setB(D2, v);  }  // 00A77C  move.b (a0)+, d2
     {  uint32_t v = rd8(A1); A1 += 1;  setB(D3, v);  }  // 00A77E  move.b (a1)+, d3
     // 00A780  cmp.b d2, d3
     if ((D3 & 0xFF) != (D2 & 0xFF)) goto L_00A786;  // 00A782  bne $a786
-    tick(4);
     setW(D1, ((D1 & 0xFFFF) + 0x1));  // 00A784  addq.w #$1, d1
 L_00A786:
-    tick(12);
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A77C;  // 00A786  dbf.w d0, $a77c
-    tick(18);
     // 00A78A  cmpi.w #$8, d1
     if ((D1 & 0xFFFF) == 0x8) goto L_00A86E;  // 00A78E  beq $a86e
-    tick(24);
     A0 = 0x1141F;  // 00A792  lea.l $1141f.l, a0
     setW(D0, 0x7);  // 00A798  move.w #$7, d0
     setW(D1, 0);  // 00A79C  clr.w d1
 L_00A79E:
-    tick(22);
     {  uint32_t s = 0x2D;  uint32_t d = rd8(A0); A0 += 1; cmp<1>(s, d); }  // 00A79E  cmpi.b #$2d, (a0)+
     if (CC_EQ) goto L_00A7AA;  // 00A7A2  beq $a7aa
-    tick(12);
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A79E;  // 00A7A4  dbf.w d0, $a79e
-    tick(10);
     goto L_00A7B0;  // 00A7A8  bra $a7b0
 L_00A7AA:
-    tick(16);
     setW(D1, ((D1 & 0xFFFF) + 0x1));  // 00A7AA  addq.w #$1, d1
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A79E;  // 00A7AC  dbf.w d0, $a79e
 L_00A7B0:
-    tick(18);
     // 00A7B0  cmpi.w #$8, d1
     if ((D1 & 0xFFFF) == 0x8) goto L_00A7F6;  // 00A7B4  beq $a7f6
-    tick(28);
     A0 = 0x1141F;  // 00A7B6  lea.l $1141f.l, a0
     A1 = 0x140FC;  // 00A7BC  lea.l $140fc.l, a1
     D0 = 0x13;  // 00A7C2  moveq.l #$13, d0
 L_00A7C4:
-    tick(16);
     D1 = 0x7;  // 00A7C4  moveq.l #$7, d1
     setW(D2, 0);  // 00A7C6  clr.w d2
     setW(D3, 0);  // 00A7C8  clr.w d3
     setW(D4, 0);  // 00A7CA  clr.w d4
 L_00A7CC:
-    tick(30);
     {  uint32_t v = rd8(A0); A0 += 1;  setB(D3, v);  }  // 00A7CC  move.b (a0)+, d3
     {  uint32_t v = rd8(A1); A1 += 1;  setB(D4, v);  }  // 00A7CE  move.b (a1)+, d4
     // 00A7D0  cmp.b d3, d4
     if ((D4 & 0xFF) != (D3 & 0xFF)) goto L_00A7D6;  // 00A7D2  bne $a7d6
-    tick(4);
     setW(D2, ((D2 & 0xFFFF) + 0x1));  // 00A7D4  addq.w #$1, d2
 L_00A7D6:
-    tick(12);
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_00A7CC;  // 00A7D6  dbf.w d1, $a7cc
-    tick(18);
     // 00A7DA  cmpi.w #$8, d2
     if ((D2 & 0xFFFF) == 0x8) goto L_00A81E;  // 00A7DE  beq $a81e
-    tick(32);
     A0 = 0x1141F;  // 00A7E0  lea.l $1141f.l, a0
     A1 = A1 + 0x2;  // 00A7E6  lea.l 2(a1), a1
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A7C4;  // 00A7EA  dbf.w d0, $a7c4
-    tick(36);
     wr16(0x1139C, 0);  // 00A7EE  clr.w $1139c.l
     return;  // 00A7F4  rts 
 L_00A7F6:
-    tick(38);
     wr16(0x1139C, 0x1);  // 00A7F6  move.w #$1, $1139c.l
     call(clear_message_line, 0xA802);  // 00A7FE  bsr $b108
-    tick(86);
     wr32(0x1B604, rd32(0x1B5F8));  // 00A802  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 00A80C  clr.w $1b608.l
     A2 = 0x143E4;  // 00A812  lea.l $143e4.l, a2
     call(draw_text, 0xA81C);  // 00A818  bsr $b2a0
-    tick(16);
     return;  // 00A81C  rts 
 L_00A81E:
-    tick(38);
     wr16(0x1139C, 0x1);  // 00A81E  move.w #$1, $1139c.l
     call(clear_message_line, 0xA82A);  // 00A826  bsr $b108
-    tick(86);
     wr32(0x1B604, rd32(0x1B5F8));  // 00A82A  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 00A834  clr.w $1b608.l
     A2 = 0x143F6;  // 00A83A  lea.l $143f6.l, a2
     call(draw_text, 0xA844);  // 00A840  bsr $b2a0
-    tick(16);
     return;  // 00A844  rts 
 L_00A846:
-    tick(38);
     wr16(0x1139C, 0x1);  // 00A846  move.w #$1, $1139c.l
     call(clear_message_line, 0xA852);  // 00A84E  bsr $b108
-    tick(86);
     wr32(0x1B604, rd32(0x1B5F8));  // 00A852  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 00A85C  clr.w $1b608.l
     A2 = 0x1444C;  // 00A862  lea.l $1444c.l, a2
     call(draw_text, 0xA86C);  // 00A868  bsr $b2a0
-    tick(16);
     return;  // 00A86C  rts 
 L_00A86E:
-    tick(38);
     wr16(0x1139C, 0x1);  // 00A86E  move.w #$1, $1139c.l
     call(clear_message_line, 0xA87A);  // 00A876  bsr $b108
-    tick(86);
     wr32(0x1B604, rd32(0x1B5F8));  // 00A87A  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 00A884  clr.w $1b608.l
     A2 = 0x1445C;  // 00A88A  lea.l $1445c.l, a2
     call(draw_text, 0xA894);  // 00A890  bsr $b2a0
-    tick(16);
     return;  // 00A894  rts 
 }
 
 void find_free_player_slot() {
-    tick(26);
     // 00A896  tst.w $1139c.l
     if (rd16(0x1139C) == 0) goto L_00A8A0;  // 00A89C  beq $a8a0
-    tick(16);
     return;  // 00A89E  rts 
 L_00A8A0:
-    tick(36);
     A0 = 0x141D2;  // 00A8A0  lea.l $141d2.l, a0
     A1 = 0x140FC;  // 00A8A6  lea.l $140fc.l, a1
     setW(D0, 0x13);  // 00A8AC  move.w #$13, d0
     setW(D1, 0);  // 00A8B0  clr.w d1
 L_00A8B2:
-    tick(18);
     // 00A8B2  tst.b (a0)
     if (rd8(A0) == 0) goto L_00A8E2;  // 00A8B4  beq $a8e2
-    tick(32);
     A0 = A0 + 0x16;  // 00A8B6  lea.l 22(a0), a0
     A1 = A1 + 0xA;  // 00A8BA  lea.l 10(a1), a1
     setW(D1, ((D1 & 0xFFFF) + 0x1));  // 00A8BE  addq.w #$1, d1
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A8B2;  // 00A8C0  dbf.w d0, $a8b2
-    tick(86);
     wr16(0x1139C, 0x1);  // 00A8C4  move.w #$1, $1139c.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00A8CC  move.l $1b5f8.l, $1b604.l
     A2 = 0x14408;  // 00A8D6  lea.l $14408.l, a2
     call(draw_text, 0xA8E0);  // 00A8DC  bsr $b2a0
-    tick(16);
     return;  // 00A8E0  rts 
 L_00A8E2:
-    tick(158);
     wr32(v_player_record, A0);  // 00A8E2  move.l a0, $113d6.l
     wr32(0x113DA, A1);  // 00A8E8  move.l a1, $113da.l
     wr32(0x113DA, (rd32(0x113DA) - 0x2));  // 00A8EE  subq.l #$2, $113da.l
@@ -3546,37 +2708,27 @@ L_00A8E2:
     wr8(A1 - 0x2, 0);  // 00A902  clr.b -2(a1)
     wr8(0x140E9, (D1 & 0xFF));  // 00A906  move.b d1, $140e9.l
     call(reset_player_record, 0xA90E);  // 00A90C  bsr $a934
-    tick(22);
     A3 = A1;  // 00A90E  movea.l a1, a3
     call(copy_player_name, 0xA912);  // 00A910  bsr $a924
-    tick(30);
     A3 = A0;  // 00A912  movea.l a0, a3
     A3 += 0x8;  // 00A914  addq.l #$8, a3
     call(copy_player_name, 0xA918);  // 00A916  bsr $a924
-    tick(18);
     call(draw_player_list, 0xA91C);  // 00A918  bsr $951a
-    tick(18);
     call(draw_player_stats, 0xA920);  // 00A91C  bsr $ad10
-    tick(18);
     call(build_positions_lines, 0xA922);  // 00A920  bsr $a95e
-    tick(16);
     return;  // 00A922  rts 
 }
 
 void copy_player_name() {
-    tick(16);
     A2 = 0x1141F;  // 00A924  lea.l $1141f.l, a2
     D0 = 0x7;  // 00A92A  moveq.l #$7, d0
 L_00A92C:
-    tick(24);
     {  uint32_t v = rd8(A2); A2 += 1;  wr8(A3, v); A3 += 1; }  // 00A92C  move.b (a2)+, (a3)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A92C;  // 00A92E  dbf.w d0, $a92c
-    tick(16);
     return;  // 00A932  rts 
 }
 
 void reset_player_record() {
-    tick(164);
     A0 = rd32(v_player_record);  // 00A934  movea.l $113d6.l, a0
     wr8(A0 + 0x1, 0);  // 00A93A  clr.b 1(a0)
     wr16(A0 + 0x2, 0);  // 00A93E  clr.w 2(a0)
@@ -3590,7 +2742,6 @@ void reset_player_record() {
 }
 
 void build_positions_lines() {
-    tick(56);
     A0 = rd32(v_player_record);  // 00A95E  movea.l $113d6.l, a0
     A2 = 0x13056;  // 00A964  lea.l $13056.l, a2
     D0 = 0x0;  // 00A96A  moveq.l #$0, d0
@@ -3599,7 +2750,6 @@ void build_positions_lines() {
     D3 = 0x0;  // 00A970  moveq.l #$0, d3
     setW(D4, 0x13);  // 00A972  move.w #$13, d4
 L_00A976:
-    tick(126);
     setB(D0, rd8(A2 + 0x2));  // 00A976  move.b 2(a2), d0
     setB(D1, rd8(A2 + 0x1));  // 00A97A  move.b 1(a2), d1
     setB(D2, rd8(A2));  // 00A97E  move.b (a2), d2
@@ -3613,13 +2763,10 @@ L_00A976:
     setW(D3, rd16(A0 + 0x14));  // 00A994  move.w 20(a0), d3
     // 00A998  cmp.w d2, d3
     if (int16_t((D3 & 0xFFFF)) > int16_t((D2 & 0xFFFF))) goto L_00A9A6;  // 00A99A  bgt $a9a6
-    tick(20);
     A2 = A2 + 0x16;  // 00A99C  lea.l 22(a2), a2
     setW(D4, D4 - 1); if ((D4 & 0xFFFF) != 0xFFFF) goto L_00A976;  // 00A9A0  dbf.w d4, $a976
-    tick(16);
     return;  // 00A9A4  rts 
 L_00A9A6:
-    tick(68);
     setW(D6, (D4 & 0xFFFF));  // 00A9A6  move.w d4, d6
     D4 = mulu(0x16, D4);  // 00A9A8  mulu.w #$16, d4
     A2 += D4;  // 00A9AC  adda.l d4, a2
@@ -3627,17 +2774,13 @@ L_00A9A6:
     A3 = A2;  // 00A9B0  movea.l a2, a3
     A3 = A3 - 0x16;  // 00A9B2  lea.l -22(a3), a3
 L_00A9B6:
-    tick(8);
     setW(D0, 0x15);  // 00A9B6  move.w #$15, d0
 L_00A9BA:
-    tick(24);
     {  uint32_t v = rd8(A3); A3 += 1;  wr8(A2, v); A2 += 1; }  // 00A9BA  move.b (a3)+, (a2)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A9BA;  // 00A9BC  dbf.w d0, $a9ba
-    tick(28);
     A2 = A2 - 0x2C;  // 00A9C0  lea.l -44(a2), a2
     A3 = A3 - 0x2C;  // 00A9C4  lea.l -44(a3), a3
     setW(D4, D4 - 1); if ((D4 & 0xFFFF) != 0xFFFF) goto L_00A9B6;  // 00A9C8  dbf.w d4, $a9b6
-    tick(68);
     A2 = A2 + 0x16;  // 00A9CC  lea.l 22(a2), a2
     wr32(0x113DE, A2);  // 00A9D0  move.l a2, $113de.l
     A2 += 0x4;  // 00A9D6  addq.l #$4, a2
@@ -3645,10 +2788,8 @@ L_00A9BA:
     A1 += 0x2;  // 00A9DE  addq.l #$2, a1
     D0 = 0x7;  // 00A9E0  moveq.l #$7, d0
 L_00A9E2:
-    tick(24);
     {  uint32_t v = rd8(A1); A1 += 1;  wr8(A2, v); A2 += 1; }  // 00A9E2  move.b (a1)+, (a2)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00A9E2;  // 00A9E4  dbf.w d0, $a9e2
-    tick(230);
     D4 = 0x0;  // 00A9E8  moveq.l #$0, d4
     A1 = rd32(0x113DE);  // 00A9EA  movea.l $113de.l, a1
     setB(D0, 0x30);  // 00A9F0  move.b #$30, d0
@@ -3666,14 +2807,11 @@ L_00A9E2:
     wr8(A1 + 0x15, (D0 & 0xFF));  // 00AA24  move.b d0, 21(a1)
     wr16(0x13028, rd16(0x140E8));  // 00AA28  move.w $140e8.l, $13028.l
     call(draw_positions_list, 0xAA36);  // 00AA32  bsr $93ea
-    tick(18);
     call(draw_positions_scroll, 0xAA3A);  // 00AA36  bsr $94d6
-    tick(16);
     return;  // 00AA3A  rts 
 }
 
 void add_level_time_to_player() {
-    tick(166);
     D0 = 0x0;  // 00AA3E  moveq.l #$0, d0
     D1 = 0x0;  // 00AA40  moveq.l #$0, d1
     D2 = 0x0;  // 00AA42  moveq.l #$0, d2
@@ -3694,24 +2832,18 @@ void add_level_time_to_player() {
     setW(D5, ((D5 & 0xFFFF) + (D2 & 0xFFFF)));  // 00AA76  add.w d2, d5
     // 00AA78  cmpi.w #$3c, d3
     if (int16_t((D3 & 0xFFFF)) < 60) goto L_00AA84;  // 00AA7C  blt $aa84
-    tick(12);
     setB(D4, ((D4 & 0xFF) + 0x1));  // 00AA7E  addq.b #$1, d4
     setB(D3, ((D3 & 0xFF) - 0x3C));  // 00AA80  subi.b #$3c, d3
 L_00AA84:
-    tick(18);
     // 00AA84  cmpi.w #$3c, d4
     if (int16_t((D4 & 0xFFFF)) < 60) goto L_00AA90;  // 00AA88  blt $aa90
-    tick(12);
     setW(D5, ((D5 & 0xFFFF) + 0x1));  // 00AA8A  addq.w #$1, d5
     setB(D4, ((D4 & 0xFF) - 0x3C));  // 00AA8C  subi.b #$3c, d4
 L_00AA90:
-    tick(18);
     // 00AA90  cmpi.w #$3e7, d5
     if (int16_t((D5 & 0xFFFF)) < 999) goto L_00AA9A;  // 00AA94  blt $aa9a
-    tick(8);
     setW(D5, 0x3E7);  // 00AA96  move.w #$3e7, d5
 L_00AA9A:
-    tick(52);
     wr16(A0 + 0x10, (D5 & 0xFFFF));  // 00AA9A  move.w d5, 16(a0)
     wr8(A0 + 0x12, (D4 & 0xFF));  // 00AA9E  move.b d4, 18(a0)
     wr8(A0 + 0x13, (D3 & 0xFF));  // 00AAA2  move.b d3, 19(a0)
@@ -3719,15 +2851,12 @@ L_00AA9A:
 }
 
 void sort_positions() {
-    tick(20);
     A0 = 0x13F7E;  // 00AAA8  lea.l $13f7e.l, a0
     setW(D0, 0x13F);  // 00AAAE  move.w #$13f, d0
 L_00AAB2:
-    tick(24);
     wr8(A0, 0);  // 00AAB2  clr.b (a0)+
     A0 += 1;
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00AAB2;  // 00AAB4  dbf.w d0, $aab2
-    tick(48);
     D1 = 0x0;  // 00AAB8  moveq.l #$0, d1
     D2 = 0x0;  // 00AABA  moveq.l #$0, d2
     D3 = 0x0;  // 00AABC  moveq.l #$0, d3
@@ -3738,76 +2867,57 @@ L_00AAB2:
     A0 = 0x141D2;  // 00AAC6  lea.l $141d2.l, a0
     setW(D0, 0x13);  // 00AACC  move.w #$13, d0
 L_00AAD0:
-    tick(38);
     A1 = 0x13F7E;  // 00AAD0  lea.l $13f7e.l, a1
     setW(D1, 0x13);  // 00AAD6  move.w #$13, d1
     // 00AADA  tst.b (a0)
     if (rd8(A0) != 0) goto L_00AAE8;  // 00AADC  bne $aae8
-    tick(20);
     A0 = A0 + 0x16;  // 00AADE  lea.l 22(a0), a0
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00AAD0;  // 00AAE2  dbf.w d0, $aad0
-    tick(16);
     return;  // 00AAE6  rts 
 L_00AAE8:
-    tick(34);
     setW(D2, rd16(A0 + 0x14));  // 00AAE8  move.w 20(a0), d2
     setW(D3, rd16(A1));  // 00AAEC  move.w (a1), d3
     // 00AAEE  cmp.w d2, d3
     if (int16_t((D3 & 0xFFFF)) < int16_t((D2 & 0xFFFF))) goto L_00AB02;  // 00AAF0  blt $ab02
-    tick(14);
     // 00AAF2  cmp.w d2, d3
     if ((D3 & 0xFFFF) == (D2 & 0xFFFF)) goto L_00AB64;  // 00AAF4  beq $ab64
-    tick(20);
     A1 = A1 + 0x10;  // 00AAF8  lea.l 16(a1), a1
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_00AAE8;  // 00AAFC  dbf.w d1, $aae8
-    tick(16);
     return;  // 00AB00  rts 
 L_00AB02:
-    tick(18);
     // 00AB02  cmpi.w #$1, d1
     if (int16_t((D1 & 0xFFFF)) > 1) goto L_00AB0E;  // 00AB06  bgt $ab0e
-    tick(18);
     setW(D1, 0x1);  // 00AB08  move.w #$1, d1
     goto L_00AB10;  // 00AB0C  bra $ab10
 L_00AB0E:
-    tick(4);
     setW(D1, ((D1 & 0xFFFF) - 0x1));  // 00AB0E  subq.w #$1, d1
 L_00AB10:
-    tick(24);
     A2 = 0x1409E;  // 00AB10  lea.l $1409e.l, a2
     A3 = 0x140AE;  // 00AB16  lea.l $140ae.l, a3
 L_00AB1C:
-    tick(8);
     setW(D3, 0xF);  // 00AB1C  move.w #$f, d3
 L_00AB20:
-    tick(24);
     {  uint32_t v = rd8(A2); A2 += 1;  wr8(A3, v); A3 += 1; }  // 00AB20  move.b (a2)+, (a3)+
     setW(D3, D3 - 1); if ((D3 & 0xFFFF) != 0xFFFF) goto L_00AB20;  // 00AB22  dbf.w d3, $ab20
-    tick(28);
     A2 = A2 - 0x20;  // 00AB26  lea.l -32(a2), a2
     A3 = A3 - 0x20;  // 00AB2A  lea.l -32(a3), a3
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_00AB1C;  // 00AB2E  dbf.w d1, $ab1c
-    tick(32);
     setW(D2, 0x7);  // 00AB32  move.w #$7, d2
     A2 = A0;  // 00AB36  movea.l a0, a2
     A3 = A1;  // 00AB38  movea.l a1, a3
     A2 += 0x8;  // 00AB3A  addq.l #$8, a2
     A3 += 0x2;  // 00AB3C  addq.l #$2, a3
 L_00AB3E:
-    tick(24);
     {  uint32_t v = rd8(A2); A2 += 1;  wr8(A3, v); A3 += 1; }  // 00AB3E  move.b (a2)+, (a3)+
     setW(D2, D2 - 1); if ((D2 & 0xFFFF) != 0xFFFF) goto L_00AB3E;  // 00AB40  dbf.w d2, $ab3e
-    tick(96);
     wr16(A1 + 0xA, rd16(A0 + 0x10));  // 00AB44  move.w 16(a0), 10(a1)
     wr8(A1 + 0xD, rd8(A0 + 0x12));  // 00AB4A  move.b 18(a0), 13(a1)
     wr8(A1 + 0xF, rd8(A0 + 0x13));  // 00AB50  move.b 19(a0), 15(a1)
     wr16(A1, rd16(A0 + 0x14));  // 00AB56  move.w 20(a0), (a1)
     A0 = A0 + 0x16;  // 00AB5A  lea.l 22(a0), a0
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00AAD0;  // 00AB5E  dbf.w d0, $aad0
-    tick(16);
     return;  // 00AB62  rts 
 L_00AB64:
-    tick(58);
     D2 = 0x0;  // 00AB64  moveq.l #$0, d2
     D3 = 0x0;  // 00AB66  moveq.l #$0, d3
     D4 = 0x0;  // 00AB68  moveq.l #$0, d4
@@ -3818,7 +2928,6 @@ L_00AB64:
     setW(D3, rd16(A1));  // 00AB74  move.w (a1), d3
     // 00AB76  cmp.w d2, d3
     if (int16_t((D3 & 0xFFFF)) < int16_t((D2 & 0xFFFF))) goto L_00AB02;  // 00AB78  blt $ab02
-    tick(94);
     setW(D3, 0);  // 00AB7A  clr.w d3
     setW(D4, 0);  // 00AB7C  clr.w d4
     setW(D2, rd16(A0 + 0x10));  // 00AB7E  move.w 16(a0), d2
@@ -3829,36 +2938,27 @@ L_00AB64:
     setW(D7, rd16(A1 + 0xE));  // 00AB92  move.w 14(a1), d7
     // 00AB96  cmp.w d2, d5
     if (int16_t((D5 & 0xFFFF)) < int16_t((D2 & 0xFFFF))) goto L_00ABB4;  // 00AB98  blt $abb4
-    tick(14);
     // 00AB9C  cmp.w d2, d5
     if (int16_t((D5 & 0xFFFF)) > int16_t((D2 & 0xFFFF))) goto L_00AB02;  // 00AB9E  bgt $ab02
-    tick(14);
     // 00ABA2  cmp.w d3, d6
     if (int16_t((D6 & 0xFFFF)) < int16_t((D3 & 0xFFFF))) goto L_00ABB4;  // 00ABA4  blt $abb4
-    tick(14);
     // 00ABA8  cmp.w d3, d6
     if (int16_t((D6 & 0xFFFF)) > int16_t((D3 & 0xFFFF))) goto L_00AB02;  // 00ABAA  bgt $ab02
-    tick(14);
     // 00ABAE  cmp.w d4, d7
     if (int16_t((D7 & 0xFFFF)) > int16_t((D4 & 0xFFFF))) goto L_00AB02;  // 00ABB0  bgt $ab02
 L_00ABB4:
-    tick(20);
     A1 = A1 + 0x10;  // 00ABB4  lea.l 16(a1), a1
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_00AB64;  // 00ABB8  dbf.w d1, $ab64
-    tick(16);
     return;  // 00ABBC  rts 
 }
 
 void format_positions() {
-    tick(32);
     A1 = 0x13F7E;  // 00ABBE  lea.l $13f7e.l, a1
     A2 = 0x13056;  // 00ABC4  lea.l $13056.l, a2
     setW(D7, 0x13);  // 00ABCA  move.w #$13, d7
 L_00ABCE:
-    tick(18);
     // 00ABCE  tst.w (a1)
     if (rd16(A1) == 0) goto L_00ACA4;  // 00ABD0  beq $aca4
-    tick(54);
     D1 = 0x0;  // 00ABD4  moveq.l #$0, d1
     D2 = 0x0;  // 00ABD6  moveq.l #$0, d2
     D3 = 0x0;  // 00ABD8  moveq.l #$0, d3
@@ -3866,7 +2966,6 @@ L_00ABCE:
     setW(D4, rd16(A1));  // 00ABDC  move.w (a1), d4
     A6 = 0x111D2;  // 00ABDE  lea.l $111d2.l, a6
     call(number_to_decimal, 0xABE8);  // 00ABE4  bsr $100cc
-    tick(274);
     wr8(A2, rd8(0x111D9));  // 00ABE8  move.b $111d9.l, (a2)
     wr8(A2 + 0x1, rd8(0x111DA));  // 00ABEE  move.b $111da.l, 1(a2)
     wr8(A2 + 0x2, rd8(0x111DB));  // 00ABF6  move.b $111db.l, 2(a2)
@@ -3882,7 +2981,6 @@ L_00ABCE:
     setW(D4, rd16(A1 + 0xA));  // 00AC30  move.w 10(a1), d4
     A6 = 0x111D2;  // 00AC34  lea.l $111d2.l, a6
     call(number_to_decimal, 0xAC3E);  // 00AC3A  bsr $100cc
-    tick(118);
     wr8(A2 + 0xD, rd8(0x111D9));  // 00AC3E  move.b $111d9.l, 13(a2)
     wr8(A2 + 0xE, rd8(0x111DA));  // 00AC46  move.b $111da.l, 14(a2)
     wr8(A2 + 0xF, rd8(0x111DB));  // 00AC4E  move.b $111db.l, 15(a2)
@@ -3890,25 +2988,20 @@ L_00ABCE:
     setW(D4, rd16(A1 + 0xC));  // 00AC58  move.w 12(a1), d4
     A6 = 0x111D2;  // 00AC5C  lea.l $111d2.l, a6
     call(number_to_decimal, 0xAC66);  // 00AC62  bsr $100cc
-    tick(94);
     wr8(A2 + 0x11, rd8(0x111DA));  // 00AC66  move.b $111da.l, 17(a2)
     wr8(A2 + 0x12, rd8(0x111DB));  // 00AC6E  move.b $111db.l, 18(a2)
     D4 = 0x0;  // 00AC76  moveq.l #$0, d4
     setW(D4, rd16(A1 + 0xE));  // 00AC78  move.w 14(a1), d4
     A6 = 0x111D2;  // 00AC7C  lea.l $111d2.l, a6
     call(number_to_decimal, 0xAC86);  // 00AC82  bsr $100cc
-    tick(48);
     wr8(A2 + 0x14, rd8(0x111DA));  // 00AC86  move.b $111da.l, 20(a2)
     wr8(A2 + 0x15, rd8(0x111DB));  // 00AC8E  move.b $111db.l, 21(a2)
 L_00AC96:
-    tick(28);
     A1 = A1 + 0x10;  // 00AC96  lea.l 16(a1), a1
     A2 = A2 + 0x16;  // 00AC9A  lea.l 22(a2), a2
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00ABCE;  // 00AC9E  dbf.w d7, $abce
-    tick(16);
     return;  // 00ACA2  rts 
 L_00ACA4:
-    tick(294);
     wr8(A2, 0x30);  // 00ACA4  move.b #$30, (a2)
     wr8(A2 + 0x1, 0x30);  // 00ACA8  move.b #$30, 1(a2)
     wr8(A2 + 0x2, 0x30);  // 00ACAE  move.b #$30, 2(a2)
@@ -3931,15 +3024,12 @@ L_00ACA4:
 }
 
 void draw_player_stats() {
-    tick(18);
     call(clear_message_line, 0xAD14);  // 00AD10  bsr $b108
-    tick(66);
     A0 = rd32(v_player_record);  // 00AD14  movea.l $113d6.l, a0
     D4 = 0x0;  // 00AD1A  moveq.l #$0, d4
     setW(D4, rd16(A0 + 0x14));  // 00AD1C  move.w 20(a0), d4
     A6 = 0x111D2;  // 00AD20  lea.l $111d2.l, a6
     call(number_to_decimal, 0xAD2A);  // 00AD26  bsr $100cc
-    tick(242);
     wr8(0x144F4, rd8(0x111D9));  // 00AD2A  move.b $111d9.l, $144f4.l
     wr8(0x144F5, rd8(0x111DA));  // 00AD34  move.b $111da.l, $144f5.l
     wr8(0x144F6, rd8(0x111DB));  // 00AD3E  move.b $111db.l, $144f6.l
@@ -3950,23 +3040,19 @@ void draw_player_stats() {
     wr32(0x14502, rd32(A2 + 0x4));  // 00AD62  move.l 4(a2), $14502.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00AD6A  move.l $1b5f8.l, $1b604.l
     call(draw_text, 0xAD78);  // 00AD74  bsr $b2a0
-    tick(44);
     A0 = rd32(v_player_record);  // 00AD78  movea.l $113d6.l, a0
     A0 += 0x8;  // 00AD7E  addq.l #$8, a0
     A1 = 0x1142C;  // 00AD80  lea.l $1142c.l, a1
     D0 = 0x7;  // 00AD86  moveq.l #$7, d0
 L_00AD88:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 00AD88  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00AD88;  // 00AD8A  dbf.w d0, $ad88
-    tick(150);
     wr16(0x1B608, 0);  // 00AD8E  clr.w $1b608.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00AD94  move.l $1b5f8.l, $1b604.l
     A2 = 0x11428;  // 00AD9E  lea.l $11428.l, a2
     wr32(0x14506, rd32(A2 + 0x4));  // 00ADA4  move.l 4(a2), $14506.l
     wr32(0x1450A, rd32(A2 + 0x8));  // 00ADAC  move.l 8(a2), $1450a.l
     call(draw_text, 0xADB8);  // 00ADB4  bsr $b2a0
-    tick(106);
     wr16(0x1141A, 0x10);  // 00ADB8  move.w #$10, $1141a.l
     wr16(0x1141C, 0x18);  // 00ADC0  move.w #$18, $1141c.l
     D4 = 0x0;  // 00ADC8  moveq.l #$0, d4
@@ -3974,7 +3060,6 @@ L_00AD88:
     setW(D4, rd16(A0 + 0x10));  // 00ADD0  move.w 16(a0), d4
     A6 = 0x111D2;  // 00ADD4  lea.l $111d2.l, a6
     call(number_to_decimal, 0xADDE);  // 00ADDA  bsr $100cc
-    tick(242);
     wr8(0x144F4, rd8(0x111D9));  // 00ADDE  move.b $111d9.l, $144f4.l
     wr8(0x144F5, rd8(0x111DA));  // 00ADE8  move.b $111da.l, $144f5.l
     wr8(0x144F6, rd8(0x111DB));  // 00ADF2  move.b $111db.l, $144f6.l
@@ -3985,13 +3070,11 @@ L_00AD88:
     wr32(0x1450E, rd32(A2 + 0x4));  // 00AE16  move.l 4(a2), $1450e.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00AE1E  move.l $1b5f8.l, $1b604.l
     call(draw_text, 0xAE2C);  // 00AE28  bsr $b2a0
-    tick(66);
     D4 = 0x0;  // 00AE2C  moveq.l #$0, d4
     A0 = rd32(v_player_record);  // 00AE2E  movea.l $113d6.l, a0
     setB(D4, rd8(A0 + 0x12));  // 00AE34  move.b 18(a0), d4
     A6 = 0x111D2;  // 00AE38  lea.l $111d2.l, a6
     call(number_to_decimal, 0xAE42);  // 00AE3E  bsr $100cc
-    tick(206);
     wr8(0x144F4, rd8(0x111DA));  // 00AE42  move.b $111da.l, $144f4.l
     wr8(0x144F5, rd8(0x111DB));  // 00AE4C  move.b $111db.l, $144f5.l
     wr8(0x144F6, 0);  // 00AE56  clr.b $144f6.l
@@ -4001,13 +3084,11 @@ L_00AD88:
     wr16(0x14512, rd16(A2 + 0x4));  // 00AE70  move.w 4(a2), $14512.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00AE78  move.l $1b5f8.l, $1b604.l
     call(draw_text, 0xAE86);  // 00AE82  bsr $b2a0
-    tick(66);
     D4 = 0x0;  // 00AE86  moveq.l #$0, d4
     A0 = rd32(v_player_record);  // 00AE88  movea.l $113d6.l, a0
     setB(D4, rd8(A0 + 0x13));  // 00AE8E  move.b 19(a0), d4
     A6 = 0x111D2;  // 00AE92  lea.l $111d2.l, a6
     call(number_to_decimal, 0xAE9C);  // 00AE98  bsr $100cc
-    tick(206);
     wr8(0x144F4, rd8(0x111DA));  // 00AE9C  move.b $111da.l, $144f4.l
     wr8(0x144F5, rd8(0x111DB));  // 00AEA6  move.b $111db.l, $144f5.l
     wr8(0x144F6, 0);  // 00AEB0  clr.b $144f6.l
@@ -4017,13 +3098,11 @@ L_00AD88:
     wr16(0x14514, rd16(A2 + 0x4));  // 00AECA  move.w 4(a2), $14514.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00AED2  move.l $1b5f8.l, $1b604.l
     call(draw_text, 0xAEE0);  // 00AEDC  bsr $b2a0
-    tick(16);
     return;  // 00AEE0  rts 
 }
 
 // Обновить «зал славы» ($13F30): вставить игрока, если его время лучше.
 void update_hall_of_fame() {
-    tick(52);
     D3 = 0x3;  // 00AEE2  moveq.l #$3, d3
     D4 = 0x0;  // 00AEE4  moveq.l #$0, d4
     D5 = 0x0;  // 00AEE6  moveq.l #$0, d5
@@ -4032,120 +3111,92 @@ void update_hall_of_fame() {
     A0 = 0x13F30;  // 00AEEC  lea.l $13f30.l, a0
     A1 = rd32(v_player_record);  // 00AEF2  movea.l $113d6.l, a1
 L_00AEF8:
-    tick(98);
     wr8(0x11402, 0x30);  // 00AEF8  move.b #$30, $11402.l
     wr8(0x11403, rd8(A0 + 0x9));  // 00AF00  move.b 9(a0), $11403.l
     wr16(0x11404, rd16(A0 + 0xA));  // 00AF08  move.w 10(a0), $11404.l
     A4 = 0x11402;  // 00AF10  lea.l $11402.l, a4
     call(parse_decimal, 0xAF1A);  // 00AF16  bsr $10098
-    tick(102);
     D5 = D0;  // 00AF1A  move.l d0, d5
     wr16(0x11402, 0x3030);  // 00AF1C  move.w #$3030, $11402.l
     wr8(0x11404, rd8(A0 + 0xD));  // 00AF24  move.b 13(a0), $11404.l
     wr8(0x11405, rd8(A0 + 0xE));  // 00AF2C  move.b 14(a0), $11405.l
     A4 = 0x11402;  // 00AF34  lea.l $11402.l, a4
     call(parse_decimal, 0xAF3E);  // 00AF3A  bsr $10098
-    tick(78);
     D6 = D0;  // 00AF3E  move.l d0, d6
     wr16(0x11402, 0x3030);  // 00AF40  move.w #$3030, $11402.l
     wr16(0x11404, rd16(A0 + 0x10));  // 00AF48  move.w 16(a0), $11404.l
     A4 = 0x11402;  // 00AF50  lea.l $11402.l, a4
     call(parse_decimal, 0xAF5A);  // 00AF56  bsr $10098
-    tick(30);
     D7 = D0;  // 00AF5A  move.l d0, d7
     setW(D4, rd16(A1 + 0x10));  // 00AF5C  move.w 16(a1), d4
     // 00AF60  cmp.w d4, d5
     if ((D5 & 0xFFFF) == (D4 & 0xFFFF)) goto L_00AF76;  // 00AF62  beq $af76
-    tick(14);
     // 00AF64  cmp.w d4, d5
     if (int16_t((D5 & 0xFFFF)) > int16_t((D4 & 0xFFFF))) goto L_00AFB0;  // 00AF66  bgt $afb0
-    tick(18);
     setW(D3, ((D3 & 0xFFFF) - 0x1));  // 00AF68  subq.w #$1, d3
     // 00AF6A  tst.w d3
     if ((D3 & 0xFFFF) == 0) goto L_00AFAE;  // 00AF6C  beq $afae
-    tick(18);
     A0 = A0 + 0x12;  // 00AF6E  lea.l 18(a0), a0
     goto L_00AEF8;  // 00AF72  bra $aef8
 L_00AF76:
-    tick(30);
     setW(D4, 0);  // 00AF76  clr.w d4
     setB(D4, rd8(A1 + 0x12));  // 00AF78  move.b 18(a1), d4
     // 00AF7C  cmp.w d4, d6
     if ((D6 & 0xFFFF) == (D4 & 0xFFFF)) goto L_00AF92;  // 00AF7E  beq $af92
-    tick(14);
     // 00AF80  cmp.w d4, d6
     if (int16_t((D6 & 0xFFFF)) > int16_t((D4 & 0xFFFF))) goto L_00AFB0;  // 00AF82  bgt $afb0
-    tick(18);
     setW(D3, ((D3 & 0xFFFF) - 0x1));  // 00AF84  subq.w #$1, d3
     // 00AF86  tst.w d3
     if ((D3 & 0xFFFF) == 0) goto L_00AFAE;  // 00AF88  beq $afae
-    tick(18);
     A0 = A0 + 0x12;  // 00AF8A  lea.l 18(a0), a0
     goto L_00AEF8;  // 00AF8E  bra $aef8
 L_00AF92:
-    tick(30);
     setW(D4, 0);  // 00AF92  clr.w d4
     setB(D4, rd8(A1 + 0x13));  // 00AF94  move.b 19(a1), d4
     // 00AF98  cmp.w d4, d7
     if ((D7 & 0xFFFF) == (D4 & 0xFFFF)) goto L_00AFA0;  // 00AF9A  beq $afa0
-    tick(14);
     // 00AF9C  cmp.w d4, d7
     if (int16_t((D7 & 0xFFFF)) > int16_t((D4 & 0xFFFF))) goto L_00AFB0;  // 00AF9E  bgt $afb0
 L_00AFA0:
-    tick(18);
     setW(D3, ((D3 & 0xFFFF) - 0x1));  // 00AFA0  subq.w #$1, d3
     // 00AFA2  tst.w d3
     if ((D3 & 0xFFFF) == 0) goto L_00AFAE;  // 00AFA4  beq $afae
-    tick(18);
     A0 = A0 + 0x12;  // 00AFA6  lea.l 18(a0), a0
     goto L_00AEF8;  // 00AFAA  bra $aef8
 L_00AFAE:
-    tick(16);
     return;  // 00AFAE  rts 
 L_00AFB0:
-    tick(26);
     D3 = (D3 - 0x1);  // 00AFB0  subq.l #$1, d3
     // 00AFB2  cmpi.w #$2, d3
     if ((D3 & 0xFFFF) == 0x2) goto L_00AFC0;  // 00AFB6  beq $afc0
-    tick(18);
     // 00AFB8  cmpi.w #$1, d3
     if ((D3 & 0xFFFF) == 0x1) goto L_00AFDE;  // 00AFBC  beq $afde
-    tick(10);
     goto L_00AFFA;  // 00AFBE  bra $affa
 L_00AFC0:
-    tick(42);
     A3 = 0x13F42;  // 00AFC0  lea.l $13f42.l, a3
     A4 = 0x13F54;  // 00AFC6  lea.l $13f54.l, a4
     call(copy_hof_line, 0xAFCE);  // 00AFCC  bsr $afee
-    tick(42);
     A3 = 0x13F30;  // 00AFCE  lea.l $13f30.l, a3
     A4 = 0x13F42;  // 00AFD4  lea.l $13f42.l, a4
     call(copy_hof_line, 0xAFDC);  // 00AFDA  bsr $afee
-    tick(10);
     goto L_00AFFA;  // 00AFDC  bra $affa
 L_00AFDE:
-    tick(42);
     A3 = 0x13F42;  // 00AFDE  lea.l $13f42.l, a3
     A4 = 0x13F54;  // 00AFE4  lea.l $13f54.l, a4
     call(copy_hof_line, 0xAFEC);  // 00AFEA  bsr $afee
-    tick(10);
     goto L_00AFFA;  // 00AFEC  bra $affa
 L_00AFFA:
-    tick(24);
     A3 = A0;  // 00AFFA  movea.l a0, a3
     A4 = A1;  // 00AFFC  movea.l a1, a4
     A1 += 0x8;  // 00AFFE  addq.l #$8, a1
     setW(D0, 0x7);  // 00B000  move.w #$7, d0
 L_00B004:
-    tick(24);
     {  uint32_t v = rd8(A1); A1 += 1;  wr8(A0, v); A0 += 1; }  // 00B004  move.b (a1)+, (a0)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00B004;  // 00B006  dbf.w d0, $b004
-    tick(46);
     D4 = 0x0;  // 00B00A  moveq.l #$0, d4
     setW(D4, rd16(A4 + 0x10));  // 00B00C  move.w 16(a4), d4
     A6 = 0x111DE;  // 00B010  lea.l $111de.l, a6
     call(number_to_decimal, 0xB01A);  // 00B016  bsr $100cc
-    tick(118);
     wr8(A3 + 0x9, rd8(0x111E5));  // 00B01A  move.b $111e5.l, 9(a3)
     wr8(A3 + 0xA, rd8(0x111E6));  // 00B022  move.b $111e6.l, 10(a3)
     wr8(A3 + 0xB, rd8(0x111E7));  // 00B02A  move.b $111e7.l, 11(a3)
@@ -4153,121 +3204,93 @@ L_00B004:
     setB(D4, rd8(A4 + 0x12));  // 00B034  move.b 18(a4), d4
     A6 = 0x111DE;  // 00B038  lea.l $111de.l, a6
     call(number_to_decimal, 0xB042);  // 00B03E  bsr $100cc
-    tick(94);
     wr8(A3 + 0xD, rd8(0x111E6));  // 00B042  move.b $111e6.l, 13(a3)
     wr8(A3 + 0xE, rd8(0x111E7));  // 00B04A  move.b $111e7.l, 14(a3)
     D4 = 0x0;  // 00B052  moveq.l #$0, d4
     setB(D4, rd8(A4 + 0x13));  // 00B054  move.b 19(a4), d4
     A6 = 0x111DE;  // 00B058  lea.l $111de.l, a6
     call(number_to_decimal, 0xB062);  // 00B05E  bsr $100cc
-    tick(66);
     wr8(A3 + 0x10, rd8(0x111E6));  // 00B062  move.b $111e6.l, 16(a3)
     wr8(A3 + 0x11, rd8(0x111E7));  // 00B06A  move.b $111e7.l, 17(a3)
     call(draw_hall_of_fame, 0xB076);  // 00B072  bsr $975c
-    tick(16);
     return;  // 00B076  rts 
 }
 
 void copy_hof_line() {
-    tick(8);
     setW(D0, 0x11);  // 00AFEE  move.w #$11, d0
 L_00AFF2:
-    tick(24);
     {  uint32_t v = rd8(A3); A3 += 1;  wr8(A4, v); A4 += 1; }  // 00AFF2  move.b (a3)+, (a4)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00AFF2;  // 00AFF4  dbf.w d0, $aff2
-    tick(16);
     return;  // 00AFF8  rts 
 }
 
 void save_hiscores() {
-    tick(66);
     wr32(0x1BD46, rd32(0x1BCEA));  // 00B078  move.l $1bcea.l, $1bd46.l
     D0 = 0x1BD46;  // 00B082  move.l #$1bd46, d0
     call(set_pointer_sprite, 0xB08C);  // 00B088  bsr $91e2
-    tick(50);
     A1 = v_hiscore_file;  // 00B08C  lea.l $1bd94.l, a1
     A0 = 0x13056;  // 00B092  lea.l $13056.l, a0
     setW(D7, 0x1B7);  // 00B098  move.w #$1b7, d7
     call(copy_bytes_d7, 0xB09E);  // 00B09C  bsr $b100
-    tick(38);
     A0 = 0x140FA;  // 00B09E  lea.l $140fa.l, a0
     setW(D7, 0xC7);  // 00B0A4  move.w #$c7, d7
     call(copy_bytes_d7, 0xB0AA);  // 00B0A8  bsr $b100
-    tick(38);
     A0 = 0x141D2;  // 00B0AA  lea.l $141d2.l, a0
     setW(D7, 0x1B7);  // 00B0B0  move.w #$1b7, d7
     call(copy_bytes_d7, 0xB0B6);  // 00B0B4  bsr $b100
-    tick(38);
     A0 = 0x13F30;  // 00B0B6  lea.l $13f30.l, a0
     setW(D7, 0x35);  // 00B0BC  move.w #$35, d7
     call(copy_bytes_d7, 0xB0C2);  // 00B0C0  bsr $b100
-    tick(30);
     A0 = 0x78000;  // 00B0C2  movea.l #$78000, a0
     call(native_diskInit, 0xB0CC);  // 00B0C8  bsr $1035e
-    tick(50);
     D0 = 0x0;  // 00B0CC  moveq.l #$0, d0
     setW(D1, 0xFA);  // 00B0CE  move.w #$fa, d1
     setW(D2, logic<2>(0x2));  // 00B0D2  move.w #$2, d2
     A0 = v_hiscore_file;  // 00B0D6  movea.l #$1bd94, a0
     call(native_saveHiscores, 0xB0E0);  // 00B0DC  jsr $7000.w
-    tick(18);
     call(native_diskMotorOff, 0xB0E4);  // 00B0E0  bsr $103c2
-    tick(20);
     call(native_diskDelay, 0xB0EA);  // 00B0E4  jsr $10a56.l
-    tick(66);
     wr32(0x1BCEA, rd32(0x1BD46));  // 00B0EA  move.l $1bd46.l, $1bcea.l
     D0 = 0x1BCEA;  // 00B0F4  move.l #$1bcea, d0
     call(set_pointer_sprite, 0xB0FE);  // 00B0FA  bsr $91e2
-    tick(16);
     return;  // 00B0FE  rts 
 }
 
 void copy_bytes_d7() {
 L_00B100:
-    tick(24);
     {  uint32_t v = logic<1>(rd8(A0)); A0 += 1;  wr8(A1, v); A1 += 1; }  // 00B100  move.b (a0)+, (a1)+
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00B100;  // 00B102  dbf.w d7, $b100
-    tick(16);
     return;  // 00B106  rts 
 }
 
 void clear_message_line() {
-    tick(36);
     A0 = rd32(v_level_bitmap_ptr);  // 00B108  movea.l $1b5e8.l, a0
     A0 = A0 + 0x2DCB;  // 00B10E  lea.l 11723(a0), a0
     A1 = A0;  // 00B112  movea.l a0, a1
     D1 = 0x6;  // 00B114  moveq.l #$6, d1
 L_00B116:
-    tick(4);
     D0 = 0x14;  // 00B116  moveq.l #$14, d0
 L_00B118:
-    tick(24);
     wr8(A0, 0);  // 00B118  clr.b (a0)+
     A0 += 1;
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00B118;  // 00B11A  dbf.w d0, $b118
-    tick(24);
     A1 = A1 + 0x50;  // 00B11E  lea.l 80(a1), a1
     A0 = A1;  // 00B122  movea.l a1, a0
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_00B116;  // 00B124  dbf.w d1, $b116
-    tick(16);
     return;  // 00B128  rts 
 }
 
 void show_message() {
-    tick(144);
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 00B12A  movem.l regs(fffe), -(a7)
     A0 = 0x1142C;  // 00B12E  lea.l $1142c.l, a0
     D0 = 0x7;  // 00B134  moveq.l #$7, d0
 L_00B136:
-    tick(24);
     {  wr8(A0, 0x2D); A0 += 1; }  // 00B136  move.b #$2d, (a0)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00B136;  // 00B13A  dbf.w d0, $b136
-    tick(86);
     wr32(0x1B604, rd32(0x1B5F8));  // 00B13E  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 00B148  clr.w $1b608.l
     A2 = 0x11428;  // 00B14E  lea.l $11428.l, a2
     call(draw_text, 0xB158);  // 00B154  bsr $b2a0
-    tick(186);
     wr16(0x144F0, 0x208);  // 00B158  move.w #$208, $144f0.l
     wr8(0x144F4, 0x20);  // 00B160  move.b #$20, $144f4.l
     wr8(0x144F5, 0x20);  // 00B168  move.b #$20, $144f5.l
@@ -4277,26 +3300,22 @@ L_00B136:
     wr16(0x1B608, 0);  // 00B188  clr.w $1b608.l
     A2 = 0x144F0;  // 00B18E  lea.l $144f0.l, a2
     call(draw_text, 0xB198);  // 00B194  bsr $b2a0
-    tick(106);
     wr16(0x144F0, 0x1A8);  // 00B198  move.w #$1a8, $144f0.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00B1A0  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 00B1AA  clr.w $1b608.l
     A2 = 0x144F0;  // 00B1B0  lea.l $144f0.l, a2
     call(draw_text, 0xB1BA);  // 00B1B6  bsr $b2a0
-    tick(126);
     wr8(0x144F6, 0);  // 00B1BA  clr.b $144f6.l
     wr16(0x144F0, 0x1C8);  // 00B1C0  move.w #$1c8, $144f0.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00B1C8  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 00B1D2  clr.w $1b608.l
     A2 = 0x144F0;  // 00B1D8  lea.l $144f0.l, a2
     call(draw_text, 0xB1E2);  // 00B1DE  bsr $b2a0
-    tick(106);
     wr16(0x144F0, 0x1E0);  // 00B1E2  move.w #$1e0, $144f0.l
     wr32(0x1B604, rd32(0x1B5F8));  // 00B1EA  move.l $1b5f8.l, $1b604.l
     wr16(0x1B608, 0);  // 00B1F4  clr.w $1b608.l
     A2 = 0x144F0;  // 00B1FA  lea.l $144f0.l, a2
     call(draw_text, 0xB204);  // 00B200  bsr $b2a0
-    tick(148);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 00B204  movem.l (a7)+, regs(7fff)
     return;  // 00B208  rts 
 }
@@ -4304,7 +3323,6 @@ L_00B136:
 // Рисует весь уровень блиттером в битмап уровня (960x384, 4 плоскости
 // interleaved, $1E00 байт на ряд клеток).
 void draw_whole_level() {
-    tick(72);
     A0 = 0x11929;  // 00B20A  lea.l $11929.l, a0
     A2 = rd32(v_tile_gfx_ptr);  // 00B210  movea.l $1b5a4.l, a2
     A3 = A2;  // 00B216  movea.l a2, a3
@@ -4314,14 +3332,11 @@ void draw_whole_level() {
     D3 = 0x0;  // 00B224  moveq.l #$0, d3
     setW(D4, 0x17);  // 00B226  move.w #$17, d4
 L_00B22A:
-    tick(26);
     setB(D1, rd8(A0));  // 00B22A  move.b (a0), d1
     // 00B22C  cmpi.w #$14, d1
     if (int16_t((D1 & 0xFFFF)) < 20) goto L_00B238;  // 00B230  blt $b238
-    tick(16);
     A2 += 0x9D8;  // 00B232  adda.l #$9d8, a2
 L_00B238:
-    tick(108);
     setW(D1, (((D1 & 0xFFFF) << 1) & 0xFFFF));  // 00B238  lsl.w #$1, d1
     A2 += sxw((D1 & 0xFFFF));  // 00B23A  adda.w d1, a2
     wr32(0x11326, A2);  // 00B23C  move.l a2, $11326.l
@@ -4330,24 +3345,19 @@ L_00B238:
     A1 += D3;  // 00B24A  adda.l d3, a1
     wr32(0x1132A, A1);  // 00B24C  move.l a1, $1132a.l
     call(blit_tile_16x16, 0xB254);  // 00B252  bsr $b26e
-    tick(30);
     A2 = A3;  // 00B254  movea.l a3, a2
     A0 += 0x2;  // 00B256  addq.w #$2, a0
     setW(D0, ((D0 & 0xFFFF) + 0x2));  // 00B258  addq.w #$2, d0
     // 00B25A  cmpi.w #$78, d0
     if ((D0 & 0xFFFF) != 0x78) goto L_00B22A;  // 00B25E  bne $b22a
-    tick(32);
     setW(D0, 0);  // 00B260  clr.w d0
     D3 = (D3 + 0x1E00);  // 00B262  addi.l #$1e00, d3
     setW(D4, D4 - 1); if ((D4 & 0xFFFF) != 0xFFFF) goto L_00B22A;  // 00B268  dbf.w d4, $b22a
-    tick(16);
     return;  // 00B26C  rts 
 }
 
 void blit_tile_16x16() {
-    tick(18);
     call(wait_blitter, 0xB272);  // 00B26E  bsr $f8a8
-    tick(160);
     wr32(A5 + 0x50, rd32(0x11326));  // 00B272  move.l $11326.l, 80(a5)
     wr32(A5 + 0x54, rd32(0x1132A));  // 00B27A  move.l $1132a.l, 84(a5)
     wr16(A5 + 0x42, 0);  // 00B282  clr.w 66(a5)
@@ -4360,7 +3370,6 @@ void blit_tile_16x16() {
 
 // Нарисовать текстовую запись a2 (координаты + строка) шрифтом меню/панели.
 void draw_text() {
-    tick(246);
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 00B2A0  movem.l regs(fffe), -(a7)
     A0 = rd32(0x1B604);  // 00B2A4  movea.l $1b604.l, a0
     D0 = 0x0;  // 00B2AA  moveq.l #$0, d0
@@ -4377,18 +3386,14 @@ void draw_text() {
     setW(D0, ((D0 & 0xFFFF) >> 3));  // 00B2C2  lsr.w #$3, d0
     // 00B2C4  tst.w $1b608.l
     if (rd16(0x1B608) == 0) goto L_00B2DA;  // 00B2CA  beq $b2da
-    tick(64);
     D1 = mulu(0x28, D1);  // 00B2CE  mulu.w #$28, d1
     D6 = 0x28;  // 00B2D2  move.l #$28, d6
     goto L_00B2E4;  // 00B2D8  bra $b2e4
 L_00B2DA:
-    tick(54);
     D1 = mulu(0x50, D1);  // 00B2DA  mulu.w #$50, d1
     D6 = 0x50;  // 00B2DE  move.l #$50, d6
 L_00B2E4:
-    tick(18);
     call(find_glyph, 0xB2E6);  // 00B2E4  bsr $b31e
-    tick(60);
     A1 = rd32(0x1B5D8);  // 00B2E6  movea.l $1b5d8.l, a1
     A1 += D4;  // 00B2EC  adda.l d4, a1
     A0 += D1;  // 00B2EE  adda.l d1, a0
@@ -4396,204 +3401,156 @@ L_00B2E4:
     A6 = A0;  // 00B2F2  movea.l a0, a6
     call(blit_glyph, 0xB2F6);  // 00B2F4  bsr $b33c
 L_00B2F6:
-    tick(26);
     A2 += 0x1;  // 00B2F6  addq.l #$1, a2
     logic<1>(rd8(A2));  // 00B2F8  tst.b (a2)
     if (CC_EQ) goto L_00B318;  // 00B2FA  beq $b318
-    tick(42);
     A0 = A6;  // 00B2FE  movea.l a6, a0
     A0 += 0x1;  // 00B300  adda.l #$1, a0
     A6 = A0;  // 00B306  movea.l a0, a6
     call(find_glyph, 0xB30A);  // 00B308  bsr $b31e
-    tick(44);
     A1 = rd32(0x1B5D8);  // 00B30A  movea.l $1b5d8.l, a1
     A1 += D4;  // 00B310  adda.l d4, a1
     call(blit_glyph, 0xB314);  // 00B312  bsr $b33c
-    tick(10);
     goto L_00B2F6;  // 00B314  bra $b2f6
 L_00B318:
-    tick(148);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 00B318  movem.l (a7)+, regs(7fff)
     return;  // 00B31C  rts 
 }
 
 void find_glyph() {
-    tick(20);
     A3 = 0x1B52A;  // 00B31E  lea.l $1b52a.l, a3
     setB(D5, rd8(A2));  // 00B324  move.b (a2), d5
 L_00B326:
-    tick(18);
     // 00B326  cmp.b (a3), d5
     if ((D5 & 0xFF) == rd8(A3)) goto L_00B336;  // 00B328  beq $b336
-    tick(22);
     // 00B32A  cmpi.b #$ff, (a3)
     if (rd8(A3) == 0xFF) goto L_00B336;  // 00B32E  beq $b336
-    tick(18);
     A3 += 0x2;  // 00B332  addq.l #$2, a3
     goto L_00B326;  // 00B334  bra $b326
 L_00B336:
-    tick(28);
     setB(D4, rd8(A3 + 0x1));  // 00B336  move.b 1(a3), d4
     return;  // 00B33A  rts 
 }
 
 void blit_glyph() {
-    tick(4);
     D7 = 0x6;  // 00B33C  moveq.l #$6, d7
 L_00B33E:
-    tick(46);
     wr8(A0, rd8(A1));  // 00B33E  move.b (a1), (a0)
     A1 += 0x3A;  // 00B340  adda.l #$3a, a1
     A0 += D6;  // 00B346  adda.l d6, a0
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00B33E;  // 00B348  dbf.w d7, $b33e
-    tick(20);
     D4 = 0x0;  // 00B34C  moveq.l #$0, d4
     return;  // 00B34E  rts 
 }
 
 void build_cell_address_table() {
-    tick(44);
     A0 = v_cell_screen_ptrs;  // 00B350  lea.l $191de.l, a0
     D2 = rd32(v_level_bitmap_ptr);  // 00B356  move.l $1b5e8.l, d2
     D3 = D2;  // 00B35C  move.l d2, d3
     setW(D1, 0x17);  // 00B35E  move.w #$17, d1
 L_00B362:
-    tick(8);
     setW(D0, 0x3B);  // 00B362  move.w #$3b, d0
 L_00B366:
-    tick(32);
     {  wr32(A0, D2); A0 += 4; }  // 00B366  move.l d2, (a0)+
     D2 = (D2 + 0x2);  // 00B368  addq.l #$2, d2
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00B366;  // 00B36A  dbf.w d0, $b366
-    tick(32);
     D3 = (D3 + 0x1E00);  // 00B36E  addi.l #$1e00, d3
     D2 = D3;  // 00B374  move.l d3, d2
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_00B362;  // 00B376  dbf.w d1, $b362
-    tick(16);
     return;  // 00B37A  rts 
 }
 
 void build_gfx_frame_table() {
-    tick(62);
     A0 = v_gfx_frame_ptrs;  // 00B37C  lea.l $1a85e.l, a0
     D2 = rd32(v_tile_gfx_ptr);  // 00B382  move.l $1b5a4.l, d2
     D3 = D2;  // 00B388  move.l d2, d3
     setW(D1, 0x6);  // 00B38A  move.w #$6, d1
     call(build_gfx_frame_row, 0xB390);  // 00B38E  bsr $b3c0
-    tick(26);
     setW(D1, 0x1);  // 00B390  move.w #$1, d1
     call(build_gfx_frame_row, 0xB396);  // 00B394  bsr $b3c0
-    tick(46);
     D3 = (D3 + 0x280);  // 00B396  addi.l #$280, d3
     D2 = D3;  // 00B39C  move.l d3, d2
     setW(D1, 0x8);  // 00B39E  move.w #$8, d1
     call(build_gfx_frame_row, 0xB3A4);  // 00B3A2  bsr $b3c0
-    tick(66);
     D2 = rd32(v_tile_gfx_ptr);  // 00B3A4  move.l $1b5a4.l, d2
     D2 = (D2 + 0x9880);  // 00B3AA  addi.l #$9880, d2
     D3 = D2;  // 00B3B0  move.l d2, d3
     setW(D1, 0xE);  // 00B3B2  move.w #$e, d1
     call(build_gfx_frame_row, 0xB3B8);  // 00B3B6  bsr $b3c0
-    tick(26);
     setW(D1, 0x1);  // 00B3B8  move.w #$1, d1
     call(build_gfx_frame_row, 0xB3BE);  // 00B3BC  bsr $b3c0
-    tick(16);
     return;  // 00B3BE  rts 
 }
 
 void build_gfx_frame_row() {
 L_00B3C0:
-    tick(8);
     setW(D0, 0x13);  // 00B3C0  move.w #$13, d0
 L_00B3C4:
-    tick(32);
     {  wr32(A0, D2); A0 += 4; }  // 00B3C4  move.l d2, (a0)+
     D2 = (D2 + 0x2);  // 00B3C6  addq.l #$2, d2
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00B3C4;  // 00B3C8  dbf.w d0, $b3c4
-    tick(34);
     D3 = (D3 + 0xA00);  // 00B3CC  addi.l #$a00, d3
     D2 = D3;  // 00B3D2  move.l d3, d2
     setW(D1, sub<2>(0x1, (D1 & 0xFFFF)));  // 00B3D4  subq.w #$1, d1
     if (CC_NE) goto L_00B3C0;  // 00B3D6  bne $b3c0
-    tick(16);
     return;  // 00B3D8  rts 
 }
 
 // Сброс состояния перед уровнем: переменные, списки объектов, таблицы.
 void reset_level_state() {
-    tick(38);
     wr16(0x1BD8E, 0x1);  // 00B3DA  move.w #$1, $1bd8e.l
     call(clear_level_variables, 0xB3E6);  // 00B3E2  bsr $b4e0
-    tick(18);
     call(clear_game_variables, 0xB3EA);  // 00B3E6  bsr $b572
-    tick(42);
     D0 = 0x1676;  // 00B3EA  move.l #$1676, d0
     A0 = 0x14D5E;  // 00B3F0  lea.l $14d5e.l, a0
     call(clear_bytes, 0xB3FA);  // 00B3F6  bsr $b586
-    tick(42);
     D0 = 0x3E8;  // 00B3FA  move.l #$3e8, d0
     A0 = v_moving_zonks;  // 00B400  lea.l $163d4.l, a0
     call(clear_bytes, 0xB40A);  // 00B406  bsr $b586
-    tick(42);
     D0 = 0x1676;  // 00B40A  move.l #$1676, d0
     A0 = 0x167BC;  // 00B410  lea.l $167bc.l, a0
     call(clear_bytes, 0xB41A);  // 00B416  bsr $b586
-    tick(42);
     D0 = 0x3E8;  // 00B41A  move.l #$3e8, d0
     A0 = v_moving_infotrons;  // 00B420  lea.l $17e32.l, a0
     call(clear_bytes, 0xB42A);  // 00B426  bsr $b586
-    tick(42);
     D0 = 0x3E8;  // 00B42A  move.l #$3e8, d0
     A0 = 0x1821A;  // 00B430  lea.l $1821a.l, a0
     call(clear_bytes, 0xB43A);  // 00B436  bsr $b586
-    tick(42);
     D0 = 0x3E8;  // 00B43A  move.l #$3e8, d0
     A0 = 0x18602;  // 00B440  lea.l $18602.l, a0
     call(clear_bytes, 0xB44A);  // 00B446  bsr $b586
-    tick(42);
     D0 = 0x7D0;  // 00B44A  move.l #$7d0, d0
     A0 = v_orange_disks;  // 00B450  lea.l $189ee.l, a0
     call(clear_bytes, 0xB45A);  // 00B456  bsr $b586
-    tick(42);
     D0 = 0x20;  // 00B45A  move.l #$20, d0
     A0 = 0x191BE;  // 00B460  lea.l $191be.l, a0
     call(clear_bytes, 0xB46A);  // 00B466  bsr $b586
-    tick(42);
     D0 = 0x1680;  // 00B46A  move.l #$1680, d0
     A0 = v_cell_screen_ptrs;  // 00B470  lea.l $191de.l, a0
     call(clear_bytes, 0xB47A);  // 00B476  bsr $b586
-    tick(42);
     D0 = 0x960;  // 00B47A  move.l #$960, d0
     A0 = v_gfx_frame_ptrs;  // 00B480  lea.l $1a85e.l, a0
     call(clear_bytes, 0xB48A);  // 00B486  bsr $b586
-    tick(42);
     D0 = 0x24;  // 00B48A  move.l #$24, d0
     A0 = 0x1B1BE;  // 00B490  lea.l $1b1be.l, a0
     call(clear_bytes, 0xB49A);  // 00B496  bsr $b586
-    tick(42);
     A0 = v_explosions;  // 00B49A  lea.l $1b1e2.l, a0
     D0 = 0x240;  // 00B4A0  move.l #$240, d0
     call(clear_bytes, 0xB4AA);  // 00B4A6  bsr $b586
-    tick(42);
     A0 = v_map;  // 00B4AA  lea.l $11928.l, a0
     D0 = 0xB40;  // 00B4B0  move.l #$b40, d0
     call(clear_bytes, 0xB4BA);  // 00B4B6  bsr $b586
-    tick(42);
     A0 = v_level_buffer;  // 00B4BA  lea.l $12468.l, a0
     D0 = 0x5A0;  // 00B4C0  move.l #$5a0, d0
     call(clear_bytes, 0xB4CA);  // 00B4C6  bsr $b586
-    tick(42);
     A0 = v_special_ports;  // 00B4CA  lea.l $12a28.l, a0
     D0 = 0x600;  // 00B4D0  move.l #$600, d0
     call(clear_bytes, 0xB4DA);  // 00B4D6  bsr $b586
-    tick(18);
     call(clear_level_title, 0xB4DE);  // 00B4DA  bsr $b58e
-    tick(16);
     return;  // 00B4DE  rts 
 }
 
 void clear_level_variables() {
-    tick(544);
     wr32(0x11372, 0);  // 00B4E0  clr.l $11372.l
     wr16(0x140DE, 0);  // 00B4E6  clr.w $140de.l
     wr16(v_port_passage_dir, 0);  // 00B4EC  clr.w $113e8.l
@@ -4622,40 +3579,32 @@ void clear_level_variables() {
 }
 
 void clear_game_variables() {
-    tick(24);
     A0 = 0x112CE;  // 00B572  lea.l $112ce.l, a0
     A1 = c_tile_empty;  // 00B578  lea.l $113b8.l, a1
 L_00B57E:
-    tick(28);
     wr16(A0, 0);  // 00B57E  clr.w (a0)+
     A0 += 2;
     // 00B580  cmpa.l a0, a1
     if (A1 != A0) goto L_00B57E;  // 00B582  bne $b57e
-    tick(16);
     return;  // 00B584  rts 
 }
 
 void clear_bytes() {
 L_00B586:
-    tick(30);
     wr8(A0, 0);  // 00B586  clr.b (a0)+
     A0 += 1;
     D0 = sub<4>(0x1, D0);  // 00B588  subq.l #$1, d0
     if (CC_NE) goto L_00B586;  // 00B58A  bne $b586
-    tick(16);
     return;  // 00B58C  rts 
 }
 
 void clear_level_title() {
-    tick(24);
     A0 = 0x12A0D;  // 00B58E  lea.l $12a0d.l, a0
     D0 = 0x18;  // 00B594  move.l #$18, d0
 L_00B59A:
-    tick(30);
     {  wr8(A0, 0x20); A0 += 1; }  // 00B59A  move.b #$20, (a0)+
     D0 = sub<4>(0x1, D0);  // 00B59E  subq.l #$1, d0
     if (CC_NE) goto L_00B59A;  // 00B5A0  bne $b59a
-    tick(16);
     return;  // 00B5A2  rts 
 }
 
@@ -4664,182 +3613,123 @@ L_00B59A:
 // сник-снаки, электроны, диски, терминалы), взрывы, отрисовка.
 void game_frame() {
 L_00B5A4:
-    tick(22);
     // 00B5A4  tst.b 6(a5)
     if (rd8(A5 + 0x6) != 0) goto L_00B5A4;  // 00B5A8  bne $b5a4
-    tick(18);
     call(sound_effects_frame, 0xB5AE);  // 00B5AA  bsr $10104
-    tick(18);
     call(stop_samples_ch0_ch2, 0xB5B2);  // 00B5AE  bsr $101a6
-    tick(18);
     call(music_tick, 0xB5B6);  // 00B5B2  bsr $10b78
-    tick(50);
     wr8(v_frame_div50, (rd8(v_frame_div50) + 0x1));  // 00B5B6  addq.b #$1, $11294.l
     // 00B5BC  cmpi.b #$32, $11294.l
     if (rd8(v_frame_div50) != 0x32) goto L_00B5D0;  // 00B5C4  bne $b5d0
-    tick(38);
     wr8(v_frame_div50, 0);  // 00B5C6  clr.b $11294.l
     call(tick_game_clock, 0xB5D0);  // 00B5CC  bsr $b782
 L_00B5D0:
-    tick(66);
     wr16(A5 + 0x9A, 0x4000);  // 00B5D0  move.w #$4000, 154(a5)
     wr16(0x1133A, (~rd16(0x1133A)));  // 00B5D6  not.w $1133a.l
     // 00B5DC  tst.l $11322.l
     if (rd32(v_snap_cell) == 0) goto L_00B614;  // 00B5E2  beq $b614
-    tick(54);
     wr16(0x112D0, (rd16(0x112D0) + 0x1));  // 00B5E4  addi.w #$1, $112d0.l
     // 00B5EC  cmpi.w #$2, $112d0.l
     if (rd16(0x112D0) != 0x2) goto L_00B614;  // 00B5F4  bne $b614
-    tick(62);
     wr16(0x112D0, 0);  // 00B5F6  clr.w $112d0.l
     A0 = rd32(v_snap_cell);  // 00B5FC  movea.l $11322.l, a0
     // 00B602  cmpi.w #$1, (a0)
     if (rd16(A0) == 0x1) goto L_00B60E;  // 00B606  beq $b60e
-    tick(20);
     wr16(A0, rd16(c_tile_empty));  // 00B608  move.w $113b8.l, (a0)
 L_00B60E:
-    tick(28);
     wr32(v_snap_cell, 0);  // 00B60E  clr.l $11322.l
 L_00B614:
-    tick(18);
     call(murphy_port_passage, 0xB618);  // 00B614  bsr $ed46
-    tick(18);
     call(update_murphy_tile_pos, 0xB61C);  // 00B618  bsr $ba5e
-    tick(18);
     call(update_murphy_cell, 0xB620);  // 00B61C  bsr $c9e8
-    tick(30);
     // 00B620  tst.l $11372.l
     if (rd32(0x11372) != 0) goto L_00B634;  // 00B626  bne $b634
-    tick(18);
     call(read_player_input, 0xB62C);  // 00B628  bsr $baa0
-    tick(18);
     call(apply_gravity, 0xB630);  // 00B62C  bsr $cb2c
-    tick(18);
     call(murphy_move, 0xB634);  // 00B630  bsr $bc14
 L_00B634:
-    tick(30);
     // 00B634  tst.l $11436.l
     if (rd32(v_murphy_crushed_cell) == 0) goto L_00B6A6;  // 00B63A  beq $b6a6
-    tick(30);
     // 00B63C  cmpi.w #$3, $112d8.l
     if (rd16(0x112D8) == 0x3) goto L_00B64E;  // 00B644  beq $b64e
-    tick(30);
     wr16(0x112D8, (rd16(0x112D8) + 0x1));  // 00B646  addq.w #$1, $112d8.l
     goto L_00B686;  // 00B64C  bra $b686
 L_00B64E:
-    tick(46);
     A6 = rd32(v_murphy_crushed_cell);  // 00B64E  movea.l $11436.l, a6
     // 00B654  cmpi.w #$3, 240(a6)
     if (rd16(A6 + 0xF0) != 0x3) goto L_00B686;  // 00B65A  bne $b686
-    tick(26);
     // 00B65C  cmpi.w #$1, 120(a6)
     if (rd16(A6 + 0x78) == 0x1) goto L_00B67E;  // 00B662  beq $b67e
-    tick(26);
     // 00B664  cmpi.w #$4, 120(a6)
     if (rd16(A6 + 0x78) == 0x4) goto L_00B67E;  // 00B66A  beq $b67e
-    tick(26);
     // 00B66C  cmpi.w #$eb08, 120(a6)
     if (rd16(A6 + 0x78) == 0xEB08) goto L_00B67E;  // 00B672  beq $b67e
-    tick(30);
     wr16(0x112D8, 0);  // 00B676  clr.w $112d8.l
     goto L_00B686;  // 00B67C  bra $b686
 L_00B67E:
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00B67E  move.w #$1, $112da.l
 L_00B686:
-    tick(68);
     D0 = rd32(v_murphy_cell);  // 00B686  move.l $1131e.l, d0
     D0 = (D0 - 0xF0);  // 00B68C  subi.l #$f0, d0
     // 00B692  cmp.l $11436.l, d0
     if (D0 == rd32(v_murphy_crushed_cell)) goto L_00B6A6;  // 00B698  beq $b6a6
-    tick(48);
     wr32(v_murphy_crushed_cell, 0);  // 00B69A  clr.l $11436.l
     wr16(0x112D8, 0);  // 00B6A0  clr.w $112d8.l
 L_00B6A6:
-    tick(26);
     // 00B6A6  tst.w $1132e.l
     if (rd16(0x1132E) == 0) goto L_00B6B2;  // 00B6AC  beq $b6b2
-    tick(18);
     call(animate_infotrons, 0xB6B2);  // 00B6AE  bsr $e98e
 L_00B6B2:
-    tick(18);
     call(animate_zonks, 0xB6B6);  // 00B6B2  bsr $e5e4
-    tick(26);
     // 00B6B6  tst.b $14500.l
     if (rd8(v_freeze_enemies) != 0) goto L_00B6C6;  // 00B6BC  bne $b6c6
-    tick(18);
     call(update_sniksnaks, 0xB6C2);  // 00B6BE  bsr $cf72
-    tick(18);
     call(update_electrons, 0xB6C6);  // 00B6C2  bsr $d982
 L_00B6C6:
-    tick(18);
     call(update_bugs, 0xB6CA);  // 00B6C6  bsr $b8b6
-    tick(18);
     call(update_red_disk, 0xB6CE);  // 00B6CA  bsr $eb32
-    tick(18);
     call(update_orange_disks, 0xB6D2);  // 00B6CE  bsr $ebb6
-    tick(30);
     // 00B6D2  btst.b #$0, $1133a.l
     if ((rd8(0x1133A) & (1u << 0))) goto L_00B6E2;  // 00B6DA  bne $b6e2
-    tick(18);
     call(scan_zonks, 0xB6E0);  // 00B6DC  bsr $e3b2
-    tick(10);
     goto L_00B6EE;  // 00B6E0  bra $b6ee
 L_00B6E2:
-    tick(26);
     // 00B6E2  tst.w $1132e.l
     if (rd16(0x1132E) == 0) goto L_00B6EE;  // 00B6E8  beq $b6ee
-    tick(18);
     call(scan_infotrons, 0xB6EE);  // 00B6EA  bsr $e786
 L_00B6EE:
-    tick(38);
     wr16(0x1132E, 0x1);  // 00B6EE  move.w #$1, $1132e.l
     call(update_explosions, 0xB6FA);  // 00B6F6  bsr $fc10
-    tick(18);
     call(animate_idle_counter, 0xB6FC);  // 00B6FA  bsr $b716
-    tick(18);
     call(blit_murphy_pending, 0xB700);  // 00B6FC  bsr $b9ea
-    tick(26);
     // 00B700  tst.b $11294.l
     if (rd8(v_frame_div50) == 0) goto L_00B70C;  // 00B706  beq $b70c
-    tick(18);
     call(update_infotron_counter, 0xB70C);  // 00B708  bsr $ff9c
 L_00B70C:
-    tick(26);
     // 00B70C  cmpi.b #$ff, 6(a5)
     if (rd8(A5 + 0x6) != 0xFF) goto L_00B70C;  // 00B712  bne $b70c
-    tick(16);
     return;  // 00B714  rts 
 }
 
 void animate_idle_counter() {
-    tick(26);
     // 00B716  tst.w $113b4.l
     if (rd16(0x113B4) == 0) goto L_00B740;  // 00B71C  beq $b740
-    tick(30);
     // 00B71E  cmpi.w #$5, $118fe.l
     if (int16_t(rd16(v_input_dir)) < 5) goto L_00B730;  // 00B726  blt $b730
-    tick(26);
     // 00B728  tst.w $113b6.l
     if (rd16(0x113B6) != 0) goto L_00B742;  // 00B72E  bne $b742
 L_00B730:
-    tick(30);
     // 00B730  cmpi.w #$6, $113b4.l
     if (rd16(0x113B4) == 0x6) goto L_00B754;  // 00B738  beq $b754
-    tick(20);
     wr16(0x113B4, (rd16(0x113B4) + 0x1));  // 00B73A  addq.w #$1, $113b4.l
 L_00B740:
-    tick(16);
     return;  // 00B740  rts 
 L_00B742:
-    tick(30);
     // 00B742  cmpi.w #$a, $113b4.l
     if (rd16(0x113B4) == 0xA) goto L_00B754;  // 00B74A  beq $b754
-    tick(36);
     wr16(0x113B4, (rd16(0x113B4) + 0x1));  // 00B74C  addq.w #$1, $113b4.l
     return;  // 00B752  rts 
 L_00B754:
-    tick(76);
     wr16(v_red_disks, (rd16(v_red_disks) + 0x1));  // 00B754  addq.w #$1, $113b2.l
     wr16(0x113B4, 0);  // 00B75A  clr.w $113b4.l
     wr16(0x113B6, 0);  // 00B760  clr.w $113b6.l
@@ -4847,178 +3737,138 @@ L_00B754:
 }
 
 void wait_6_frames() {
-    tick(8);
     setW(D0, 0x5);  // 00B768  move.w #$5, d0
 L_00B76C:
-    tick(26);
     // 00B76C  cmpi.b #$c8, 6(a5)
     if (rd8(A5 + 0x6) != 0xC8) goto L_00B76C;  // 00B772  bne $b76c
 L_00B774:
-    tick(26);
     // 00B774  cmpi.b #$c8, 6(a5)
     if (rd8(A5 + 0x6) == 0xC8) goto L_00B774;  // 00B77A  beq $b774
-    tick(12);
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00B76C;  // 00B77C  dbf.w d0, $b76c
-    tick(16);
     return;  // 00B780  rts 
 }
 
 void tick_game_clock() {
-    tick(30);
     // 00B782  cmpi.b #$ff, $11296.l
     if (rd8(v_clock_seconds) != 0xFF) goto L_00B78E;  // 00B78A  bne $b78e
-    tick(16);
     return;  // 00B78C  rts 
 L_00B78E:
-    tick(50);
     wr8(v_clock_seconds, (rd8(v_clock_seconds) + 0x1));  // 00B78E  addq.b #$1, $11296.l
     // 00B794  cmpi.b #$3c, $11296.l
     if (rd8(v_clock_seconds) != 0x3C) goto L_00B7AA;  // 00B79C  bne $b7aa
-    tick(40);
     wr8(v_clock_seconds, 0);  // 00B79E  clr.b $11296.l
     wr8(v_clock_minutes, (rd8(v_clock_minutes) + 0x1));  // 00B7A4  addq.b #$1, $11297.l
 L_00B7AA:
-    tick(30);
     // 00B7AA  cmpi.b #$3c, $11297.l
     if (rd8(v_clock_minutes) != 0x3C) goto L_00B7C6;  // 00B7B2  bne $b7c6
-    tick(60);
     wr8(v_clock_seconds, 0);  // 00B7B4  clr.b $11296.l
     wr8(v_clock_minutes, 0);  // 00B7BA  clr.b $11297.l
     wr16(v_clock_hours, (rd16(v_clock_hours) + 0x1));  // 00B7C0  addq.w #$1, $11298.l
 L_00B7C6:
-    tick(30);
     // 00B7C6  cmpi.w #$64, $11298.l
     if (rd16(v_clock_hours) != 0x64) goto L_00B7E6;  // 00B7CE  bne $b7e6
-    tick(76);
     wr8(v_clock_seconds, 0xFF);  // 00B7D0  move.b #$ff, $11296.l
     wr8(v_clock_minutes, 0);  // 00B7D8  clr.b $11297.l
     wr16(v_clock_hours, 0);  // 00B7DE  clr.w $11298.l
     return;  // 00B7E4  rts 
 L_00B7E6:
-    tick(18);
     call(draw_clock_seconds, 0xB7E8);  // 00B7E6  bsr $b802
-    tick(18);
     call(draw_clock_minutes, 0xB7EA);  // 00B7E8  bsr $b83c
-    tick(18);
     call(draw_clock_hours, 0xB7EE);  // 00B7EA  bsr $b878
-    tick(16);
     return;  // 00B7EE  rts 
 }
 
 void draw_panel_digit() {
-    tick(52);
     setB(D0, ((D0 & 0xFF) - 0x30));  // 00B7F0  subi.b #$30, d0
     A1 = rd32(0x1B5D4);  // 00B7F4  movea.l $1b5d4.l, a1
     A1 += D0;  // 00B7FA  adda.l d0, a1
     call(draw_digit_7x9, 0xB800);  // 00B7FC  bsr $10082
-    tick(16);
     return;  // 00B800  rts 
 }
 
 void draw_clock_seconds() {
-    tick(50);
     D4 = 0x0;  // 00B802  moveq.l #$0, d4
     setB(D4, rd8(v_clock_seconds));  // 00B804  move.b $11296.l, d4
     A6 = 0x111D2;  // 00B80A  lea.l $111d2.l, a6
     call(number_to_decimal, 0xB814);  // 00B810  bsr $100cc
-    tick(66);
     D0 = 0x0;  // 00B814  moveq.l #$0, d0
     setB(D0, rd8(0x111DB));  // 00B816  move.b $111db.l, d0
     A0 = rd32(0x1B5C0);  // 00B81C  movea.l $1b5c0.l, a0
     A0 = A0 + 0x183;  // 00B822  lea.l 387(a0), a0
     call(draw_panel_digit, 0xB828);  // 00B826  bsr $b7f0
-    tick(62);
     setB(D0, rd8(0x111DA));  // 00B828  move.b $111da.l, d0
     A0 = rd32(0x1B5C0);  // 00B82E  movea.l $1b5c0.l, a0
     A0 = A0 + 0x182;  // 00B834  lea.l 386(a0), a0
     call(draw_panel_digit, 0xB83A);  // 00B838  bsr $b7f0
-    tick(16);
     return;  // 00B83A  rts 
 }
 
 void draw_clock_minutes() {
-    tick(50);
     D4 = 0x0;  // 00B83C  moveq.l #$0, d4
     setB(D4, rd8(v_clock_minutes));  // 00B83E  move.b $11297.l, d4
     A6 = 0x111D2;  // 00B844  lea.l $111d2.l, a6
     call(number_to_decimal, 0xB84E);  // 00B84A  bsr $100cc
-    tick(66);
     D0 = 0x0;  // 00B84E  moveq.l #$0, d0
     setB(D0, rd8(0x111DB));  // 00B850  move.b $111db.l, d0
     A0 = rd32(0x1B5C0);  // 00B856  movea.l $1b5c0.l, a0
     A0 = A0 + 0x180;  // 00B85C  lea.l 384(a0), a0
     call(draw_panel_digit, 0xB862);  // 00B860  bsr $b7f0
-    tick(62);
     setB(D0, rd8(0x111DA));  // 00B862  move.b $111da.l, d0
     A0 = rd32(0x1B5C0);  // 00B868  movea.l $1b5c0.l, a0
     A0 = A0 + 0x17F;  // 00B86E  lea.l 383(a0), a0
     call(draw_panel_digit, 0xB876);  // 00B872  bsr $b7f0
-    tick(16);
     return;  // 00B876  rts 
 }
 
 void draw_clock_hours() {
-    tick(50);
     D4 = 0x0;  // 00B878  moveq.l #$0, d4
     setW(D4, rd16(v_clock_hours));  // 00B87A  move.w $11298.l, d4
     A6 = 0x111D2;  // 00B880  lea.l $111d2.l, a6
     call(number_to_decimal, 0xB88A);  // 00B886  bsr $100cc
-    tick(66);
     D0 = 0x0;  // 00B88A  moveq.l #$0, d0
     setB(D0, rd8(0x111DB));  // 00B88C  move.b $111db.l, d0
     A0 = rd32(0x1B5C0);  // 00B892  movea.l $1b5c0.l, a0
     A0 = A0 + 0x17D;  // 00B898  lea.l 381(a0), a0
     call(draw_panel_digit, 0xB8A0);  // 00B89C  bsr $b7f0
-    tick(62);
     setB(D0, rd8(0x111DA));  // 00B8A0  move.b $111da.l, d0
     A0 = rd32(0x1B5C0);  // 00B8A6  movea.l $1b5c0.l, a0
     A0 = A0 + 0x17C;  // 00B8AC  lea.l 380(a0), a0
     call(draw_panel_digit, 0xB8B4);  // 00B8B0  bsr $b7f0
-    tick(16);
     return;  // 00B8B4  rts 
 }
 
 // Баги: раз в 4 кадра очередной баг из списка $12738 «вспыхивает», если
 // его клетка — база (5 фаз вперёд и назад). Активен один баг за раз.
 void update_bugs() {
-    tick(30);
     // 00B8B6  cmpi.w #$3, $11370.l
     if (rd16(0x11370) == 0x3) goto L_00B8C8;  // 00B8BE  beq $b8c8
-    tick(36);
     wr16(0x11370, (rd16(0x11370) + 0x1));  // 00B8C0  addq.w #$1, $11370.l
     return;  // 00B8C6  rts 
 L_00B8C8:
-    tick(46);
     wr16(0x11370, 0);  // 00B8C8  clr.w $11370.l
     // 00B8CE  tst.b $11364.l
     if (rd8(0x11364) != 0) goto L_00B93C;  // 00B8D4  bne $b93c
-    tick(26);
     // 00B8D6  tst.b $11365.l
     if (rd8(0x11365) != 0) goto L_00B93C;  // 00B8DC  bne $b93c
-    tick(56);
     D0 = 0x0;  // 00B8DE  moveq.l #$0, d0
     setW(D0, rd16(0x1136E));  // 00B8E0  move.w $1136e.l, d0
     A2 = v_bug_list;  // 00B8E6  lea.l $12738.l, a2
     A2 += D0;  // 00B8EC  adda.l d0, a2
     // 00B8EE  tst.w (a2)
     if (rd16(A2) != 0) goto L_00B902;  // 00B8F0  bne $b902
-    tick(56);
     wr8(0x11364, 0);  // 00B8F4  clr.b $11364.l
     wr16(0x1136E, 0);  // 00B8FA  clr.w $1136e.l
     return;  // 00B900  rts 
 L_00B902:
-    tick(48);
     A3 = v_map;  // 00B902  movea.l #$11928, a3
     setW(D0, rd16(A2));  // 00B908  move.w (a2), d0
     A3 += D0;  // 00B90A  adda.l d0, a3
     // 00B90C  cmpi.w #$2, (a3)
     if (rd16(A3) == 0x2) goto L_00B922;  // 00B910  beq $b922
-    tick(56);
     wr16(0x1136E, (rd16(0x1136E) + 0x2));  // 00B914  addq.w #$2, $1136e.l
     wr8(0x11364, 0);  // 00B91A  clr.b $11364.l
     return;  // 00B920  rts 
 L_00B922:
-    tick(86);
     wr32(0x1136A, A3);  // 00B922  move.l a3, $1136a.l
     wr16(A3, 0x19);  // 00B928  move.w #$19, (a3)
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 00B92C  lsl.w #$1, d0
@@ -5026,11 +3876,9 @@ L_00B922:
     A0 += D0;  // 00B934  adda.l d0, a0
     wr32(0x11366, rd32(A0));  // 00B936  move.l (a0), $11366.l
 L_00B93C:
-    tick(42);
     A4 = rd32(0x1136A);  // 00B93C  movea.l $1136a.l, a4
     // 00B942  cmpi.w #$19, (a4)
     if (rd16(A4) != 0x19) goto L_00B9A4;  // 00B946  bne $b9a4
-    tick(82);
     D0 = 0x0;  // 00B948  moveq.l #$0, d0
     A0 = 0x11540;  // 00B94A  lea.l $11540.l, a0
     A1 = v_gfx_frame_ptrs;  // 00B950  lea.l $1a85e.l, a1
@@ -5039,7 +3887,6 @@ L_00B93C:
     setW(D0, rd16(A0));  // 00B95E  move.w (a0), d0
     A1 += D0;  // 00B960  adda.l d0, a1
     call(wait_blitter, 0xB966);  // 00B962  bsr $f8a8
-    tick(162);
     wr32(A5 + 0x54, rd32(0x11366));  // 00B966  move.l $11366.l, 84(a5)
     wr32(A5 + 0x50, rd32(A1));  // 00B96E  move.l (a1), 80(a5)
     wr16(A5 + 0x42, 0);  // 00B972  clr.w 66(a5)
@@ -5049,16 +3896,12 @@ L_00B93C:
     wr16(A5 + 0x58, 0x1001);  // 00B988  move.w #$1001, 88(a5)
     // 00B98E  tst.b $11365.l
     if (rd8(0x11365) == 0) goto L_00B9D0;  // 00B994  beq $b9d0
-    tick(26);
     // 00B996  tst.b $11364.l
     if (rd8(0x11364) == 0) goto L_00B9A6;  // 00B99C  beq $b9a6
-    tick(20);
     wr8(0x11364, (rd8(0x11364) - 0x2));  // 00B99E  subq.b #$2, $11364.l
 L_00B9A4:
-    tick(16);
     return;  // 00B9A4  rts 
 L_00B9A6:
-    tick(164);
     A4 = rd32(0x1136A);  // 00B9A6  movea.l $1136a.l, a4
     wr16(A4, 0x2);  // 00B9AC  move.w #$2, (a4)
     wr16(0x1136E, (rd16(0x1136E) + 0x2));  // 00B9B0  addq.w #$2, $1136e.l
@@ -5068,49 +3911,38 @@ L_00B9A6:
     wr32(0x1136A, 0);  // 00B9C8  clr.l $1136a.l
     return;  // 00B9CE  rts 
 L_00B9D0:
-    tick(50);
     wr8(0x11364, (rd8(0x11364) + 0x2));  // 00B9D0  addq.b #$2, $11364.l
     // 00B9D6  cmpi.b #$a, $11364.l
     if (rd8(0x11364) == 0xA) goto L_00B9E2;  // 00B9DE  beq $b9e2
-    tick(16);
     return;  // 00B9E0  rts 
 L_00B9E2:
-    tick(36);
     wr8(0x11365, (~rd8(0x11365)));  // 00B9E2  not.b $11365.l
     return;  // 00B9E8  rts 
 }
 
 void blit_murphy_pending() {
-    tick(26);
     // 00B9EA  tst.w $112d4.l
     if (rd16(v_death_anim) != 0) goto L_00BA02;  // 00B9F0  bne $ba02
-    tick(26);
     // 00B9F2  tst.w $1138e.l
     if (rd16(v_red_disk_planted) != 0) goto L_00BA02;  // 00B9F8  bne $ba02
-    tick(30);
     // 00B9FA  tst.l $11330.l
     if (rd32(0x11330) != 0) goto L_00BA04;  // 00BA00  bne $ba04
 L_00BA02:
-    tick(16);
     return;  // 00BA02  rts 
 L_00BA04:
-    tick(18);
     call(wait_blitter, 0xBA08);  // 00BA04  bsr $f8a8
-    tick(122);
     wr32(A5 + 0x50, rd32(0x11330));  // 00BA08  move.l $11330.l, 80(a5)
     wr32(A5 + 0x54, rd32(0x11334));  // 00BA10  move.l $11334.l, 84(a5)
     wr16(A5 + 0x42, 0);  // 00BA18  clr.w 66(a5)
     wr16(A5 + 0x40, 0x9F0);  // 00BA1C  move.w #$9f0, 64(a5)
     // 00BA22  tst.w $11338.l
     if (rd16(0x11338) != 0) goto L_00BA44;  // 00BA28  bne $ba44
-    tick(92);
     wr16(A5 + 0x64, 0x26);  // 00BA2A  move.w #$26, 100(a5)
     wr16(A5 + 0x66, 0x76);  // 00BA30  move.w #$76, 102(a5)
     wr16(A5 + 0x58, 0x1001);  // 00BA36  move.w #$1001, 88(a5)
     wr32(0x11330, 0);  // 00BA3C  clr.l $11330.l
     return;  // 00BA42  rts 
 L_00BA44:
-    tick(92);
     wr16(A5 + 0x64, 0x26);  // 00BA44  move.w #$26, 100(a5)
     wr16(A5 + 0x66, 0x76);  // 00BA4A  move.w #$76, 102(a5)
     wr16(A5 + 0x58, 0x1201);  // 00BA50  move.w #$1201, 88(a5)
@@ -5119,7 +3951,6 @@ L_00BA44:
 }
 
 void update_murphy_tile_pos() {
-    tick(204);
     setW(D0, rd16(v_scroll_x));  // 00BA5E  move.w $11344.l, d0
     setW(D0, ((D0 & 0xFFFF) >> 4));  // 00BA64  lsr.w #$4, d0
     wr16(v_view_cell_x, (D0 & 0xFFFF));  // 00BA66  move.w d0, $11340.l
@@ -5139,151 +3970,110 @@ void update_murphy_tile_pos() {
 // $118FE: 1..4 = вверх/влево/вниз/вправо, 5..8 = то же с кнопкой
 // («взять не сходя с места»). Долгое стояние без ввода — «самоуничтожение».
 void read_player_input() {
-    tick(26);
     // 00BAA0  tst.w $1134c.l
     if (rd16(0x1134C) != 0) goto L_00F49A;  // 00BAA6  bne $f49a
-    tick(26);
     // 00BAAA  tst.w $112d4.l
     if (rd16(v_death_anim) != 0) goto L_00F49A;  // 00BAB0  bne $f49a
-    tick(26);
     // 00BAB4  tst.w $11348.l
     if (rd16(v_murphy_moving) != 0) goto L_00BC12;  // 00BABA  bne $bc12
-    tick(46);
     setW(D0, rd16(A5 + 0xC));  // 00BABE  move.w 12(a5), d0
     setW(D0, ((D0 & 0xFFFF) & 0x303));  // 00BAC2  andi.w #$303, d0
     // 00BAC6  tst.w $113ac.l
     if (rd16(v_demo_mode) == 0) goto L_00BAE2;  // 00BACC  beq $bae2
-    tick(78);
     A0 = rd32(0x1B5C8);  // 00BACE  movea.l $1b5c8.l, a0
     A0 += rd32(0x113AE);  // 00BAD4  adda.l $113ae.l, a0
     setW(D0, rd16(A0));  // 00BADA  move.w (a0), d0
     wr32(0x113AE, (rd32(0x113AE) + 0x2));  // 00BADC  addq.l #$2, $113ae.l
 L_00BAE2:
-    tick(14);
     // 00BAE2  tst.w d0
     if ((D0 & 0xFFFF) != 0) goto L_00BB4E;  // 00BAE4  bne $bb4e
-    tick(26);
     // 00BAE6  tst.w $1138e.l
     if (rd16(v_red_disk_planted) != 0) goto L_00BB4E;  // 00BAEC  bne $bb4e
-    tick(30);
     // 00BAEE  btst.b #$7, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 7))) goto L_00BB4C;  // 00BAF6  bne $bb4c
-    tick(52);
     A0 = rd32(v_murphy_cell);  // 00BAF8  movea.l $1131e.l, a0
     // 00BAFE  cmpa.l $11394.l, a0
     if (A0 != rd32(v_fire_hold_cell)) goto L_00BB3C;  // 00BB04  bne $bb3c
-    tick(50);
     wr16(v_fire_hold_frames, (rd16(v_fire_hold_frames) + 0x1));  // 00BB06  addq.w #$1, $11392.l
     // 00BB0C  cmpi.w #$1e, $11392.l
     if (rd16(v_fire_hold_frames) != 0x1E) goto L_00BB4C;  // 00BB14  bne $bb4c
-    tick(26);
     // 00BB16  tst.w $113b2.l
     if (rd16(v_red_disks) == 0) goto L_00BB3C;  // 00BB1C  beq $bb3c
-    tick(104);
     wr16(v_red_disks, (rd16(v_red_disks) - 0x1));  // 00BB1E  subq.w #$1, $113b2.l
     wr16(A0, 0x2);  // 00BB24  move.w #$2, (a0)
     wr16(v_red_disk_planted, 0x1);  // 00BB28  move.w #$1, $1138e.l
     wr32(0x1138A, rd32(v_murphy_screen));  // 00BB30  move.l $11398.l, $1138a.l
     return;  // 00BB3A  rts 
 L_00BB3C:
-    tick(56);
     wr32(v_fire_hold_cell, rd32(v_murphy_cell));  // 00BB3C  move.l $1131e.l, $11394.l
     wr16(v_fire_hold_frames, 0);  // 00BB46  clr.w $11392.l
 L_00BB4C:
-    tick(16);
     return;  // 00BB4C  rts 
 L_00BB4E:
-    tick(38);
     wr16(v_fire_hold_frames, 0);  // 00BB4E  clr.w $11392.l
     // 00BB54  cmpi.w #$100, d0
     if ((D0 & 0xFFFF) != 0x100) goto L_00BB80;  // 00BB58  bne $bb80
-    tick(26);
     // 00BB5A  tst.w $113ac.l
     if (rd16(v_demo_mode) != 0) goto L_00BB76;  // 00BB60  bne $bb76
-    tick(30);
     // 00BB62  btst.b #$7, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 7))) goto L_00BB76;  // 00BB6A  bne $bb76
-    tick(36);
     wr16(v_input_dir, 0x5);  // 00BB6C  move.w #$5, $118fe.l
     return;  // 00BB74  rts 
 L_00BB76:
-    tick(36);
     wr16(v_input_dir, 0x1);  // 00BB76  move.w #$1, $118fe.l
     return;  // 00BB7E  rts 
 L_00BB80:
-    tick(26);
     // 00BB80  tst.w $112d0.l
     if (rd16(0x112D0) != 0) goto L_00BBB4;  // 00BB86  bne $bbb4
-    tick(18);
     // 00BB88  cmpi.w #$300, d0
     if ((D0 & 0xFFFF) != 0x300) goto L_00BBB4;  // 00BB8C  bne $bbb4
-    tick(26);
     // 00BB8E  tst.w $113ac.l
     if (rd16(v_demo_mode) != 0) goto L_00BBAA;  // 00BB94  bne $bbaa
-    tick(30);
     // 00BB96  btst.b #$7, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 7))) goto L_00BBAA;  // 00BB9E  bne $bbaa
-    tick(36);
     wr16(v_input_dir, 0x6);  // 00BBA0  move.w #$6, $118fe.l
     return;  // 00BBA8  rts 
 L_00BBAA:
-    tick(36);
     wr16(v_input_dir, 0x2);  // 00BBAA  move.w #$2, $118fe.l
     return;  // 00BBB2  rts 
 L_00BBB4:
-    tick(18);
     // 00BBB4  cmpi.w #$1, d0
     if ((D0 & 0xFFFF) != 0x1) goto L_00BBE0;  // 00BBB8  bne $bbe0
-    tick(26);
     // 00BBBA  tst.w $113ac.l
     if (rd16(v_demo_mode) != 0) goto L_00BBD6;  // 00BBC0  bne $bbd6
-    tick(30);
     // 00BBC2  btst.b #$7, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 7))) goto L_00BBD6;  // 00BBCA  bne $bbd6
-    tick(36);
     wr16(v_input_dir, 0x7);  // 00BBCC  move.w #$7, $118fe.l
     return;  // 00BBD4  rts 
 L_00BBD6:
-    tick(36);
     wr16(v_input_dir, 0x3);  // 00BBD6  move.w #$3, $118fe.l
     return;  // 00BBDE  rts 
 L_00BBE0:
-    tick(26);
     // 00BBE0  tst.w $112d0.l
     if (rd16(0x112D0) != 0) goto L_00BC12;  // 00BBE6  bne $bc12
-    tick(18);
     // 00BBE8  cmpi.w #$3, d0
     if ((D0 & 0xFFFF) != 0x3) goto L_00BC12;  // 00BBEC  bne $bc12
-    tick(26);
     // 00BBEE  tst.w $113ac.l
     if (rd16(v_demo_mode) != 0) goto L_00BC0A;  // 00BBF4  bne $bc0a
-    tick(30);
     // 00BBF6  btst.b #$7, $bfe001.l
     if ((rd8(0xBFE001) & (1u << 7))) goto L_00BC0A;  // 00BBFE  bne $bc0a
-    tick(36);
     wr16(v_input_dir, 0x8);  // 00BC00  move.w #$8, $118fe.l
     return;  // 00BC08  rts 
 L_00BC0A:
-    tick(20);
     wr16(v_input_dir, 0x4);  // 00BC0A  move.w #$4, $118fe.l
 L_00BC12:
-    tick(16);
     return;  // 00BC12  rts 
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 // Движение Murphy: по направлению из $118FE запускает обработчик
 // (таблица $11900) и продолжает начатый шаг, пока $11348 != 0.
 void murphy_move() {
-    tick(26);
     // 00BC14  tst.w $118fe.l
     if (rd16(v_input_dir) == 0) goto L_00F49A;  // 00BC1A  beq $f49a
-    tick(26);
     // 00BC1E  tst.w $11348.l
     if (rd16(v_murphy_moving) != 0) goto L_00BCBC;  // 00BC24  bne $bcbc
-    tick(88);
     wr16(v_murphy_moving, 0x1);  // 00BC28  move.w #$1, $11348.l
     A0 = 0x11900;  // 00BC30  lea.l $11900.l, a0
     D0 = 0x0;  // 00BC36  moveq.l #$0, d0
@@ -5293,157 +4083,108 @@ void murphy_move() {
     A0 = rd32(A0);  // 00BC42  movea.l (a0), a0
     callAddress(A0); return;  // 00BC44  jmp (a0)
 L_00BCBC:
-    tick(50);
     wr16(0x1131A, 0);  // 00BCBC  clr.w $1131a.l
     // 00BCC2  cmpi.w #$1, $118fe.l
     if (rd16(v_input_dir) == 0x1) goto L_00BD22;  // 00BCCA  beq $bd22
-    tick(30);
     // 00BCCC  cmpi.w #$2, $118fe.l
     if (rd16(v_input_dir) == 0x2) goto L_00BF1C;  // 00BCD4  beq $bf1c
-    tick(30);
     // 00BCD8  cmpi.w #$3, $118fe.l
     if (rd16(v_input_dir) == 0x3) goto L_00C138;  // 00BCE0  beq $c138
-    tick(30);
     // 00BCE4  cmpi.w #$4, $118fe.l
     if (rd16(v_input_dir) == 0x4) goto L_00C32E;  // 00BCEC  beq $c32e
-    tick(30);
     // 00BCF0  cmpi.w #$5, $118fe.l
     if (rd16(v_input_dir) == 0x5) { murphy_snap_up(); return; }  // 00BCF8  beq $c654
-    tick(30);
     // 00BCFC  cmpi.w #$6, $118fe.l
     if (rd16(v_input_dir) == 0x6) { murphy_snap_left(); return; }  // 00BD04  beq $c6e2
-    tick(30);
     // 00BD08  cmpi.w #$7, $118fe.l
     if (rd16(v_input_dir) == 0x7) { murphy_snap_down(); return; }  // 00BD10  beq $c76a
-    tick(30);
     // 00BD14  cmpi.w #$8, $118fe.l
     if (rd16(v_input_dir) == 0x8) { murphy_snap_right(); return; }  // 00BD1C  beq $c7fa
-    tick(16);
     return;  // 00BD20  rts 
 L_00BD22:
-    tick(26);
     // 00BD22  tst.w $11388.l
     if (rd16(v_murphy_step_active) != 0) goto L_00BE44;  // 00BD28  bne $be44
-    tick(58);
     A0 = rd32(v_murphy_cell);  // 00BD2C  movea.l $1131e.l, a0
     setW(D0, rd16(A0 - 0x78));  // 00BD32  move.w -120(a0), d0
     // 00BD36  cmpi.w #$4, -120(a0)
     if (rd16(A0 - 0x78) == 0x4) goto L_00BE44;  // 00BD3C  beq $be44
-    tick(26);
     // 00BD40  cmpi.b #$4, -119(a0)
     if (rd8(A0 - 0x77) == 0x4) goto L_00BE3E;  // 00BD46  beq $be3e
-    tick(26);
     // 00BD4A  cmp.w $113d4.l, d0
     if ((D0 & 0xFFFF) != rd16(c_tile_yellow_disk)) goto L_00BD7C;  // 00BD50  bne $bd7c
-    tick(22);
     // 00BD52  tst.w -240(a0)
     if (rd16(A0 - 0xF0) != 0) { murphy_move_done(); return; }  // 00BD56  bne $cf28
-    tick(58);
     wr16(v_push_kind, 0x3);  // 00BD5A  move.w #$3, $11308.l
     wr16(0x1131C, 0x3);  // 00BD62  move.w #$3, $1131c.l
     call(murphy_push_step, 0xBD6E);  // 00BD6A  bsr $c5c6
-    tick(26);
     // 00BD6E  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00BE44;  // 00BD74  bne $be44
-    tick(10);
     { murphy_move_done(); return; }  // 00BD78  bra $cf28
 L_00BD7C:
-    tick(26);
     // 00BD7C  cmp.w $113ba.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_zonk)) goto L_00BE3E;  // 00BD82  beq $be3e
-    tick(26);
     // 00BD86  cmp.w $113c2.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_ramchip)) goto L_00BE3E;  // 00BD8C  beq $be3e
-    tick(26);
     // 00BD90  cmp.w $113c4.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_hardware)) goto L_00BE3E;  // 00BD96  beq $be3e
-    tick(18);
     // 00BD9A  cmpi.w #$14, d0
     if ((D0 & 0xFFFF) != 0x14) goto L_00BDB2;  // 00BD9E  bne $bdb2
-    tick(46);
     A6 = rd32(v_murphy_cell);  // 00BDA0  movea.l $1131e.l, a6
     A6 = A6 - 0x78;  // 00BDA6  lea.l -120(a6), a6
     call(collect_red_disk, 0xBDAE);  // 00BDAA  bsr $bc96
-    tick(10);
     goto L_00BE44;  // 00BDAE  bra $be44
 L_00BDB2:
-    tick(26);
     // 00BDB2  cmp.w $113cc.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_down)) goto L_00BE3E;  // 00BDB8  beq $be3e
-    tick(26);
     // 00BDBC  cmp.w $113ce.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_left)) goto L_00BE3E;  // 00BDC2  beq $be3e
-    tick(26);
     // 00BDC4  cmp.w $113ca.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_right)) goto L_00BE3E;  // 00BDCA  beq $be3e
-    tick(26);
     // 00BDCC  cmp.w $113d0.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_up)) goto L_00BF04;  // 00BDD2  beq $bf04
-    tick(18);
     // 00BDD6  cmpi.w #$15, d0
     if ((D0 & 0xFFFF) == 0x15) goto L_00BF04;  // 00BDDA  beq $bf04
-    tick(18);
     // 00BDDE  cmpi.w #$17, d0
     if ((D0 & 0xFFFF) == 0x17) goto L_00BF04;  // 00BDE2  beq $bf04
-    tick(26);
     // 00BDE6  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00BE3E;  // 00BDEC  beq $be3e
-    tick(26);
     // 00BDEE  cmp.w $113c6.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_exit)) goto L_00BE2E;  // 00BDF4  beq $be2e
-    tick(18);
     // 00BDF6  cmpi.w #$19, d0
     if ((D0 & 0xFFFF) != 0x19) goto L_00BE04;  // 00BDFA  bne $be04
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00BDFC  move.w #$1, $112da.l
 L_00BE04:
-    tick(18);
     // 00BE04  cmpi.w #$12, d0
     if ((D0 & 0xFFFF) == 0x12) goto L_00BE3E;  // 00BE08  beq $be3e
-    tick(18);
     // 00BE0A  cmpi.w #$13, d0
     if ((D0 & 0xFFFF) == 0x13) goto L_00C91C;  // 00BE0E  beq $c91c
-    tick(18);
     // 00BE12  cmpi.w #$16, d0
     if ((D0 & 0xFFFF) == 0x16) goto L_00BE3E;  // 00BE16  beq $be3e
-    tick(18);
     // 00BE18  cmpi.w #$10, d0
     if ((D0 & 0xFFFF) == 0x10) goto L_00C540;  // 00BE1C  beq $c540
-    tick(18);
     // 00BE20  cmpi.w #$d, d0
     if (int16_t((D0 & 0xFFFF)) < 13) goto L_00BE44;  // 00BE24  blt $be44
-    tick(18);
     // 00BE26  cmpi.w #$10, d0
     if (int16_t((D0 & 0xFFFF)) > 16) goto L_00BE44;  // 00BE2A  bgt $be44
-    tick(10);
     goto L_00BE3E;  // 00BE2C  bra $be3e
 L_00BE2E:
-    tick(30);
     // 00BE2E  tst.l $111cc.l
     if (rd32(v_infotrons_left) != 0) goto L_00BE3E;  // 00BE34  bne $be3e
-    tick(20);
     wr16(v_level_completed, 0x1);  // 00BE36  move.w #$1, $112d2.l
 L_00BE3E:
-    tick(18);
     call(murphy_move_done, 0xBE42);  // 00BE3E  bsr $cf28
-    tick(16);
     return;  // 00BE42  rts 
 L_00BE44:
-    tick(46);
     wr16(v_murphy_step_active, 0x1);  // 00BE44  move.w #$1, $11388.l
     // 00BE4C  tst.w $1137c.l
     if (rd16(0x1137C) != 0) goto L_00BEA8;  // 00BE52  bne $bea8
-    tick(26);
     // 00BE54  tst.w $1137a.l
     if (rd16(0x1137A) != 0) goto L_00BE66;  // 00BE5A  bne $be66
-    tick(30);
     wr16(0x11440, 0x2);  // 00BE5C  move.w #$2, $11440.l
     goto L_00BE6E;  // 00BE64  bra $be6e
 L_00BE66:
-    tick(20);
     wr16(0x11440, 0x1);  // 00BE66  move.w #$1, $11440.l
 L_00BE6E:
-    tick(212);
     wr16(0x1143E, 0);  // 00BE6E  clr.w $1143e.l
     wr32(0x11350, 0);  // 00BE74  clr.l $11350.l
     wr32(0x11354, 0);  // 00BE7A  clr.l $11354.l
@@ -5455,174 +4196,120 @@ L_00BE6E:
     wr16(0x1137C, 0x1);  // 00BE9E  move.w #$1, $1137c.l
     return;  // 00BEA6  rts 
 L_00BEA8:
-    tick(26);
     // 00BEA8  tst.w $11346.l
     if (rd16(v_scroll_y) != 0) goto L_00BED4;  // 00BEAE  bne $bed4
-    tick(30);
     // 00BEB0  cmpi.w #$1, $1133e.l
     if (rd16(v_murphy_screen_y) != 0x1) goto L_00BEC6;  // 00BEB8  bne $bec6
-    tick(38);
     wr16(0x11358, 0);  // 00BEBA  clr.w $11358.l
     call(murphy_move_done, 0xBEC4);  // 00BEC0  bsr $cf28
-    tick(16);
     return;  // 00BEC4  rts 
 L_00BEC6:
-    tick(38);
     wr16(0x11358, 0x1);  // 00BEC6  move.w #$1, $11358.l
     call(scroll_step_up, 0xBED2);  // 00BECE  bsr $cbc8
-    tick(16);
     return;  // 00BED2  rts 
 L_00BED4:
-    tick(30);
     // 00BED4  cmpi.w #$6, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x6) goto L_00BEE4;  // 00BEDC  beq $bee4
-    tick(18);
     call(scroll_step_up, 0xBEE2);  // 00BEDE  bsr $cbc8
-    tick(16);
     return;  // 00BEE2  rts 
 L_00BEE4:
-    tick(18);
     call(scroll_step_up, 0xBEE8);  // 00BEE4  bsr $cbc8
-    tick(18);
     call(bplptr_up_one_line_block, 0xBEEC);  // 00BEE8  bsr $ce62
-    tick(62);
     wr16(v_scroll_y, (rd16(v_scroll_y) - 0x2));  // 00BEEC  subq.w #$2, $11346.l
     setW(D0, rd16(v_scroll_y));  // 00BEF2  move.w $11346.l, d0
     // 00BEF8  cmp.w $1134a.l, d0
     if (int16_t((D0 & 0xFFFF)) <= int16_t(rd16(0x1134A))) { murphy_move_done(); return; }  // 00BEFE  ble $cf28
-    tick(16);
     return;  // 00BF02  rts 
 L_00BF04:
-    tick(42);
     A0 = rd32(v_murphy_cell);  // 00BF04  movea.l $1131e.l, a0
     // 00BF0A  tst.w -240(a0)
     if (rd16(A0 - 0xF0) != 0) { murphy_move_done(); return; }  // 00BF0E  bne $cf28
-    tick(36);
     wr16(v_port_passage_dir, 0x1);  // 00BF12  move.w #$1, $113e8.l
     return;  // 00BF1A  rts 
 L_00BF1C:
-    tick(26);
     // 00BF1C  tst.w $11388.l
     if (rd16(v_murphy_step_active) != 0) goto L_00C078;  // 00BF22  bne $c078
-    tick(58);
     A0 = rd32(v_murphy_cell);  // 00BF26  movea.l $1131e.l, a0
     setW(D0, rd16(A0 - 0x2));  // 00BF2C  move.w -2(a0), d0
     // 00BF30  cmpi.w #$4, -2(a0)
     if (rd16(A0 - 0x2) == 0x4) goto L_00C06A;  // 00BF36  beq $c06a
-    tick(26);
     // 00BF3A  cmpi.b #$4, -1(a0)
     if (rd8(A0 - 0x1) == 0x4) { murphy_move_done(); return; }  // 00BF40  beq $cf28
-    tick(26);
     // 00BF44  cmp.w $113ba.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_zonk)) goto L_00BF78;  // 00BF4A  beq $bf78
-    tick(26);
     // 00BF4E  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00BF6E;  // 00BF54  beq $bf6e
-    tick(26);
     // 00BF58  cmp.w $113d4.l, d0
     if ((D0 & 0xFFFF) != rd16(c_tile_yellow_disk)) goto L_00BFA2;  // 00BF5E  bne $bfa2
-    tick(30);
     wr16(v_push_kind, 0x3);  // 00BF62  move.w #$3, $11308.l
     goto L_00BF80;  // 00BF6A  bra $bf80
 L_00BF6E:
-    tick(30);
     wr16(v_push_kind, 0x2);  // 00BF6E  move.w #$2, $11308.l
     goto L_00BF80;  // 00BF76  bra $bf80
 L_00BF78:
-    tick(20);
     wr16(v_push_kind, 0x1);  // 00BF78  move.w #$1, $11308.l
 L_00BF80:
-    tick(22);
     // 00BF80  tst.w -4(a0)
     if (rd16(A0 - 0x4) != 0) { murphy_move_done(); return; }  // 00BF84  bne $cf28
-    tick(38);
     wr16(0x1131C, 0x1);  // 00BF88  move.w #$1, $1131c.l
     call(murphy_push_step, 0xBF94);  // 00BF90  bsr $c5c6
-    tick(26);
     // 00BF94  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00C06A;  // 00BF9A  bne $c06a
-    tick(10);
     { murphy_move_done(); return; }  // 00BF9E  bra $cf28
 L_00BFA2:
-    tick(26);
     // 00BFA2  cmp.w $113c2.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_ramchip)) { murphy_move_done(); return; }  // 00BFA8  beq $cf28
-    tick(26);
     // 00BFAC  cmp.w $113c4.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_hardware)) { murphy_move_done(); return; }  // 00BFB2  beq $cf28
-    tick(18);
     // 00BFB6  cmpi.w #$14, d0
     if ((D0 & 0xFFFF) != 0x14) goto L_00BFCC;  // 00BFBA  bne $bfcc
-    tick(46);
     A6 = rd32(v_murphy_cell);  // 00BFBC  movea.l $1131e.l, a6
     A6 -= 0x2;  // 00BFC2  subq.l #$2, a6
     call(collect_red_disk, 0xBFC8);  // 00BFC4  bsr $bc96
-    tick(10);
     goto L_00C06A;  // 00BFC8  bra $c06a
 L_00BFCC:
-    tick(26);
     // 00BFCC  cmp.w $113ca.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_right)) { murphy_move_done(); return; }  // 00BFD2  beq $cf28
-    tick(26);
     // 00BFD6  cmp.w $113cc.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_down)) { murphy_move_done(); return; }  // 00BFDC  beq $cf28
-    tick(26);
     // 00BFE0  cmp.w $113d0.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_up)) { murphy_move_done(); return; }  // 00BFE6  beq $cf28
-    tick(26);
     // 00BFEA  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) { murphy_move_done(); return; }  // 00BFF0  beq $cf28
-    tick(26);
     // 00BFF4  cmp.w $113ce.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_left)) goto L_00C120;  // 00BFFA  beq $c120
-    tick(18);
     // 00BFFE  cmpi.w #$17, d0
     if ((D0 & 0xFFFF) == 0x17) goto L_00C120;  // 00C002  beq $c120
-    tick(18);
     // 00C006  cmpi.w #$16, d0
     if ((D0 & 0xFFFF) == 0x16) goto L_00C120;  // 00C00A  beq $c120
-    tick(26);
     // 00C00E  cmp.w $113c6.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_exit)) goto L_00C054;  // 00C014  beq $c054
-    tick(18);
     // 00C016  cmpi.w #$f, d0
     if ((D0 & 0xFFFF) == 0xF) goto L_00C570;  // 00C01A  beq $c570
-    tick(18);
     // 00C01E  cmpi.w #$19, d0
     if ((D0 & 0xFFFF) != 0x19) goto L_00C02C;  // 00C022  bne $c02c
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00C024  move.w #$1, $112da.l
 L_00C02C:
-    tick(18);
     // 00C02C  cmpi.w #$12, d0
     if ((D0 & 0xFFFF) == 0x12) { murphy_move_done(); return; }  // 00C030  beq $cf28
-    tick(18);
     // 00C034  cmpi.w #$13, d0
     if ((D0 & 0xFFFF) == 0x13) goto L_00C91C;  // 00C038  beq $c91c
-    tick(18);
     // 00C03C  cmpi.w #$15, d0
     if ((D0 & 0xFFFF) == 0x15) { murphy_move_done(); return; }  // 00C040  beq $cf28
-    tick(18);
     // 00C044  cmpi.w #$d, d0
     if (int16_t((D0 & 0xFFFF)) < 13) goto L_00C06A;  // 00C048  blt $c06a
-    tick(18);
     // 00C04A  cmpi.w #$10, d0
     if (int16_t((D0 & 0xFFFF)) > 16) goto L_00C06A;  // 00C04E  bgt $c06a
-    tick(10);
     { murphy_move_done(); return; }  // 00C050  bra $cf28
 L_00C054:
-    tick(30);
     // 00C054  tst.l $111cc.l
     if (rd32(v_infotrons_left) != 0) { murphy_move_done(); return; }  // 00C05A  bne $cf28
-    tick(30);
     wr16(v_level_completed, 0x1);  // 00C05E  move.w #$1, $112d2.l
     { murphy_move_done(); return; }  // 00C066  bra $cf28
 L_00C06A:
-    tick(36);
     wr16(v_murphy_step_active, 0x1);  // 00C06A  move.w #$1, $11388.l
     wr16(0x11442, (D0 & 0xFFFF));  // 00C072  move.w d0, $11442.l
 L_00C078:
-    tick(130);
     wr16(0x1135E, 0);  // 00C078  clr.w $1135e.l
     wr16(0x1137C, 0);  // 00C07E  clr.w $1137c.l
     wr16(0x1137E, 0);  // 00C084  clr.w $1137e.l
@@ -5630,185 +4317,128 @@ L_00C078:
     wr16(0x1137A, 0x1);  // 00C090  move.w #$1, $1137a.l
     // 00C098  cmpi.w #$a, $1133c.l
     if (rd16(v_murphy_screen_x) != 0xA) goto L_00C0AC;  // 00C0A0  bne $c0ac
-    tick(30);
     // 00C0A2  cmpi.w #$7, $11344.l
     if (rd16(v_scroll_x) != 0x7) goto L_00C0F6;  // 00C0AA  bne $c0f6
 L_00C0AC:
-    tick(50);
     wr16(0x1135C, 0x1);  // 00C0AC  move.w #$1, $1135c.l
     // 00C0B4  cmpi.w #$1, $1133c.l
     if (rd16(v_murphy_screen_x) == 0x1) goto L_00C0E4;  // 00C0BC  beq $c0e4
-    tick(30);
     // 00C0BE  cmpi.w #$e, $1143c.l
     if (rd16(0x1143C) != 0xE) goto L_00C0DE;  // 00C0C6  bne $c0de
-    tick(18);
     call(murphy_anim_step, 0xC0CC);  // 00C0C8  bsr $cc98
-    tick(58);
     wr16(0x1143C, 0);  // 00C0CC  clr.w $1143c.l
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) - 0x1));  // 00C0D2  subq.w #$1, $1133c.l
     call(murphy_move_done, 0xC0DC);  // 00C0D8  bsr $cf28
-    tick(16);
     return;  // 00C0DC  rts 
 L_00C0DE:
-    tick(18);
     call(murphy_anim_step, 0xC0E2);  // 00C0DE  bsr $cc98
-    tick(16);
     return;  // 00C0E2  rts 
 L_00C0E4:
-    tick(58);
     wr16(0x1135C, 0);  // 00C0E4  clr.w $1135c.l
     wr16(0x1143C, 0);  // 00C0EA  clr.w $1143c.l
     call(murphy_move_done, 0xC0F4);  // 00C0F0  bsr $cf28
-    tick(16);
     return;  // 00C0F4  rts 
 L_00C0F6:
-    tick(38);
     wr16(0x1135C, 0);  // 00C0F6  clr.w $1135c.l
     call(fine_scroll_left, 0xC100);  // 00C0FC  bsr $cebe
-    tick(18);
     call(murphy_anim_step, 0xC104);  // 00C100  bsr $cc98
-    tick(50);
     wr16(v_scroll_x, (rd16(v_scroll_x) - 0x2));  // 00C104  subq.w #$2, $11344.l
     // 00C10A  cmpi.w #$10, $1143c.l
     if (rd16(0x1143C) != 0x10) goto L_00C11E;  // 00C112  bne $c11e
-    tick(38);
     wr16(0x1143C, 0);  // 00C114  clr.w $1143c.l
     call(murphy_move_done, 0xC11E);  // 00C11A  bsr $cf28
 L_00C11E:
-    tick(16);
     return;  // 00C11E  rts 
 L_00C120:
-    tick(42);
     A0 = rd32(v_murphy_cell);  // 00C120  movea.l $1131e.l, a0
     // 00C126  tst.w -4(a0)
     if (rd16(A0 - 0x4) != 0) { murphy_move_done(); return; }  // 00C12A  bne $cf28
-    tick(36);
     wr16(v_port_passage_dir, 0x2);  // 00C12E  move.w #$2, $113e8.l
     return;  // 00C136  rts 
 L_00C138:
-    tick(26);
     // 00C138  tst.w $11388.l
     if (rd16(v_murphy_step_active) != 0) goto L_00C25A;  // 00C13E  bne $c25a
-    tick(58);
     A0 = rd32(v_murphy_cell);  // 00C142  movea.l $1131e.l, a0
     setW(D0, rd16(A0 + 0x78));  // 00C148  move.w 120(a0), d0
     // 00C14C  cmpi.w #$4, 120(a0)
     if (rd16(A0 + 0x78) == 0x4) goto L_00C25A;  // 00C152  beq $c25a
-    tick(26);
     // 00C156  cmpi.b #$4, 121(a0)
     if (rd8(A0 + 0x79) == 0x4) goto L_00C254;  // 00C15C  beq $c254
-    tick(26);
     // 00C160  cmp.w $113d4.l, d0
     if ((D0 & 0xFFFF) != rd16(c_tile_yellow_disk)) goto L_00C192;  // 00C166  bne $c192
-    tick(22);
     // 00C168  tst.w 240(a0)
     if (rd16(A0 + 0xF0) != 0) { murphy_move_done(); return; }  // 00C16C  bne $cf28
-    tick(58);
     wr16(v_push_kind, 0x3);  // 00C170  move.w #$3, $11308.l
     wr16(0x1131C, 0x4);  // 00C178  move.w #$4, $1131c.l
     call(murphy_push_step, 0xC184);  // 00C180  bsr $c5c6
-    tick(26);
     // 00C184  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00BE44;  // 00C18A  bne $be44
-    tick(10);
     { murphy_move_done(); return; }  // 00C18E  bra $cf28
 L_00C192:
-    tick(26);
     // 00C192  cmp.w $113ba.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_zonk)) goto L_00C254;  // 00C198  beq $c254
-    tick(26);
     // 00C19C  cmp.w $113c2.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_ramchip)) goto L_00C254;  // 00C1A2  beq $c254
-    tick(26);
     // 00C1A6  cmp.w $113c4.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_hardware)) goto L_00C254;  // 00C1AC  beq $c254
-    tick(18);
     // 00C1B0  cmpi.w #$14, d0
     if ((D0 & 0xFFFF) != 0x14) goto L_00C1C8;  // 00C1B4  bne $c1c8
-    tick(46);
     A6 = rd32(v_murphy_cell);  // 00C1B6  movea.l $1131e.l, a6
     A6 = A6 + 0x78;  // 00C1BC  lea.l 120(a6), a6
     call(collect_red_disk, 0xC1C4);  // 00C1C0  bsr $bc96
-    tick(10);
     goto L_00C25A;  // 00C1C4  bra $c25a
 L_00C1C8:
-    tick(26);
     // 00C1C8  cmp.w $113d0.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_up)) goto L_00C254;  // 00C1CE  beq $c254
-    tick(26);
     // 00C1D2  cmp.w $113ce.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_left)) goto L_00C254;  // 00C1D8  beq $c254
-    tick(26);
     // 00C1DA  cmp.w $113ca.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_right)) goto L_00C254;  // 00C1E0  beq $c254
-    tick(26);
     // 00C1E2  cmp.w $113cc.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_down)) goto L_00C316;  // 00C1E8  beq $c316
-    tick(18);
     // 00C1EC  cmpi.w #$15, d0
     if ((D0 & 0xFFFF) == 0x15) goto L_00C316;  // 00C1F0  beq $c316
-    tick(18);
     // 00C1F4  cmpi.w #$17, d0
     if ((D0 & 0xFFFF) == 0x17) goto L_00C316;  // 00C1F8  beq $c316
-    tick(26);
     // 00C1FC  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00C254;  // 00C202  beq $c254
-    tick(26);
     // 00C204  cmp.w $113c6.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_exit)) goto L_00C244;  // 00C20A  beq $c244
-    tick(18);
     // 00C20C  cmpi.w #$19, d0
     if ((D0 & 0xFFFF) != 0x19) goto L_00C21A;  // 00C210  bne $c21a
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00C212  move.w #$1, $112da.l
 L_00C21A:
-    tick(18);
     // 00C21A  cmpi.w #$12, d0
     if ((D0 & 0xFFFF) == 0x12) goto L_00C254;  // 00C21E  beq $c254
-    tick(18);
     // 00C220  cmpi.w #$13, d0
     if ((D0 & 0xFFFF) == 0x13) goto L_00C91C;  // 00C224  beq $c91c
-    tick(18);
     // 00C228  cmpi.w #$16, d0
     if ((D0 & 0xFFFF) == 0x16) goto L_00C254;  // 00C22C  beq $c254
-    tick(18);
     // 00C22E  cmpi.w #$e, d0
     if ((D0 & 0xFFFF) == 0xE) goto L_00C558;  // 00C232  beq $c558
-    tick(18);
     // 00C236  cmpi.w #$d, d0
     if (int16_t((D0 & 0xFFFF)) < 13) goto L_00C25A;  // 00C23A  blt $c25a
-    tick(18);
     // 00C23C  cmpi.w #$10, d0
     if (int16_t((D0 & 0xFFFF)) > 16) goto L_00C25A;  // 00C240  bgt $c25a
-    tick(10);
     goto L_00C254;  // 00C242  bra $c254
 L_00C244:
-    tick(30);
     // 00C244  tst.l $111cc.l
     if (rd32(v_infotrons_left) != 0) goto L_00C254;  // 00C24A  bne $c254
-    tick(20);
     wr16(v_level_completed, 0x1);  // 00C24C  move.w #$1, $112d2.l
 L_00C254:
-    tick(18);
     call(murphy_move_done, 0xC258);  // 00C254  bsr $cf28
-    tick(16);
     return;  // 00C258  rts 
 L_00C25A:
-    tick(46);
     wr16(v_murphy_step_active, 0x1);  // 00C25A  move.w #$1, $11388.l
     // 00C262  tst.w $1137e.l
     if (rd16(0x1137E) != 0) goto L_00C2B8;  // 00C268  bne $c2b8
-    tick(26);
     // 00C26A  tst.w $1137a.l
     if (rd16(0x1137A) != 0) goto L_00C27C;  // 00C270  bne $c27c
-    tick(30);
     wr16(0x11440, 0x2);  // 00C272  move.w #$2, $11440.l
     goto L_00C284;  // 00C27A  bra $c284
 L_00C27C:
-    tick(20);
     wr16(0x11440, 0x1);  // 00C27C  move.w #$1, $11440.l
 L_00C284:
-    tick(192);
     wr32(0x11350, 0);  // 00C284  clr.l $11350.l
     wr32(0x11354, 0);  // 00C28A  clr.l $11354.l
     wr16(0x11358, 0);  // 00C290  clr.w $11358.l
@@ -5819,178 +4449,122 @@ L_00C284:
     wr16(0x1137E, 0x1);  // 00C2AE  move.w #$1, $1137e.l
     return;  // 00C2B6  rts 
 L_00C2B8:
-    tick(30);
     // 00C2B8  cmpi.w #$b0, $11346.l
     if (rd16(v_scroll_y) != 0xB0) goto L_00C2E6;  // 00C2C0  bne $c2e6
-    tick(30);
     // 00C2C2  cmpi.w #$b, $1133e.l
     if (rd16(v_murphy_screen_y) != 0xB) goto L_00C2D8;  // 00C2CA  bne $c2d8
-    tick(38);
     wr16(0x1135A, 0);  // 00C2CC  clr.w $1135a.l
     call(murphy_move_done, 0xC2D6);  // 00C2D2  bsr $cf28
-    tick(16);
     return;  // 00C2D6  rts 
 L_00C2D8:
-    tick(38);
     wr16(0x1135A, 0x1);  // 00C2D8  move.w #$1, $1135a.l
     call(scroll_step_down, 0xC2E4);  // 00C2E0  bsr $cd92
-    tick(16);
     return;  // 00C2E4  rts 
 L_00C2E6:
-    tick(30);
     // 00C2E6  cmpi.w #$6, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x6) goto L_00C2F6;  // 00C2EE  beq $c2f6
-    tick(18);
     call(scroll_step_down, 0xC2F4);  // 00C2F0  bsr $cd92
-    tick(16);
     return;  // 00C2F4  rts 
 L_00C2F6:
-    tick(18);
     call(scroll_step_down, 0xC2FA);  // 00C2F6  bsr $cd92
-    tick(18);
     call(bplptr_down_one_line_block, 0xC2FE);  // 00C2FA  bsr $ce90
-    tick(62);
     wr16(v_scroll_y, (rd16(v_scroll_y) + 0x2));  // 00C2FE  addq.w #$2, $11346.l
     setW(D0, rd16(v_scroll_y));  // 00C304  move.w $11346.l, d0
     // 00C30A  cmp.w $1134a.l, d0
     if (int16_t((D0 & 0xFFFF)) >= int16_t(rd16(0x1134A))) { murphy_move_done(); return; }  // 00C310  bge $cf28
-    tick(16);
     return;  // 00C314  rts 
 L_00C316:
-    tick(42);
     A0 = rd32(v_murphy_cell);  // 00C316  movea.l $1131e.l, a0
     // 00C31C  tst.w 240(a0)
     if (rd16(A0 + 0xF0) != 0) { murphy_move_done(); return; }  // 00C320  bne $cf28
-    tick(36);
     wr16(v_port_passage_dir, 0x4);  // 00C324  move.w #$4, $113e8.l
     return;  // 00C32C  rts 
 L_00C32E:
-    tick(26);
     // 00C32E  tst.w $11388.l
     if (rd16(v_murphy_step_active) != 0) goto L_00C480;  // 00C334  bne $c480
-    tick(58);
     A0 = rd32(v_murphy_cell);  // 00C338  movea.l $1131e.l, a0
     setW(D0, rd16(A0 + 0x2));  // 00C33E  move.w 2(a0), d0
     // 00C342  cmpi.w #$4, 2(a0)
     if (rd16(A0 + 0x2) == 0x4) goto L_00C472;  // 00C348  beq $c472
-    tick(26);
     // 00C34C  cmpi.b #$4, 3(a0)
     if (rd8(A0 + 0x3) == 0x4) goto L_00C46C;  // 00C352  beq $c46c
-    tick(26);
     // 00C356  cmp.w $113ba.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_zonk)) goto L_00C38A;  // 00C35C  beq $c38a
-    tick(26);
     // 00C35E  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00C37E;  // 00C364  beq $c37e
-    tick(26);
     // 00C368  cmp.w $113d4.l, d0
     if ((D0 & 0xFFFF) != rd16(c_tile_yellow_disk)) goto L_00C3B4;  // 00C36E  bne $c3b4
-    tick(30);
     wr16(v_push_kind, 0x3);  // 00C372  move.w #$3, $11308.l
     goto L_00C392;  // 00C37A  bra $c392
 L_00C37E:
-    tick(30);
     wr16(v_push_kind, 0x2);  // 00C37E  move.w #$2, $11308.l
     goto L_00C392;  // 00C386  bra $c392
 L_00C38A:
-    tick(20);
     wr16(v_push_kind, 0x1);  // 00C38A  move.w #$1, $11308.l
 L_00C392:
-    tick(22);
     // 00C392  tst.w 4(a0)
     if (rd16(A0 + 0x4) != 0) goto L_00C46C;  // 00C396  bne $c46c
-    tick(38);
     wr16(0x1131C, 0x2);  // 00C39A  move.w #$2, $1131c.l
     call(murphy_push_step, 0xC3A6);  // 00C3A2  bsr $c5c6
-    tick(26);
     // 00C3A6  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00C472;  // 00C3AC  bne $c472
-    tick(10);
     goto L_00C46C;  // 00C3B0  bra $c46c
 L_00C3B4:
-    tick(26);
     // 00C3B4  cmp.w $113c2.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_ramchip)) goto L_00C46C;  // 00C3BA  beq $c46c
-    tick(26);
     // 00C3BE  cmp.w $113c4.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_hardware)) goto L_00C46C;  // 00C3C4  beq $c46c
-    tick(18);
     // 00C3C8  cmpi.w #$14, d0
     if ((D0 & 0xFFFF) != 0x14) goto L_00C3DE;  // 00C3CC  bne $c3de
-    tick(46);
     A6 = rd32(v_murphy_cell);  // 00C3CE  movea.l $1131e.l, a6
     A6 += 0x2;  // 00C3D4  addq.l #$2, a6
     call(collect_red_disk, 0xC3DA);  // 00C3D6  bsr $bc96
-    tick(10);
     goto L_00C472;  // 00C3DA  bra $c472
 L_00C3DE:
-    tick(26);
     // 00C3DE  cmp.w $113ce.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_left)) goto L_00C46C;  // 00C3E4  beq $c46c
-    tick(26);
     // 00C3E8  cmp.w $113d0.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_up)) goto L_00C46C;  // 00C3EE  beq $c46c
-    tick(26);
     // 00C3F0  cmp.w $113cc.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_down)) goto L_00C46C;  // 00C3F6  beq $c46c
-    tick(26);
     // 00C3F8  cmp.w $113ca.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_right)) goto L_00C528;  // 00C3FE  beq $c528
-    tick(18);
     // 00C402  cmpi.w #$17, d0
     if ((D0 & 0xFFFF) == 0x17) goto L_00C528;  // 00C406  beq $c528
-    tick(18);
     // 00C40A  cmpi.w #$16, d0
     if ((D0 & 0xFFFF) == 0x16) goto L_00C528;  // 00C40E  beq $c528
-    tick(26);
     // 00C412  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00C46C;  // 00C418  beq $c46c
-    tick(26);
     // 00C41A  cmp.w $113c6.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_exit)) goto L_00C45C;  // 00C420  beq $c45c
-    tick(18);
     // 00C422  cmpi.w #$19, d0
     if ((D0 & 0xFFFF) != 0x19) goto L_00C430;  // 00C426  bne $c430
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00C428  move.w #$1, $112da.l
 L_00C430:
-    tick(18);
     // 00C430  cmpi.w #$12, d0
     if ((D0 & 0xFFFF) == 0x12) goto L_00C46C;  // 00C434  beq $c46c
-    tick(18);
     // 00C436  cmpi.w #$13, d0
     if ((D0 & 0xFFFF) == 0x13) goto L_00C91C;  // 00C43A  beq $c91c
-    tick(18);
     // 00C43E  cmpi.w #$15, d0
     if ((D0 & 0xFFFF) == 0x15) goto L_00C46C;  // 00C442  beq $c46c
-    tick(18);
     // 00C446  cmpi.w #$d, d0
     if ((D0 & 0xFFFF) == 0xD) goto L_00C584;  // 00C44A  beq $c584
-    tick(18);
     // 00C44E  cmpi.w #$e, d0
     if (int16_t((D0 & 0xFFFF)) < 14) goto L_00C472;  // 00C452  blt $c472
-    tick(18);
     // 00C454  cmpi.w #$10, d0
     if (int16_t((D0 & 0xFFFF)) > 16) goto L_00C472;  // 00C458  bgt $c472
-    tick(10);
     goto L_00C46C;  // 00C45A  bra $c46c
 L_00C45C:
-    tick(30);
     // 00C45C  tst.l $111cc.l
     if (rd32(v_infotrons_left) != 0) goto L_00C46C;  // 00C462  bne $c46c
-    tick(20);
     wr16(v_level_completed, 0x1);  // 00C464  move.w #$1, $112d2.l
 L_00C46C:
-    tick(18);
     call(murphy_move_done, 0xC470);  // 00C46C  bsr $cf28
-    tick(16);
     return;  // 00C470  rts 
 L_00C472:
-    tick(36);
     wr16(v_murphy_step_active, 0x1);  // 00C472  move.w #$1, $11388.l
     wr16(0x11442, (D0 & 0xFFFF));  // 00C47A  move.w d0, $11442.l
 L_00C480:
-    tick(130);
     wr16(0x1135C, 0);  // 00C480  clr.w $1135c.l
     wr16(0x1137C, 0);  // 00C486  clr.w $1137c.l
     wr16(0x1137E, 0);  // 00C48C  clr.w $1137e.l
@@ -5998,95 +4572,69 @@ L_00C480:
     wr16(0x11378, 0x1);  // 00C498  move.w #$1, $11378.l
     // 00C4A0  cmpi.w #$a, $1133c.l
     if (rd16(v_murphy_screen_x) != 0xA) goto L_00C4B4;  // 00C4A8  bne $c4b4
-    tick(30);
     // 00C4AA  cmpi.w #$277, $11344.l
     if (rd16(v_scroll_x) != 0x277) goto L_00C4FE;  // 00C4B2  bne $c4fe
 L_00C4B4:
-    tick(50);
     wr16(0x1135E, 0x1);  // 00C4B4  move.w #$1, $1135e.l
     // 00C4BC  cmpi.w #$13, $1133c.l
     if (rd16(v_murphy_screen_x) == 0x13) goto L_00C4EC;  // 00C4C4  beq $c4ec
-    tick(30);
     // 00C4C6  cmpi.w #$e, $1143c.l
     if (rd16(0x1143C) != 0xE) goto L_00C4E6;  // 00C4CE  bne $c4e6
-    tick(18);
     call(murphy_anim_step, 0xC4D4);  // 00C4D0  bsr $cc98
-    tick(58);
     wr16(0x1143C, 0);  // 00C4D4  clr.w $1143c.l
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) + 0x1));  // 00C4DA  addq.w #$1, $1133c.l
     call(murphy_move_done, 0xC4E4);  // 00C4E0  bsr $cf28
-    tick(16);
     return;  // 00C4E4  rts 
 L_00C4E6:
-    tick(18);
     call(murphy_anim_step, 0xC4EA);  // 00C4E6  bsr $cc98
-    tick(16);
     return;  // 00C4EA  rts 
 L_00C4EC:
-    tick(58);
     wr16(0x1135E, 0);  // 00C4EC  clr.w $1135e.l
     wr16(0x1143C, 0);  // 00C4F2  clr.w $1143c.l
     call(murphy_move_done, 0xC4FC);  // 00C4F8  bsr $cf28
-    tick(16);
     return;  // 00C4FC  rts 
 L_00C4FE:
-    tick(38);
     wr16(0x1135E, 0);  // 00C4FE  clr.w $1135e.l
     call(fine_scroll_right, 0xC508);  // 00C504  bsr $cef2
-    tick(18);
     call(murphy_anim_step, 0xC50C);  // 00C508  bsr $cc98
-    tick(50);
     wr16(v_scroll_x, (rd16(v_scroll_x) + 0x2));  // 00C50C  addq.w #$2, $11344.l
     // 00C512  cmpi.w #$10, $1143c.l
     if (rd16(0x1143C) != 0x10) goto L_00C526;  // 00C51A  bne $c526
-    tick(38);
     wr16(0x1143C, 0);  // 00C51C  clr.w $1143c.l
     call(murphy_move_done, 0xC526);  // 00C522  bsr $cf28
 L_00C526:
-    tick(16);
     return;  // 00C526  rts 
 L_00C528:
-    tick(42);
     A0 = rd32(v_murphy_cell);  // 00C528  movea.l $1131e.l, a0
     // 00C52E  tst.w 4(a0)
     if (rd16(A0 + 0x4) != 0) { murphy_move_done(); return; }  // 00C532  bne $cf28
-    tick(36);
     wr16(v_port_passage_dir, 0x3);  // 00C536  move.w #$3, $113e8.l
     return;  // 00C53E  rts 
 L_00C540:
-    tick(66);
     A0 = v_special_ports;  // 00C540  lea.l $12a28.l, a0
     D0 = rd32(v_murphy_cell);  // 00C546  move.l $1131e.l, d0
     D0 = (D0 - 0x78);  // 00C54C  subi.l #$78, d0
     call(find_special_port, 0xC554);  // 00C552  bsr $c596
-    tick(10);
     goto L_00BF04;  // 00C554  bra $bf04
 L_00C558:
-    tick(66);
     A0 = v_special_ports;  // 00C558  lea.l $12a28.l, a0
     D0 = rd32(v_murphy_cell);  // 00C55E  move.l $1131e.l, d0
     D0 = (D0 + 0x78);  // 00C564  addi.l #$78, d0
     call(find_special_port, 0xC56C);  // 00C56A  bsr $c596
-    tick(10);
     goto L_00C316;  // 00C56C  bra $c316
 L_00C570:
-    tick(58);
     A0 = v_special_ports;  // 00C570  lea.l $12a28.l, a0
     D0 = rd32(v_murphy_cell);  // 00C576  move.l $1131e.l, d0
     D0 = (D0 - 0x2);  // 00C57C  subq.l #$2, d0
     call(find_special_port, 0xC580);  // 00C57E  bsr $c596
-    tick(10);
     goto L_00C120;  // 00C580  bra $c120
 L_00C584:
-    tick(58);
     A0 = v_special_ports;  // 00C584  lea.l $12a28.l, a0
     D0 = rd32(v_murphy_cell);  // 00C58A  move.l $1131e.l, d0
     D0 = (D0 + 0x2);  // 00C590  addq.l #$2, d0
     call(find_special_port, 0xC594);  // 00C592  bsr $c596
-    tick(10);
     goto L_00C528;  // 00C594  bra $c528
 L_00C91C:
-    tick(100);
     D0 = 0x7;  // 00C91C  moveq.l #$7, d0
     A2 = v_yellow_disk_list;  // 00C91E  lea.l $191c0.l, a2
     A3 = v_gfx_frame_ptrs;  // 00C924  lea.l $1a85e.l, a3
@@ -6094,34 +4642,25 @@ L_00C91C:
     D1 = rd32(v_murphy_screen);  // 00C930  move.l $11398.l, d1
     // 00C936  cmpi.w #$1, $118fe.l
     if (rd16(v_input_dir) != 0x1) goto L_00C948;  // 00C93E  bne $c948
-    tick(26);
     D1 = (D1 - 0x1E00);  // 00C940  subi.l #$1e00, d1
     goto L_00C974;  // 00C946  bra $c974
 L_00C948:
-    tick(30);
     // 00C948  cmpi.w #$2, $118fe.l
     if (rd16(v_input_dir) != 0x2) goto L_00C956;  // 00C950  bne $c956
-    tick(18);
     D1 = (D1 - 0x2);  // 00C952  subq.l #$2, d1
     goto L_00C974;  // 00C954  bra $c974
 L_00C956:
-    tick(30);
     // 00C956  cmpi.w #$3, $118fe.l
     if (rd16(v_input_dir) != 0x3) goto L_00C968;  // 00C95E  bne $c968
-    tick(26);
     D1 = (D1 + 0x1E00);  // 00C960  addi.l #$1e00, d1
     goto L_00C974;  // 00C966  bra $c974
 L_00C968:
-    tick(30);
     // 00C968  cmpi.w #$4, $118fe.l
     if (rd16(v_input_dir) != 0x4) goto L_00C9A0;  // 00C970  bne $c9a0
-    tick(8);
     D1 = (D1 + 0x2);  // 00C972  addq.l #$2, d1
 L_00C974:
-    tick(26);
     // 00C974  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C974;  // 00C97A  bne $c974
-    tick(120);
     wr32(A5 + 0x50, rd32(A3));  // 00C97C  move.l (a3), 80(a5)
     wr32(A5 + 0x54, D1);  // 00C980  move.l d1, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C984  move.w #$26, 100(a5)
@@ -6130,17 +4669,14 @@ L_00C974:
     wr16(A5 + 0x40, 0x9F0);  // 00C994  move.w #$9f0, 64(a5)
     wr16(A5 + 0x58, 0x1001);  // 00C99A  move.w #$1001, 88(a5)
 L_00C9A0:
-    tick(46);
     D1 = 0x0;  // 00C9A0  moveq.l #$0, d1
     A0 = v_map;  // 00C9A2  lea.l $11928.l, a0
     A1 = v_cell_screen_ptrs;  // 00C9A8  lea.l $191de.l, a1
     // 00C9AE  tst.w (a2)
     if (rd16(A2) == 0) { murphy_move_done(); return; }  // 00C9B0  beq $cf28
-    tick(26);
     setW(D1, rd16(A2));  // 00C9B4  move.w (a2), d1
     // 00C9B6  cmpi.w #$ffff, d1
     if ((D1 & 0xFFFF) == 0xFFFF) goto L_00C9DE;  // 00C9BA  beq $c9de
-    tick(90);
     setW(D1, ((D1 & 0xFFFF) >> 1));  // 00C9BE  lsr.w #$1, d1
     A0 += D1;  // 00C9C0  adda.l d1, a0
     setW(D1, rd16(A2));  // 00C9C2  move.w (a2), d1
@@ -6149,149 +4685,104 @@ L_00C9A0:
     A1 = rd32(A1);  // 00C9CA  movea.l (a1), a1
     wr16(0x113F4, 0x1);  // 00C9CC  move.w #$1, $113f4.l
     call(start_explosion, 0xC9D8);  // 00C9D4  bsr $f8e6
-    tick(20);
     wr16(0x113F4, 0);  // 00C9D8  clr.w $113f4.l
 L_00C9DE:
-    tick(20);
     A2 += 0x4;  // 00C9DE  addq.l #$4, a2
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00C9A0;  // 00C9E0  dbf.w d0, $c9a0
-    tick(10);
     { murphy_move_done(); return; }  // 00C9E4  bra $cf28
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void murphy_start_up() {
-    tick(50);
     setW(D0, rd16(v_scroll_y));  // 00BC46  move.w $11346.l, d0
     setW(D0, ((D0 & 0xFFFF) - 0x10));  // 00BC4C  subi.w #$10, d0
     wr16(0x1134A, (D0 & 0xFFFF));  // 00BC50  move.w d0, $1134a.l
     goto L_00BD22;  // 00BC56  bra $bd22
 L_00BD22:
-    tick(26);
     // 00BD22  tst.w $11388.l
     if (rd16(v_murphy_step_active) != 0) goto L_00BE44;  // 00BD28  bne $be44
-    tick(58);
     A0 = rd32(v_murphy_cell);  // 00BD2C  movea.l $1131e.l, a0
     setW(D0, rd16(A0 - 0x78));  // 00BD32  move.w -120(a0), d0
     // 00BD36  cmpi.w #$4, -120(a0)
     if (rd16(A0 - 0x78) == 0x4) goto L_00BE44;  // 00BD3C  beq $be44
-    tick(26);
     // 00BD40  cmpi.b #$4, -119(a0)
     if (rd8(A0 - 0x77) == 0x4) goto L_00BE3E;  // 00BD46  beq $be3e
-    tick(26);
     // 00BD4A  cmp.w $113d4.l, d0
     if ((D0 & 0xFFFF) != rd16(c_tile_yellow_disk)) goto L_00BD7C;  // 00BD50  bne $bd7c
-    tick(22);
     // 00BD52  tst.w -240(a0)
     if (rd16(A0 - 0xF0) != 0) { murphy_move_done(); return; }  // 00BD56  bne $cf28
-    tick(58);
     wr16(v_push_kind, 0x3);  // 00BD5A  move.w #$3, $11308.l
     wr16(0x1131C, 0x3);  // 00BD62  move.w #$3, $1131c.l
     call(murphy_push_step, 0xBD6E);  // 00BD6A  bsr $c5c6
-    tick(26);
     // 00BD6E  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00BE44;  // 00BD74  bne $be44
-    tick(10);
     { murphy_move_done(); return; }  // 00BD78  bra $cf28
 L_00BD7C:
-    tick(26);
     // 00BD7C  cmp.w $113ba.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_zonk)) goto L_00BE3E;  // 00BD82  beq $be3e
-    tick(26);
     // 00BD86  cmp.w $113c2.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_ramchip)) goto L_00BE3E;  // 00BD8C  beq $be3e
-    tick(26);
     // 00BD90  cmp.w $113c4.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_hardware)) goto L_00BE3E;  // 00BD96  beq $be3e
-    tick(18);
     // 00BD9A  cmpi.w #$14, d0
     if ((D0 & 0xFFFF) != 0x14) goto L_00BDB2;  // 00BD9E  bne $bdb2
-    tick(46);
     A6 = rd32(v_murphy_cell);  // 00BDA0  movea.l $1131e.l, a6
     A6 = A6 - 0x78;  // 00BDA6  lea.l -120(a6), a6
     call(collect_red_disk, 0xBDAE);  // 00BDAA  bsr $bc96
-    tick(10);
     goto L_00BE44;  // 00BDAE  bra $be44
 L_00BDB2:
-    tick(26);
     // 00BDB2  cmp.w $113cc.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_down)) goto L_00BE3E;  // 00BDB8  beq $be3e
-    tick(26);
     // 00BDBC  cmp.w $113ce.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_left)) goto L_00BE3E;  // 00BDC2  beq $be3e
-    tick(26);
     // 00BDC4  cmp.w $113ca.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_right)) goto L_00BE3E;  // 00BDCA  beq $be3e
-    tick(26);
     // 00BDCC  cmp.w $113d0.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_up)) goto L_00BF04;  // 00BDD2  beq $bf04
-    tick(18);
     // 00BDD6  cmpi.w #$15, d0
     if ((D0 & 0xFFFF) == 0x15) goto L_00BF04;  // 00BDDA  beq $bf04
-    tick(18);
     // 00BDDE  cmpi.w #$17, d0
     if ((D0 & 0xFFFF) == 0x17) goto L_00BF04;  // 00BDE2  beq $bf04
-    tick(26);
     // 00BDE6  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00BE3E;  // 00BDEC  beq $be3e
-    tick(26);
     // 00BDEE  cmp.w $113c6.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_exit)) goto L_00BE2E;  // 00BDF4  beq $be2e
-    tick(18);
     // 00BDF6  cmpi.w #$19, d0
     if ((D0 & 0xFFFF) != 0x19) goto L_00BE04;  // 00BDFA  bne $be04
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00BDFC  move.w #$1, $112da.l
 L_00BE04:
-    tick(18);
     // 00BE04  cmpi.w #$12, d0
     if ((D0 & 0xFFFF) == 0x12) goto L_00BE3E;  // 00BE08  beq $be3e
-    tick(18);
     // 00BE0A  cmpi.w #$13, d0
     if ((D0 & 0xFFFF) == 0x13) goto L_00C91C;  // 00BE0E  beq $c91c
-    tick(18);
     // 00BE12  cmpi.w #$16, d0
     if ((D0 & 0xFFFF) == 0x16) goto L_00BE3E;  // 00BE16  beq $be3e
-    tick(18);
     // 00BE18  cmpi.w #$10, d0
     if ((D0 & 0xFFFF) == 0x10) goto L_00C540;  // 00BE1C  beq $c540
-    tick(18);
     // 00BE20  cmpi.w #$d, d0
     if (int16_t((D0 & 0xFFFF)) < 13) goto L_00BE44;  // 00BE24  blt $be44
-    tick(18);
     // 00BE26  cmpi.w #$10, d0
     if (int16_t((D0 & 0xFFFF)) > 16) goto L_00BE44;  // 00BE2A  bgt $be44
-    tick(10);
     goto L_00BE3E;  // 00BE2C  bra $be3e
 L_00BE2E:
-    tick(30);
     // 00BE2E  tst.l $111cc.l
     if (rd32(v_infotrons_left) != 0) goto L_00BE3E;  // 00BE34  bne $be3e
-    tick(20);
     wr16(v_level_completed, 0x1);  // 00BE36  move.w #$1, $112d2.l
 L_00BE3E:
-    tick(18);
     call(murphy_move_done, 0xBE42);  // 00BE3E  bsr $cf28
-    tick(16);
     return;  // 00BE42  rts 
 L_00BE44:
-    tick(46);
     wr16(v_murphy_step_active, 0x1);  // 00BE44  move.w #$1, $11388.l
     // 00BE4C  tst.w $1137c.l
     if (rd16(0x1137C) != 0) goto L_00BEA8;  // 00BE52  bne $bea8
-    tick(26);
     // 00BE54  tst.w $1137a.l
     if (rd16(0x1137A) != 0) goto L_00BE66;  // 00BE5A  bne $be66
-    tick(30);
     wr16(0x11440, 0x2);  // 00BE5C  move.w #$2, $11440.l
     goto L_00BE6E;  // 00BE64  bra $be6e
 L_00BE66:
-    tick(20);
     wr16(0x11440, 0x1);  // 00BE66  move.w #$1, $11440.l
 L_00BE6E:
-    tick(212);
     wr16(0x1143E, 0);  // 00BE6E  clr.w $1143e.l
     wr32(0x11350, 0);  // 00BE74  clr.l $11350.l
     wr32(0x11354, 0);  // 00BE7A  clr.l $11354.l
@@ -6303,61 +4794,43 @@ L_00BE6E:
     wr16(0x1137C, 0x1);  // 00BE9E  move.w #$1, $1137c.l
     return;  // 00BEA6  rts 
 L_00BEA8:
-    tick(26);
     // 00BEA8  tst.w $11346.l
     if (rd16(v_scroll_y) != 0) goto L_00BED4;  // 00BEAE  bne $bed4
-    tick(30);
     // 00BEB0  cmpi.w #$1, $1133e.l
     if (rd16(v_murphy_screen_y) != 0x1) goto L_00BEC6;  // 00BEB8  bne $bec6
-    tick(38);
     wr16(0x11358, 0);  // 00BEBA  clr.w $11358.l
     call(murphy_move_done, 0xBEC4);  // 00BEC0  bsr $cf28
-    tick(16);
     return;  // 00BEC4  rts 
 L_00BEC6:
-    tick(38);
     wr16(0x11358, 0x1);  // 00BEC6  move.w #$1, $11358.l
     call(scroll_step_up, 0xBED2);  // 00BECE  bsr $cbc8
-    tick(16);
     return;  // 00BED2  rts 
 L_00BED4:
-    tick(30);
     // 00BED4  cmpi.w #$6, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x6) goto L_00BEE4;  // 00BEDC  beq $bee4
-    tick(18);
     call(scroll_step_up, 0xBEE2);  // 00BEDE  bsr $cbc8
-    tick(16);
     return;  // 00BEE2  rts 
 L_00BEE4:
-    tick(18);
     call(scroll_step_up, 0xBEE8);  // 00BEE4  bsr $cbc8
-    tick(18);
     call(bplptr_up_one_line_block, 0xBEEC);  // 00BEE8  bsr $ce62
-    tick(62);
     wr16(v_scroll_y, (rd16(v_scroll_y) - 0x2));  // 00BEEC  subq.w #$2, $11346.l
     setW(D0, rd16(v_scroll_y));  // 00BEF2  move.w $11346.l, d0
     // 00BEF8  cmp.w $1134a.l, d0
     if (int16_t((D0 & 0xFFFF)) <= int16_t(rd16(0x1134A))) { murphy_move_done(); return; }  // 00BEFE  ble $cf28
-    tick(16);
     return;  // 00BF02  rts 
 L_00BF04:
-    tick(42);
     A0 = rd32(v_murphy_cell);  // 00BF04  movea.l $1131e.l, a0
     // 00BF0A  tst.w -240(a0)
     if (rd16(A0 - 0xF0) != 0) { murphy_move_done(); return; }  // 00BF0E  bne $cf28
-    tick(36);
     wr16(v_port_passage_dir, 0x1);  // 00BF12  move.w #$1, $113e8.l
     return;  // 00BF1A  rts 
 L_00C540:
-    tick(66);
     A0 = v_special_ports;  // 00C540  lea.l $12a28.l, a0
     D0 = rd32(v_murphy_cell);  // 00C546  move.l $1131e.l, d0
     D0 = (D0 - 0x78);  // 00C54C  subi.l #$78, d0
     call(find_special_port, 0xC554);  // 00C552  bsr $c596
-    tick(10);
     goto L_00BF04;  // 00C554  bra $bf04
 L_00C91C:
-    tick(100);
     D0 = 0x7;  // 00C91C  moveq.l #$7, d0
     A2 = v_yellow_disk_list;  // 00C91E  lea.l $191c0.l, a2
     A3 = v_gfx_frame_ptrs;  // 00C924  lea.l $1a85e.l, a3
@@ -6365,34 +4838,25 @@ L_00C91C:
     D1 = rd32(v_murphy_screen);  // 00C930  move.l $11398.l, d1
     // 00C936  cmpi.w #$1, $118fe.l
     if (rd16(v_input_dir) != 0x1) goto L_00C948;  // 00C93E  bne $c948
-    tick(26);
     D1 = (D1 - 0x1E00);  // 00C940  subi.l #$1e00, d1
     goto L_00C974;  // 00C946  bra $c974
 L_00C948:
-    tick(30);
     // 00C948  cmpi.w #$2, $118fe.l
     if (rd16(v_input_dir) != 0x2) goto L_00C956;  // 00C950  bne $c956
-    tick(18);
     D1 = (D1 - 0x2);  // 00C952  subq.l #$2, d1
     goto L_00C974;  // 00C954  bra $c974
 L_00C956:
-    tick(30);
     // 00C956  cmpi.w #$3, $118fe.l
     if (rd16(v_input_dir) != 0x3) goto L_00C968;  // 00C95E  bne $c968
-    tick(26);
     D1 = (D1 + 0x1E00);  // 00C960  addi.l #$1e00, d1
     goto L_00C974;  // 00C966  bra $c974
 L_00C968:
-    tick(30);
     // 00C968  cmpi.w #$4, $118fe.l
     if (rd16(v_input_dir) != 0x4) goto L_00C9A0;  // 00C970  bne $c9a0
-    tick(8);
     D1 = (D1 + 0x2);  // 00C972  addq.l #$2, d1
 L_00C974:
-    tick(26);
     // 00C974  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C974;  // 00C97A  bne $c974
-    tick(120);
     wr32(A5 + 0x50, rd32(A3));  // 00C97C  move.l (a3), 80(a5)
     wr32(A5 + 0x54, D1);  // 00C980  move.l d1, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C984  move.w #$26, 100(a5)
@@ -6401,17 +4865,14 @@ L_00C974:
     wr16(A5 + 0x40, 0x9F0);  // 00C994  move.w #$9f0, 64(a5)
     wr16(A5 + 0x58, 0x1001);  // 00C99A  move.w #$1001, 88(a5)
 L_00C9A0:
-    tick(46);
     D1 = 0x0;  // 00C9A0  moveq.l #$0, d1
     A0 = v_map;  // 00C9A2  lea.l $11928.l, a0
     A1 = v_cell_screen_ptrs;  // 00C9A8  lea.l $191de.l, a1
     // 00C9AE  tst.w (a2)
     if (rd16(A2) == 0) { murphy_move_done(); return; }  // 00C9B0  beq $cf28
-    tick(26);
     setW(D1, rd16(A2));  // 00C9B4  move.w (a2), d1
     // 00C9B6  cmpi.w #$ffff, d1
     if ((D1 & 0xFFFF) == 0xFFFF) goto L_00C9DE;  // 00C9BA  beq $c9de
-    tick(90);
     setW(D1, ((D1 & 0xFFFF) >> 1));  // 00C9BE  lsr.w #$1, d1
     A0 += D1;  // 00C9C0  adda.l d1, a0
     setW(D1, rd16(A2));  // 00C9C2  move.w (a2), d1
@@ -6420,145 +4881,102 @@ L_00C9A0:
     A1 = rd32(A1);  // 00C9CA  movea.l (a1), a1
     wr16(0x113F4, 0x1);  // 00C9CC  move.w #$1, $113f4.l
     call(start_explosion, 0xC9D8);  // 00C9D4  bsr $f8e6
-    tick(20);
     wr16(0x113F4, 0);  // 00C9D8  clr.w $113f4.l
 L_00C9DE:
-    tick(20);
     A2 += 0x4;  // 00C9DE  addq.l #$4, a2
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00C9A0;  // 00C9E0  dbf.w d0, $c9a0
-    tick(10);
     { murphy_move_done(); return; }  // 00C9E4  bra $cf28
 }
 
 void murphy_start_left() {
-    tick(50);
     setW(D0, rd16(v_scroll_x));  // 00BC5A  move.w $11344.l, d0
     setW(D0, ((D0 & 0xFFFF) - 0x10));  // 00BC60  subi.w #$10, d0
     wr16(0x1134A, (D0 & 0xFFFF));  // 00BC64  move.w d0, $1134a.l
     goto L_00BF1C;  // 00BC6A  bra $bf1c
 L_00BF1C:
-    tick(26);
     // 00BF1C  tst.w $11388.l
     if (rd16(v_murphy_step_active) != 0) goto L_00C078;  // 00BF22  bne $c078
-    tick(58);
     A0 = rd32(v_murphy_cell);  // 00BF26  movea.l $1131e.l, a0
     setW(D0, rd16(A0 - 0x2));  // 00BF2C  move.w -2(a0), d0
     // 00BF30  cmpi.w #$4, -2(a0)
     if (rd16(A0 - 0x2) == 0x4) goto L_00C06A;  // 00BF36  beq $c06a
-    tick(26);
     // 00BF3A  cmpi.b #$4, -1(a0)
     if (rd8(A0 - 0x1) == 0x4) { murphy_move_done(); return; }  // 00BF40  beq $cf28
-    tick(26);
     // 00BF44  cmp.w $113ba.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_zonk)) goto L_00BF78;  // 00BF4A  beq $bf78
-    tick(26);
     // 00BF4E  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00BF6E;  // 00BF54  beq $bf6e
-    tick(26);
     // 00BF58  cmp.w $113d4.l, d0
     if ((D0 & 0xFFFF) != rd16(c_tile_yellow_disk)) goto L_00BFA2;  // 00BF5E  bne $bfa2
-    tick(30);
     wr16(v_push_kind, 0x3);  // 00BF62  move.w #$3, $11308.l
     goto L_00BF80;  // 00BF6A  bra $bf80
 L_00BF6E:
-    tick(30);
     wr16(v_push_kind, 0x2);  // 00BF6E  move.w #$2, $11308.l
     goto L_00BF80;  // 00BF76  bra $bf80
 L_00BF78:
-    tick(20);
     wr16(v_push_kind, 0x1);  // 00BF78  move.w #$1, $11308.l
 L_00BF80:
-    tick(22);
     // 00BF80  tst.w -4(a0)
     if (rd16(A0 - 0x4) != 0) { murphy_move_done(); return; }  // 00BF84  bne $cf28
-    tick(38);
     wr16(0x1131C, 0x1);  // 00BF88  move.w #$1, $1131c.l
     call(murphy_push_step, 0xBF94);  // 00BF90  bsr $c5c6
-    tick(26);
     // 00BF94  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00C06A;  // 00BF9A  bne $c06a
-    tick(10);
     { murphy_move_done(); return; }  // 00BF9E  bra $cf28
 L_00BFA2:
-    tick(26);
     // 00BFA2  cmp.w $113c2.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_ramchip)) { murphy_move_done(); return; }  // 00BFA8  beq $cf28
-    tick(26);
     // 00BFAC  cmp.w $113c4.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_hardware)) { murphy_move_done(); return; }  // 00BFB2  beq $cf28
-    tick(18);
     // 00BFB6  cmpi.w #$14, d0
     if ((D0 & 0xFFFF) != 0x14) goto L_00BFCC;  // 00BFBA  bne $bfcc
-    tick(46);
     A6 = rd32(v_murphy_cell);  // 00BFBC  movea.l $1131e.l, a6
     A6 -= 0x2;  // 00BFC2  subq.l #$2, a6
     call(collect_red_disk, 0xBFC8);  // 00BFC4  bsr $bc96
-    tick(10);
     goto L_00C06A;  // 00BFC8  bra $c06a
 L_00BFCC:
-    tick(26);
     // 00BFCC  cmp.w $113ca.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_right)) { murphy_move_done(); return; }  // 00BFD2  beq $cf28
-    tick(26);
     // 00BFD6  cmp.w $113cc.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_down)) { murphy_move_done(); return; }  // 00BFDC  beq $cf28
-    tick(26);
     // 00BFE0  cmp.w $113d0.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_up)) { murphy_move_done(); return; }  // 00BFE6  beq $cf28
-    tick(26);
     // 00BFEA  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) { murphy_move_done(); return; }  // 00BFF0  beq $cf28
-    tick(26);
     // 00BFF4  cmp.w $113ce.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_left)) goto L_00C120;  // 00BFFA  beq $c120
-    tick(18);
     // 00BFFE  cmpi.w #$17, d0
     if ((D0 & 0xFFFF) == 0x17) goto L_00C120;  // 00C002  beq $c120
-    tick(18);
     // 00C006  cmpi.w #$16, d0
     if ((D0 & 0xFFFF) == 0x16) goto L_00C120;  // 00C00A  beq $c120
-    tick(26);
     // 00C00E  cmp.w $113c6.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_exit)) goto L_00C054;  // 00C014  beq $c054
-    tick(18);
     // 00C016  cmpi.w #$f, d0
     if ((D0 & 0xFFFF) == 0xF) goto L_00C570;  // 00C01A  beq $c570
-    tick(18);
     // 00C01E  cmpi.w #$19, d0
     if ((D0 & 0xFFFF) != 0x19) goto L_00C02C;  // 00C022  bne $c02c
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00C024  move.w #$1, $112da.l
 L_00C02C:
-    tick(18);
     // 00C02C  cmpi.w #$12, d0
     if ((D0 & 0xFFFF) == 0x12) { murphy_move_done(); return; }  // 00C030  beq $cf28
-    tick(18);
     // 00C034  cmpi.w #$13, d0
     if ((D0 & 0xFFFF) == 0x13) goto L_00C91C;  // 00C038  beq $c91c
-    tick(18);
     // 00C03C  cmpi.w #$15, d0
     if ((D0 & 0xFFFF) == 0x15) { murphy_move_done(); return; }  // 00C040  beq $cf28
-    tick(18);
     // 00C044  cmpi.w #$d, d0
     if (int16_t((D0 & 0xFFFF)) < 13) goto L_00C06A;  // 00C048  blt $c06a
-    tick(18);
     // 00C04A  cmpi.w #$10, d0
     if (int16_t((D0 & 0xFFFF)) > 16) goto L_00C06A;  // 00C04E  bgt $c06a
-    tick(10);
     { murphy_move_done(); return; }  // 00C050  bra $cf28
 L_00C054:
-    tick(30);
     // 00C054  tst.l $111cc.l
     if (rd32(v_infotrons_left) != 0) { murphy_move_done(); return; }  // 00C05A  bne $cf28
-    tick(30);
     wr16(v_level_completed, 0x1);  // 00C05E  move.w #$1, $112d2.l
     { murphy_move_done(); return; }  // 00C066  bra $cf28
 L_00C06A:
-    tick(36);
     wr16(v_murphy_step_active, 0x1);  // 00C06A  move.w #$1, $11388.l
     wr16(0x11442, (D0 & 0xFFFF));  // 00C072  move.w d0, $11442.l
 L_00C078:
-    tick(130);
     wr16(0x1135E, 0);  // 00C078  clr.w $1135e.l
     wr16(0x1137C, 0);  // 00C07E  clr.w $1137c.l
     wr16(0x1137E, 0);  // 00C084  clr.w $1137e.l
@@ -6566,71 +4984,51 @@ L_00C078:
     wr16(0x1137A, 0x1);  // 00C090  move.w #$1, $1137a.l
     // 00C098  cmpi.w #$a, $1133c.l
     if (rd16(v_murphy_screen_x) != 0xA) goto L_00C0AC;  // 00C0A0  bne $c0ac
-    tick(30);
     // 00C0A2  cmpi.w #$7, $11344.l
     if (rd16(v_scroll_x) != 0x7) goto L_00C0F6;  // 00C0AA  bne $c0f6
 L_00C0AC:
-    tick(50);
     wr16(0x1135C, 0x1);  // 00C0AC  move.w #$1, $1135c.l
     // 00C0B4  cmpi.w #$1, $1133c.l
     if (rd16(v_murphy_screen_x) == 0x1) goto L_00C0E4;  // 00C0BC  beq $c0e4
-    tick(30);
     // 00C0BE  cmpi.w #$e, $1143c.l
     if (rd16(0x1143C) != 0xE) goto L_00C0DE;  // 00C0C6  bne $c0de
-    tick(18);
     call(murphy_anim_step, 0xC0CC);  // 00C0C8  bsr $cc98
-    tick(58);
     wr16(0x1143C, 0);  // 00C0CC  clr.w $1143c.l
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) - 0x1));  // 00C0D2  subq.w #$1, $1133c.l
     call(murphy_move_done, 0xC0DC);  // 00C0D8  bsr $cf28
-    tick(16);
     return;  // 00C0DC  rts 
 L_00C0DE:
-    tick(18);
     call(murphy_anim_step, 0xC0E2);  // 00C0DE  bsr $cc98
-    tick(16);
     return;  // 00C0E2  rts 
 L_00C0E4:
-    tick(58);
     wr16(0x1135C, 0);  // 00C0E4  clr.w $1135c.l
     wr16(0x1143C, 0);  // 00C0EA  clr.w $1143c.l
     call(murphy_move_done, 0xC0F4);  // 00C0F0  bsr $cf28
-    tick(16);
     return;  // 00C0F4  rts 
 L_00C0F6:
-    tick(38);
     wr16(0x1135C, 0);  // 00C0F6  clr.w $1135c.l
     call(fine_scroll_left, 0xC100);  // 00C0FC  bsr $cebe
-    tick(18);
     call(murphy_anim_step, 0xC104);  // 00C100  bsr $cc98
-    tick(50);
     wr16(v_scroll_x, (rd16(v_scroll_x) - 0x2));  // 00C104  subq.w #$2, $11344.l
     // 00C10A  cmpi.w #$10, $1143c.l
     if (rd16(0x1143C) != 0x10) goto L_00C11E;  // 00C112  bne $c11e
-    tick(38);
     wr16(0x1143C, 0);  // 00C114  clr.w $1143c.l
     call(murphy_move_done, 0xC11E);  // 00C11A  bsr $cf28
 L_00C11E:
-    tick(16);
     return;  // 00C11E  rts 
 L_00C120:
-    tick(42);
     A0 = rd32(v_murphy_cell);  // 00C120  movea.l $1131e.l, a0
     // 00C126  tst.w -4(a0)
     if (rd16(A0 - 0x4) != 0) { murphy_move_done(); return; }  // 00C12A  bne $cf28
-    tick(36);
     wr16(v_port_passage_dir, 0x2);  // 00C12E  move.w #$2, $113e8.l
     return;  // 00C136  rts 
 L_00C570:
-    tick(58);
     A0 = v_special_ports;  // 00C570  lea.l $12a28.l, a0
     D0 = rd32(v_murphy_cell);  // 00C576  move.l $1131e.l, d0
     D0 = (D0 - 0x2);  // 00C57C  subq.l #$2, d0
     call(find_special_port, 0xC580);  // 00C57E  bsr $c596
-    tick(10);
     goto L_00C120;  // 00C580  bra $c120
 L_00C91C:
-    tick(100);
     D0 = 0x7;  // 00C91C  moveq.l #$7, d0
     A2 = v_yellow_disk_list;  // 00C91E  lea.l $191c0.l, a2
     A3 = v_gfx_frame_ptrs;  // 00C924  lea.l $1a85e.l, a3
@@ -6638,34 +5036,25 @@ L_00C91C:
     D1 = rd32(v_murphy_screen);  // 00C930  move.l $11398.l, d1
     // 00C936  cmpi.w #$1, $118fe.l
     if (rd16(v_input_dir) != 0x1) goto L_00C948;  // 00C93E  bne $c948
-    tick(26);
     D1 = (D1 - 0x1E00);  // 00C940  subi.l #$1e00, d1
     goto L_00C974;  // 00C946  bra $c974
 L_00C948:
-    tick(30);
     // 00C948  cmpi.w #$2, $118fe.l
     if (rd16(v_input_dir) != 0x2) goto L_00C956;  // 00C950  bne $c956
-    tick(18);
     D1 = (D1 - 0x2);  // 00C952  subq.l #$2, d1
     goto L_00C974;  // 00C954  bra $c974
 L_00C956:
-    tick(30);
     // 00C956  cmpi.w #$3, $118fe.l
     if (rd16(v_input_dir) != 0x3) goto L_00C968;  // 00C95E  bne $c968
-    tick(26);
     D1 = (D1 + 0x1E00);  // 00C960  addi.l #$1e00, d1
     goto L_00C974;  // 00C966  bra $c974
 L_00C968:
-    tick(30);
     // 00C968  cmpi.w #$4, $118fe.l
     if (rd16(v_input_dir) != 0x4) goto L_00C9A0;  // 00C970  bne $c9a0
-    tick(8);
     D1 = (D1 + 0x2);  // 00C972  addq.l #$2, d1
 L_00C974:
-    tick(26);
     // 00C974  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C974;  // 00C97A  bne $c974
-    tick(120);
     wr32(A5 + 0x50, rd32(A3));  // 00C97C  move.l (a3), 80(a5)
     wr32(A5 + 0x54, D1);  // 00C980  move.l d1, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C984  move.w #$26, 100(a5)
@@ -6674,17 +5063,14 @@ L_00C974:
     wr16(A5 + 0x40, 0x9F0);  // 00C994  move.w #$9f0, 64(a5)
     wr16(A5 + 0x58, 0x1001);  // 00C99A  move.w #$1001, 88(a5)
 L_00C9A0:
-    tick(46);
     D1 = 0x0;  // 00C9A0  moveq.l #$0, d1
     A0 = v_map;  // 00C9A2  lea.l $11928.l, a0
     A1 = v_cell_screen_ptrs;  // 00C9A8  lea.l $191de.l, a1
     // 00C9AE  tst.w (a2)
     if (rd16(A2) == 0) { murphy_move_done(); return; }  // 00C9B0  beq $cf28
-    tick(26);
     setW(D1, rd16(A2));  // 00C9B4  move.w (a2), d1
     // 00C9B6  cmpi.w #$ffff, d1
     if ((D1 & 0xFFFF) == 0xFFFF) goto L_00C9DE;  // 00C9BA  beq $c9de
-    tick(90);
     setW(D1, ((D1 & 0xFFFF) >> 1));  // 00C9BE  lsr.w #$1, d1
     A0 += D1;  // 00C9C0  adda.l d1, a0
     setW(D1, rd16(A2));  // 00C9C2  move.w (a2), d1
@@ -6693,38 +5079,29 @@ L_00C9A0:
     A1 = rd32(A1);  // 00C9CA  movea.l (a1), a1
     wr16(0x113F4, 0x1);  // 00C9CC  move.w #$1, $113f4.l
     call(start_explosion, 0xC9D8);  // 00C9D4  bsr $f8e6
-    tick(20);
     wr16(0x113F4, 0);  // 00C9D8  clr.w $113f4.l
 L_00C9DE:
-    tick(20);
     A2 += 0x4;  // 00C9DE  addq.l #$4, a2
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00C9A0;  // 00C9E0  dbf.w d0, $c9a0
-    tick(10);
     { murphy_move_done(); return; }  // 00C9E4  bra $cf28
 }
 
 void murphy_start_down() {
-    tick(50);
     setW(D0, rd16(v_scroll_y));  // 00BC6E  move.w $11346.l, d0
     setW(D0, ((D0 & 0xFFFF) + 0x10));  // 00BC74  addi.w #$10, d0
     wr16(0x1134A, (D0 & 0xFFFF));  // 00BC78  move.w d0, $1134a.l
     goto L_00C138;  // 00BC7E  bra $c138
 L_00BE44:
-    tick(46);
     wr16(v_murphy_step_active, 0x1);  // 00BE44  move.w #$1, $11388.l
     // 00BE4C  tst.w $1137c.l
     if (rd16(0x1137C) != 0) goto L_00BEA8;  // 00BE52  bne $bea8
-    tick(26);
     // 00BE54  tst.w $1137a.l
     if (rd16(0x1137A) != 0) goto L_00BE66;  // 00BE5A  bne $be66
-    tick(30);
     wr16(0x11440, 0x2);  // 00BE5C  move.w #$2, $11440.l
     goto L_00BE6E;  // 00BE64  bra $be6e
 L_00BE66:
-    tick(20);
     wr16(0x11440, 0x1);  // 00BE66  move.w #$1, $11440.l
 L_00BE6E:
-    tick(212);
     wr16(0x1143E, 0);  // 00BE6E  clr.w $1143e.l
     wr32(0x11350, 0);  // 00BE74  clr.l $11350.l
     wr32(0x11354, 0);  // 00BE7A  clr.l $11354.l
@@ -6736,167 +5113,114 @@ L_00BE6E:
     wr16(0x1137C, 0x1);  // 00BE9E  move.w #$1, $1137c.l
     return;  // 00BEA6  rts 
 L_00BEA8:
-    tick(26);
     // 00BEA8  tst.w $11346.l
     if (rd16(v_scroll_y) != 0) goto L_00BED4;  // 00BEAE  bne $bed4
-    tick(30);
     // 00BEB0  cmpi.w #$1, $1133e.l
     if (rd16(v_murphy_screen_y) != 0x1) goto L_00BEC6;  // 00BEB8  bne $bec6
-    tick(38);
     wr16(0x11358, 0);  // 00BEBA  clr.w $11358.l
     call(murphy_move_done, 0xBEC4);  // 00BEC0  bsr $cf28
-    tick(16);
     return;  // 00BEC4  rts 
 L_00BEC6:
-    tick(38);
     wr16(0x11358, 0x1);  // 00BEC6  move.w #$1, $11358.l
     call(scroll_step_up, 0xBED2);  // 00BECE  bsr $cbc8
-    tick(16);
     return;  // 00BED2  rts 
 L_00BED4:
-    tick(30);
     // 00BED4  cmpi.w #$6, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x6) goto L_00BEE4;  // 00BEDC  beq $bee4
-    tick(18);
     call(scroll_step_up, 0xBEE2);  // 00BEDE  bsr $cbc8
-    tick(16);
     return;  // 00BEE2  rts 
 L_00BEE4:
-    tick(18);
     call(scroll_step_up, 0xBEE8);  // 00BEE4  bsr $cbc8
-    tick(18);
     call(bplptr_up_one_line_block, 0xBEEC);  // 00BEE8  bsr $ce62
-    tick(62);
     wr16(v_scroll_y, (rd16(v_scroll_y) - 0x2));  // 00BEEC  subq.w #$2, $11346.l
     setW(D0, rd16(v_scroll_y));  // 00BEF2  move.w $11346.l, d0
     // 00BEF8  cmp.w $1134a.l, d0
     if (int16_t((D0 & 0xFFFF)) <= int16_t(rd16(0x1134A))) { murphy_move_done(); return; }  // 00BEFE  ble $cf28
-    tick(16);
     return;  // 00BF02  rts 
 L_00C138:
-    tick(26);
     // 00C138  tst.w $11388.l
     if (rd16(v_murphy_step_active) != 0) goto L_00C25A;  // 00C13E  bne $c25a
-    tick(58);
     A0 = rd32(v_murphy_cell);  // 00C142  movea.l $1131e.l, a0
     setW(D0, rd16(A0 + 0x78));  // 00C148  move.w 120(a0), d0
     // 00C14C  cmpi.w #$4, 120(a0)
     if (rd16(A0 + 0x78) == 0x4) goto L_00C25A;  // 00C152  beq $c25a
-    tick(26);
     // 00C156  cmpi.b #$4, 121(a0)
     if (rd8(A0 + 0x79) == 0x4) goto L_00C254;  // 00C15C  beq $c254
-    tick(26);
     // 00C160  cmp.w $113d4.l, d0
     if ((D0 & 0xFFFF) != rd16(c_tile_yellow_disk)) goto L_00C192;  // 00C166  bne $c192
-    tick(22);
     // 00C168  tst.w 240(a0)
     if (rd16(A0 + 0xF0) != 0) { murphy_move_done(); return; }  // 00C16C  bne $cf28
-    tick(58);
     wr16(v_push_kind, 0x3);  // 00C170  move.w #$3, $11308.l
     wr16(0x1131C, 0x4);  // 00C178  move.w #$4, $1131c.l
     call(murphy_push_step, 0xC184);  // 00C180  bsr $c5c6
-    tick(26);
     // 00C184  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00BE44;  // 00C18A  bne $be44
-    tick(10);
     { murphy_move_done(); return; }  // 00C18E  bra $cf28
 L_00C192:
-    tick(26);
     // 00C192  cmp.w $113ba.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_zonk)) goto L_00C254;  // 00C198  beq $c254
-    tick(26);
     // 00C19C  cmp.w $113c2.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_ramchip)) goto L_00C254;  // 00C1A2  beq $c254
-    tick(26);
     // 00C1A6  cmp.w $113c4.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_hardware)) goto L_00C254;  // 00C1AC  beq $c254
-    tick(18);
     // 00C1B0  cmpi.w #$14, d0
     if ((D0 & 0xFFFF) != 0x14) goto L_00C1C8;  // 00C1B4  bne $c1c8
-    tick(46);
     A6 = rd32(v_murphy_cell);  // 00C1B6  movea.l $1131e.l, a6
     A6 = A6 + 0x78;  // 00C1BC  lea.l 120(a6), a6
     call(collect_red_disk, 0xC1C4);  // 00C1C0  bsr $bc96
-    tick(10);
     goto L_00C25A;  // 00C1C4  bra $c25a
 L_00C1C8:
-    tick(26);
     // 00C1C8  cmp.w $113d0.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_up)) goto L_00C254;  // 00C1CE  beq $c254
-    tick(26);
     // 00C1D2  cmp.w $113ce.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_left)) goto L_00C254;  // 00C1D8  beq $c254
-    tick(26);
     // 00C1DA  cmp.w $113ca.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_right)) goto L_00C254;  // 00C1E0  beq $c254
-    tick(26);
     // 00C1E2  cmp.w $113cc.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_down)) goto L_00C316;  // 00C1E8  beq $c316
-    tick(18);
     // 00C1EC  cmpi.w #$15, d0
     if ((D0 & 0xFFFF) == 0x15) goto L_00C316;  // 00C1F0  beq $c316
-    tick(18);
     // 00C1F4  cmpi.w #$17, d0
     if ((D0 & 0xFFFF) == 0x17) goto L_00C316;  // 00C1F8  beq $c316
-    tick(26);
     // 00C1FC  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00C254;  // 00C202  beq $c254
-    tick(26);
     // 00C204  cmp.w $113c6.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_exit)) goto L_00C244;  // 00C20A  beq $c244
-    tick(18);
     // 00C20C  cmpi.w #$19, d0
     if ((D0 & 0xFFFF) != 0x19) goto L_00C21A;  // 00C210  bne $c21a
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00C212  move.w #$1, $112da.l
 L_00C21A:
-    tick(18);
     // 00C21A  cmpi.w #$12, d0
     if ((D0 & 0xFFFF) == 0x12) goto L_00C254;  // 00C21E  beq $c254
-    tick(18);
     // 00C220  cmpi.w #$13, d0
     if ((D0 & 0xFFFF) == 0x13) goto L_00C91C;  // 00C224  beq $c91c
-    tick(18);
     // 00C228  cmpi.w #$16, d0
     if ((D0 & 0xFFFF) == 0x16) goto L_00C254;  // 00C22C  beq $c254
-    tick(18);
     // 00C22E  cmpi.w #$e, d0
     if ((D0 & 0xFFFF) == 0xE) goto L_00C558;  // 00C232  beq $c558
-    tick(18);
     // 00C236  cmpi.w #$d, d0
     if (int16_t((D0 & 0xFFFF)) < 13) goto L_00C25A;  // 00C23A  blt $c25a
-    tick(18);
     // 00C23C  cmpi.w #$10, d0
     if (int16_t((D0 & 0xFFFF)) > 16) goto L_00C25A;  // 00C240  bgt $c25a
-    tick(10);
     goto L_00C254;  // 00C242  bra $c254
 L_00C244:
-    tick(30);
     // 00C244  tst.l $111cc.l
     if (rd32(v_infotrons_left) != 0) goto L_00C254;  // 00C24A  bne $c254
-    tick(20);
     wr16(v_level_completed, 0x1);  // 00C24C  move.w #$1, $112d2.l
 L_00C254:
-    tick(18);
     call(murphy_move_done, 0xC258);  // 00C254  bsr $cf28
-    tick(16);
     return;  // 00C258  rts 
 L_00C25A:
-    tick(46);
     wr16(v_murphy_step_active, 0x1);  // 00C25A  move.w #$1, $11388.l
     // 00C262  tst.w $1137e.l
     if (rd16(0x1137E) != 0) goto L_00C2B8;  // 00C268  bne $c2b8
-    tick(26);
     // 00C26A  tst.w $1137a.l
     if (rd16(0x1137A) != 0) goto L_00C27C;  // 00C270  bne $c27c
-    tick(30);
     wr16(0x11440, 0x2);  // 00C272  move.w #$2, $11440.l
     goto L_00C284;  // 00C27A  bra $c284
 L_00C27C:
-    tick(20);
     wr16(0x11440, 0x1);  // 00C27C  move.w #$1, $11440.l
 L_00C284:
-    tick(192);
     wr32(0x11350, 0);  // 00C284  clr.l $11350.l
     wr32(0x11354, 0);  // 00C28A  clr.l $11354.l
     wr16(0x11358, 0);  // 00C290  clr.w $11358.l
@@ -6907,61 +5231,43 @@ L_00C284:
     wr16(0x1137E, 0x1);  // 00C2AE  move.w #$1, $1137e.l
     return;  // 00C2B6  rts 
 L_00C2B8:
-    tick(30);
     // 00C2B8  cmpi.w #$b0, $11346.l
     if (rd16(v_scroll_y) != 0xB0) goto L_00C2E6;  // 00C2C0  bne $c2e6
-    tick(30);
     // 00C2C2  cmpi.w #$b, $1133e.l
     if (rd16(v_murphy_screen_y) != 0xB) goto L_00C2D8;  // 00C2CA  bne $c2d8
-    tick(38);
     wr16(0x1135A, 0);  // 00C2CC  clr.w $1135a.l
     call(murphy_move_done, 0xC2D6);  // 00C2D2  bsr $cf28
-    tick(16);
     return;  // 00C2D6  rts 
 L_00C2D8:
-    tick(38);
     wr16(0x1135A, 0x1);  // 00C2D8  move.w #$1, $1135a.l
     call(scroll_step_down, 0xC2E4);  // 00C2E0  bsr $cd92
-    tick(16);
     return;  // 00C2E4  rts 
 L_00C2E6:
-    tick(30);
     // 00C2E6  cmpi.w #$6, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x6) goto L_00C2F6;  // 00C2EE  beq $c2f6
-    tick(18);
     call(scroll_step_down, 0xC2F4);  // 00C2F0  bsr $cd92
-    tick(16);
     return;  // 00C2F4  rts 
 L_00C2F6:
-    tick(18);
     call(scroll_step_down, 0xC2FA);  // 00C2F6  bsr $cd92
-    tick(18);
     call(bplptr_down_one_line_block, 0xC2FE);  // 00C2FA  bsr $ce90
-    tick(62);
     wr16(v_scroll_y, (rd16(v_scroll_y) + 0x2));  // 00C2FE  addq.w #$2, $11346.l
     setW(D0, rd16(v_scroll_y));  // 00C304  move.w $11346.l, d0
     // 00C30A  cmp.w $1134a.l, d0
     if (int16_t((D0 & 0xFFFF)) >= int16_t(rd16(0x1134A))) { murphy_move_done(); return; }  // 00C310  bge $cf28
-    tick(16);
     return;  // 00C314  rts 
 L_00C316:
-    tick(42);
     A0 = rd32(v_murphy_cell);  // 00C316  movea.l $1131e.l, a0
     // 00C31C  tst.w 240(a0)
     if (rd16(A0 + 0xF0) != 0) { murphy_move_done(); return; }  // 00C320  bne $cf28
-    tick(36);
     wr16(v_port_passage_dir, 0x4);  // 00C324  move.w #$4, $113e8.l
     return;  // 00C32C  rts 
 L_00C558:
-    tick(66);
     A0 = v_special_ports;  // 00C558  lea.l $12a28.l, a0
     D0 = rd32(v_murphy_cell);  // 00C55E  move.l $1131e.l, d0
     D0 = (D0 + 0x78);  // 00C564  addi.l #$78, d0
     call(find_special_port, 0xC56C);  // 00C56A  bsr $c596
-    tick(10);
     goto L_00C316;  // 00C56C  bra $c316
 L_00C91C:
-    tick(100);
     D0 = 0x7;  // 00C91C  moveq.l #$7, d0
     A2 = v_yellow_disk_list;  // 00C91E  lea.l $191c0.l, a2
     A3 = v_gfx_frame_ptrs;  // 00C924  lea.l $1a85e.l, a3
@@ -6969,34 +5275,25 @@ L_00C91C:
     D1 = rd32(v_murphy_screen);  // 00C930  move.l $11398.l, d1
     // 00C936  cmpi.w #$1, $118fe.l
     if (rd16(v_input_dir) != 0x1) goto L_00C948;  // 00C93E  bne $c948
-    tick(26);
     D1 = (D1 - 0x1E00);  // 00C940  subi.l #$1e00, d1
     goto L_00C974;  // 00C946  bra $c974
 L_00C948:
-    tick(30);
     // 00C948  cmpi.w #$2, $118fe.l
     if (rd16(v_input_dir) != 0x2) goto L_00C956;  // 00C950  bne $c956
-    tick(18);
     D1 = (D1 - 0x2);  // 00C952  subq.l #$2, d1
     goto L_00C974;  // 00C954  bra $c974
 L_00C956:
-    tick(30);
     // 00C956  cmpi.w #$3, $118fe.l
     if (rd16(v_input_dir) != 0x3) goto L_00C968;  // 00C95E  bne $c968
-    tick(26);
     D1 = (D1 + 0x1E00);  // 00C960  addi.l #$1e00, d1
     goto L_00C974;  // 00C966  bra $c974
 L_00C968:
-    tick(30);
     // 00C968  cmpi.w #$4, $118fe.l
     if (rd16(v_input_dir) != 0x4) goto L_00C9A0;  // 00C970  bne $c9a0
-    tick(8);
     D1 = (D1 + 0x2);  // 00C972  addq.l #$2, d1
 L_00C974:
-    tick(26);
     // 00C974  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C974;  // 00C97A  bne $c974
-    tick(120);
     wr32(A5 + 0x50, rd32(A3));  // 00C97C  move.l (a3), 80(a5)
     wr32(A5 + 0x54, D1);  // 00C980  move.l d1, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C984  move.w #$26, 100(a5)
@@ -7005,17 +5302,14 @@ L_00C974:
     wr16(A5 + 0x40, 0x9F0);  // 00C994  move.w #$9f0, 64(a5)
     wr16(A5 + 0x58, 0x1001);  // 00C99A  move.w #$1001, 88(a5)
 L_00C9A0:
-    tick(46);
     D1 = 0x0;  // 00C9A0  moveq.l #$0, d1
     A0 = v_map;  // 00C9A2  lea.l $11928.l, a0
     A1 = v_cell_screen_ptrs;  // 00C9A8  lea.l $191de.l, a1
     // 00C9AE  tst.w (a2)
     if (rd16(A2) == 0) { murphy_move_done(); return; }  // 00C9B0  beq $cf28
-    tick(26);
     setW(D1, rd16(A2));  // 00C9B4  move.w (a2), d1
     // 00C9B6  cmpi.w #$ffff, d1
     if ((D1 & 0xFFFF) == 0xFFFF) goto L_00C9DE;  // 00C9BA  beq $c9de
-    tick(90);
     setW(D1, ((D1 & 0xFFFF) >> 1));  // 00C9BE  lsr.w #$1, d1
     A0 += D1;  // 00C9C0  adda.l d1, a0
     setW(D1, rd16(A2));  // 00C9C2  move.w (a2), d1
@@ -7024,149 +5318,104 @@ L_00C9A0:
     A1 = rd32(A1);  // 00C9CA  movea.l (a1), a1
     wr16(0x113F4, 0x1);  // 00C9CC  move.w #$1, $113f4.l
     call(start_explosion, 0xC9D8);  // 00C9D4  bsr $f8e6
-    tick(20);
     wr16(0x113F4, 0);  // 00C9D8  clr.w $113f4.l
 L_00C9DE:
-    tick(20);
     A2 += 0x4;  // 00C9DE  addq.l #$4, a2
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00C9A0;  // 00C9E0  dbf.w d0, $c9a0
-    tick(10);
     { murphy_move_done(); return; }  // 00C9E4  bra $cf28
 }
 
 void murphy_start_right() {
-    tick(50);
     setW(D0, rd16(v_scroll_x));  // 00BC82  move.w $11344.l, d0
     setW(D0, ((D0 & 0xFFFF) + 0x10));  // 00BC88  addi.w #$10, d0
     wr16(0x1134A, (D0 & 0xFFFF));  // 00BC8C  move.w d0, $1134a.l
     goto L_00C32E;  // 00BC92  bra $c32e
 L_00C32E:
-    tick(26);
     // 00C32E  tst.w $11388.l
     if (rd16(v_murphy_step_active) != 0) goto L_00C480;  // 00C334  bne $c480
-    tick(58);
     A0 = rd32(v_murphy_cell);  // 00C338  movea.l $1131e.l, a0
     setW(D0, rd16(A0 + 0x2));  // 00C33E  move.w 2(a0), d0
     // 00C342  cmpi.w #$4, 2(a0)
     if (rd16(A0 + 0x2) == 0x4) goto L_00C472;  // 00C348  beq $c472
-    tick(26);
     // 00C34C  cmpi.b #$4, 3(a0)
     if (rd8(A0 + 0x3) == 0x4) goto L_00C46C;  // 00C352  beq $c46c
-    tick(26);
     // 00C356  cmp.w $113ba.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_zonk)) goto L_00C38A;  // 00C35C  beq $c38a
-    tick(26);
     // 00C35E  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00C37E;  // 00C364  beq $c37e
-    tick(26);
     // 00C368  cmp.w $113d4.l, d0
     if ((D0 & 0xFFFF) != rd16(c_tile_yellow_disk)) goto L_00C3B4;  // 00C36E  bne $c3b4
-    tick(30);
     wr16(v_push_kind, 0x3);  // 00C372  move.w #$3, $11308.l
     goto L_00C392;  // 00C37A  bra $c392
 L_00C37E:
-    tick(30);
     wr16(v_push_kind, 0x2);  // 00C37E  move.w #$2, $11308.l
     goto L_00C392;  // 00C386  bra $c392
 L_00C38A:
-    tick(20);
     wr16(v_push_kind, 0x1);  // 00C38A  move.w #$1, $11308.l
 L_00C392:
-    tick(22);
     // 00C392  tst.w 4(a0)
     if (rd16(A0 + 0x4) != 0) goto L_00C46C;  // 00C396  bne $c46c
-    tick(38);
     wr16(0x1131C, 0x2);  // 00C39A  move.w #$2, $1131c.l
     call(murphy_push_step, 0xC3A6);  // 00C3A2  bsr $c5c6
-    tick(26);
     // 00C3A6  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00C472;  // 00C3AC  bne $c472
-    tick(10);
     goto L_00C46C;  // 00C3B0  bra $c46c
 L_00C3B4:
-    tick(26);
     // 00C3B4  cmp.w $113c2.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_ramchip)) goto L_00C46C;  // 00C3BA  beq $c46c
-    tick(26);
     // 00C3BE  cmp.w $113c4.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_hardware)) goto L_00C46C;  // 00C3C4  beq $c46c
-    tick(18);
     // 00C3C8  cmpi.w #$14, d0
     if ((D0 & 0xFFFF) != 0x14) goto L_00C3DE;  // 00C3CC  bne $c3de
-    tick(46);
     A6 = rd32(v_murphy_cell);  // 00C3CE  movea.l $1131e.l, a6
     A6 += 0x2;  // 00C3D4  addq.l #$2, a6
     call(collect_red_disk, 0xC3DA);  // 00C3D6  bsr $bc96
-    tick(10);
     goto L_00C472;  // 00C3DA  bra $c472
 L_00C3DE:
-    tick(26);
     // 00C3DE  cmp.w $113ce.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_left)) goto L_00C46C;  // 00C3E4  beq $c46c
-    tick(26);
     // 00C3E8  cmp.w $113d0.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_up)) goto L_00C46C;  // 00C3EE  beq $c46c
-    tick(26);
     // 00C3F0  cmp.w $113cc.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_down)) goto L_00C46C;  // 00C3F6  beq $c46c
-    tick(26);
     // 00C3F8  cmp.w $113ca.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_port_right)) goto L_00C528;  // 00C3FE  beq $c528
-    tick(18);
     // 00C402  cmpi.w #$17, d0
     if ((D0 & 0xFFFF) == 0x17) goto L_00C528;  // 00C406  beq $c528
-    tick(18);
     // 00C40A  cmpi.w #$16, d0
     if ((D0 & 0xFFFF) == 0x16) goto L_00C528;  // 00C40E  beq $c528
-    tick(26);
     // 00C412  cmp.w $113c8.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_orange_disk)) goto L_00C46C;  // 00C418  beq $c46c
-    tick(26);
     // 00C41A  cmp.w $113c6.l, d0
     if ((D0 & 0xFFFF) == rd16(c_tile_exit)) goto L_00C45C;  // 00C420  beq $c45c
-    tick(18);
     // 00C422  cmpi.w #$19, d0
     if ((D0 & 0xFFFF) != 0x19) goto L_00C430;  // 00C426  bne $c430
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00C428  move.w #$1, $112da.l
 L_00C430:
-    tick(18);
     // 00C430  cmpi.w #$12, d0
     if ((D0 & 0xFFFF) == 0x12) goto L_00C46C;  // 00C434  beq $c46c
-    tick(18);
     // 00C436  cmpi.w #$13, d0
     if ((D0 & 0xFFFF) == 0x13) goto L_00C91C;  // 00C43A  beq $c91c
-    tick(18);
     // 00C43E  cmpi.w #$15, d0
     if ((D0 & 0xFFFF) == 0x15) goto L_00C46C;  // 00C442  beq $c46c
-    tick(18);
     // 00C446  cmpi.w #$d, d0
     if ((D0 & 0xFFFF) == 0xD) goto L_00C584;  // 00C44A  beq $c584
-    tick(18);
     // 00C44E  cmpi.w #$e, d0
     if (int16_t((D0 & 0xFFFF)) < 14) goto L_00C472;  // 00C452  blt $c472
-    tick(18);
     // 00C454  cmpi.w #$10, d0
     if (int16_t((D0 & 0xFFFF)) > 16) goto L_00C472;  // 00C458  bgt $c472
-    tick(10);
     goto L_00C46C;  // 00C45A  bra $c46c
 L_00C45C:
-    tick(30);
     // 00C45C  tst.l $111cc.l
     if (rd32(v_infotrons_left) != 0) goto L_00C46C;  // 00C462  bne $c46c
-    tick(20);
     wr16(v_level_completed, 0x1);  // 00C464  move.w #$1, $112d2.l
 L_00C46C:
-    tick(18);
     call(murphy_move_done, 0xC470);  // 00C46C  bsr $cf28
-    tick(16);
     return;  // 00C470  rts 
 L_00C472:
-    tick(36);
     wr16(v_murphy_step_active, 0x1);  // 00C472  move.w #$1, $11388.l
     wr16(0x11442, (D0 & 0xFFFF));  // 00C47A  move.w d0, $11442.l
 L_00C480:
-    tick(130);
     wr16(0x1135C, 0);  // 00C480  clr.w $1135c.l
     wr16(0x1137C, 0);  // 00C486  clr.w $1137c.l
     wr16(0x1137E, 0);  // 00C48C  clr.w $1137e.l
@@ -7174,71 +5423,51 @@ L_00C480:
     wr16(0x11378, 0x1);  // 00C498  move.w #$1, $11378.l
     // 00C4A0  cmpi.w #$a, $1133c.l
     if (rd16(v_murphy_screen_x) != 0xA) goto L_00C4B4;  // 00C4A8  bne $c4b4
-    tick(30);
     // 00C4AA  cmpi.w #$277, $11344.l
     if (rd16(v_scroll_x) != 0x277) goto L_00C4FE;  // 00C4B2  bne $c4fe
 L_00C4B4:
-    tick(50);
     wr16(0x1135E, 0x1);  // 00C4B4  move.w #$1, $1135e.l
     // 00C4BC  cmpi.w #$13, $1133c.l
     if (rd16(v_murphy_screen_x) == 0x13) goto L_00C4EC;  // 00C4C4  beq $c4ec
-    tick(30);
     // 00C4C6  cmpi.w #$e, $1143c.l
     if (rd16(0x1143C) != 0xE) goto L_00C4E6;  // 00C4CE  bne $c4e6
-    tick(18);
     call(murphy_anim_step, 0xC4D4);  // 00C4D0  bsr $cc98
-    tick(58);
     wr16(0x1143C, 0);  // 00C4D4  clr.w $1143c.l
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) + 0x1));  // 00C4DA  addq.w #$1, $1133c.l
     call(murphy_move_done, 0xC4E4);  // 00C4E0  bsr $cf28
-    tick(16);
     return;  // 00C4E4  rts 
 L_00C4E6:
-    tick(18);
     call(murphy_anim_step, 0xC4EA);  // 00C4E6  bsr $cc98
-    tick(16);
     return;  // 00C4EA  rts 
 L_00C4EC:
-    tick(58);
     wr16(0x1135E, 0);  // 00C4EC  clr.w $1135e.l
     wr16(0x1143C, 0);  // 00C4F2  clr.w $1143c.l
     call(murphy_move_done, 0xC4FC);  // 00C4F8  bsr $cf28
-    tick(16);
     return;  // 00C4FC  rts 
 L_00C4FE:
-    tick(38);
     wr16(0x1135E, 0);  // 00C4FE  clr.w $1135e.l
     call(fine_scroll_right, 0xC508);  // 00C504  bsr $cef2
-    tick(18);
     call(murphy_anim_step, 0xC50C);  // 00C508  bsr $cc98
-    tick(50);
     wr16(v_scroll_x, (rd16(v_scroll_x) + 0x2));  // 00C50C  addq.w #$2, $11344.l
     // 00C512  cmpi.w #$10, $1143c.l
     if (rd16(0x1143C) != 0x10) goto L_00C526;  // 00C51A  bne $c526
-    tick(38);
     wr16(0x1143C, 0);  // 00C51C  clr.w $1143c.l
     call(murphy_move_done, 0xC526);  // 00C522  bsr $cf28
 L_00C526:
-    tick(16);
     return;  // 00C526  rts 
 L_00C528:
-    tick(42);
     A0 = rd32(v_murphy_cell);  // 00C528  movea.l $1131e.l, a0
     // 00C52E  tst.w 4(a0)
     if (rd16(A0 + 0x4) != 0) { murphy_move_done(); return; }  // 00C532  bne $cf28
-    tick(36);
     wr16(v_port_passage_dir, 0x3);  // 00C536  move.w #$3, $113e8.l
     return;  // 00C53E  rts 
 L_00C584:
-    tick(58);
     A0 = v_special_ports;  // 00C584  lea.l $12a28.l, a0
     D0 = rd32(v_murphy_cell);  // 00C58A  move.l $1131e.l, d0
     D0 = (D0 + 0x2);  // 00C590  addq.l #$2, d0
     call(find_special_port, 0xC594);  // 00C592  bsr $c596
-    tick(10);
     goto L_00C528;  // 00C594  bra $c528
 L_00C91C:
-    tick(100);
     D0 = 0x7;  // 00C91C  moveq.l #$7, d0
     A2 = v_yellow_disk_list;  // 00C91E  lea.l $191c0.l, a2
     A3 = v_gfx_frame_ptrs;  // 00C924  lea.l $1a85e.l, a3
@@ -7246,34 +5475,25 @@ L_00C91C:
     D1 = rd32(v_murphy_screen);  // 00C930  move.l $11398.l, d1
     // 00C936  cmpi.w #$1, $118fe.l
     if (rd16(v_input_dir) != 0x1) goto L_00C948;  // 00C93E  bne $c948
-    tick(26);
     D1 = (D1 - 0x1E00);  // 00C940  subi.l #$1e00, d1
     goto L_00C974;  // 00C946  bra $c974
 L_00C948:
-    tick(30);
     // 00C948  cmpi.w #$2, $118fe.l
     if (rd16(v_input_dir) != 0x2) goto L_00C956;  // 00C950  bne $c956
-    tick(18);
     D1 = (D1 - 0x2);  // 00C952  subq.l #$2, d1
     goto L_00C974;  // 00C954  bra $c974
 L_00C956:
-    tick(30);
     // 00C956  cmpi.w #$3, $118fe.l
     if (rd16(v_input_dir) != 0x3) goto L_00C968;  // 00C95E  bne $c968
-    tick(26);
     D1 = (D1 + 0x1E00);  // 00C960  addi.l #$1e00, d1
     goto L_00C974;  // 00C966  bra $c974
 L_00C968:
-    tick(30);
     // 00C968  cmpi.w #$4, $118fe.l
     if (rd16(v_input_dir) != 0x4) goto L_00C9A0;  // 00C970  bne $c9a0
-    tick(8);
     D1 = (D1 + 0x2);  // 00C972  addq.l #$2, d1
 L_00C974:
-    tick(26);
     // 00C974  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C974;  // 00C97A  bne $c974
-    tick(120);
     wr32(A5 + 0x50, rd32(A3));  // 00C97C  move.l (a3), 80(a5)
     wr32(A5 + 0x54, D1);  // 00C980  move.l d1, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C984  move.w #$26, 100(a5)
@@ -7282,17 +5502,14 @@ L_00C974:
     wr16(A5 + 0x40, 0x9F0);  // 00C994  move.w #$9f0, 64(a5)
     wr16(A5 + 0x58, 0x1001);  // 00C99A  move.w #$1001, 88(a5)
 L_00C9A0:
-    tick(46);
     D1 = 0x0;  // 00C9A0  moveq.l #$0, d1
     A0 = v_map;  // 00C9A2  lea.l $11928.l, a0
     A1 = v_cell_screen_ptrs;  // 00C9A8  lea.l $191de.l, a1
     // 00C9AE  tst.w (a2)
     if (rd16(A2) == 0) { murphy_move_done(); return; }  // 00C9B0  beq $cf28
-    tick(26);
     setW(D1, rd16(A2));  // 00C9B4  move.w (a2), d1
     // 00C9B6  cmpi.w #$ffff, d1
     if ((D1 & 0xFFFF) == 0xFFFF) goto L_00C9DE;  // 00C9BA  beq $c9de
-    tick(90);
     setW(D1, ((D1 & 0xFFFF) >> 1));  // 00C9BE  lsr.w #$1, d1
     A0 += D1;  // 00C9C0  adda.l d1, a0
     setW(D1, rd16(A2));  // 00C9C2  move.w (a2), d1
@@ -7301,56 +5518,42 @@ L_00C9A0:
     A1 = rd32(A1);  // 00C9CA  movea.l (a1), a1
     wr16(0x113F4, 0x1);  // 00C9CC  move.w #$1, $113f4.l
     call(start_explosion, 0xC9D8);  // 00C9D4  bsr $f8e6
-    tick(20);
     wr16(0x113F4, 0);  // 00C9D8  clr.w $113f4.l
 L_00C9DE:
-    tick(20);
     A2 += 0x4;  // 00C9DE  addq.l #$4, a2
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00C9A0;  // 00C9E0  dbf.w d0, $c9a0
-    tick(10);
     { murphy_move_done(); return; }  // 00C9E4  bra $cf28
 }
 
 // Собрать красный диск в клетке a6: пометить в списке, запас $113B2 + 1.
 void collect_red_disk() {
-    tick(32);
     A6 -= 0x11928;  // 00BC96  suba.l #$11928, a6
     D6 = A6;  // 00BC9C  move.l a6, d6
     A4 = v_level_buffer;  // 00BC9E  lea.l $12468.l, a4
 L_00BCA4:
-    tick(18);
     // 00BCA4  tst.w (a4)
     if (rd16(A4) == 0) goto L_00BCBA;  // 00BCA6  beq $bcba
-    tick(18);
     // 00BCA8  cmp.w (a4), d6
     if ((D6 & 0xFFFF) == rd16(A4)) goto L_00BCB0;  // 00BCAA  beq $bcb0
-    tick(18);
     A4 += 0x2;  // 00BCAC  addq.l #$2, a4
     goto L_00BCA4;  // 00BCAE  bra $bca4
 L_00BCB0:
-    tick(32);
     wr16(A4, 0xFFFF);  // 00BCB0  move.w #$ffff, (a4)
     wr16(v_red_disks, (rd16(v_red_disks) + 0x1));  // 00BCB4  addq.w #$1, $113b2.l
 L_00BCBA:
-    tick(16);
     return;  // 00BCBA  rts 
 }
 
 void find_special_port() {
-    tick(24);
     D0 = (D0 - 0x11928);  // 00C596  subi.l #$11928, d0
     setW(D1, 0xFF);  // 00C59C  move.w #$ff, d1
 L_00C5A0:
-    tick(18);
     // 00C5A0  cmp.w (a0), d0
     if ((D0 & 0xFFFF) == rd16(A0)) goto L_00C5AC;  // 00C5A2  beq $c5ac
-    tick(20);
     A0 += 0x6;  // 00C5A4  addq.l #$6, a0
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_00C5A0;  // 00C5A6  dbf.w d1, $c5a0
-    tick(16);
     return;  // 00C5AA  rts 
 L_00C5AC:
-    tick(88);
     wr8(v_gravity, rd8(A0 + 0x2));  // 00C5AC  move.b 2(a0), $12a0c.l
     wr8(v_freeze_zonks, rd8(A0 + 0x3));  // 00C5B4  move.b 3(a0), $12a25.l
     wr8(v_freeze_enemies, rd8(A0 + 0x4));  // 00C5BC  move.b 4(a0), $14500.l
@@ -7358,25 +5561,19 @@ L_00C5AC:
 }
 
 void murphy_push_step() {
-    tick(52);
     D1 = rd32(v_murphy_screen);  // 00C5C6  move.l $11398.l, d1
     // 00C5CC  cmp.l $11316.l, d1
     if (D1 != rd32(0x11316)) goto L_00C646;  // 00C5D2  bne $c646
-    tick(42);
     A3 = v_gfx_frame_ptrs;  // 00C5D6  lea.l $1a85e.l, a3
     // 00C5DC  cmpi.w #$1, $1131c.l
     if (rd16(0x1131C) == 0x1) goto L_00C5EE;  // 00C5E4  beq $c5ee
-    tick(26);
     A3 += 0x128;  // 00C5E6  adda.l #$128, a3
     goto L_00C5F4;  // 00C5EC  bra $c5f4
 L_00C5EE:
-    tick(16);
     A3 += 0x12C;  // 00C5EE  adda.l #$12c, a3
 L_00C5F4:
-    tick(26);
     // 00C5F4  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C5F4;  // 00C5FA  bne $c5f4
-    tick(186);
     wr32(A5 + 0x50, rd32(A3));  // 00C5FC  move.l (a3), 80(a5)
     wr32(A5 + 0x54, rd32(v_murphy_screen));  // 00C600  move.l $11398.l, 84(a5)
     wr16(A5 + 0x42, 0);  // 00C608  clr.w 66(a5)
@@ -7387,92 +5584,70 @@ L_00C5F4:
     wr16(v_push_frames, (rd16(v_push_frames) + 0x1));  // 00C624  addq.w #$1, $11304.l
     // 00C62A  cmpi.w #$f, $11304.l
     if (rd16(v_push_frames) == 0xF) goto L_00C636;  // 00C632  beq $c636
-    tick(16);
     return;  // 00C634  rts 
 L_00C636:
-    tick(56);
     wr16(v_push_ready, 0x1);  // 00C636  move.w #$1, $11306.l
     wr16(0x1131A, 0);  // 00C63E  clr.w $1131a.l
     return;  // 00C644  rts 
 L_00C646:
-    tick(56);
     wr32(0x11316, D1);  // 00C646  move.l d1, $11316.l
     wr16(v_push_frames, 0);  // 00C64C  clr.w $11304.l
     return;  // 00C652  rts 
 }
 
 void murphy_snap_up() {
-    tick(30);
     // 00C654  cmpi.w #$1, $112d0.l
     if (rd16(0x112D0) == 0x1) goto L_00F49A;  // 00C65C  beq $f49a
-    tick(46);
     A0 = rd32(v_murphy_cell);  // 00C660  movea.l $1131e.l, a0
     // 00C666  cmpi.w #$14, -120(a0)
     if (rd16(A0 - 0x78) != 0x14) goto L_00C67A;  // 00C66C  bne $c67a
-    tick(30);
     A6 = A0;  // 00C66E  movea.l a0, a6
     A6 = A6 - 0x78;  // 00C670  lea.l -120(a6), a6
     call(collect_red_disk, 0xC678);  // 00C674  bsr $bc96
-    tick(10);
     goto L_00C69C;  // 00C678  bra $c69c
 L_00C67A:
-    tick(26);
     // 00C67A  cmpi.w #$2, -120(a0)
     if (rd16(A0 - 0x78) == 0x2) goto L_00C69C;  // 00C680  beq $c69c
-    tick(26);
     // 00C682  cmpi.w #$4, -120(a0)
     if (rd16(A0 - 0x78) == 0x4) goto L_00C696;  // 00C688  beq $c696
-    tick(26);
     // 00C68A  cmpi.w #$fc04, -120(a0)
     if (rd16(A0 - 0x78) == 0xFC04) goto L_00C69C;  // 00C690  beq $c69c
-    tick(10);
     { murphy_move_done(); return; }  // 00C692  bra $cf28
 L_00C696:
-    tick(16);
     wr16(A0 - 0x78, 0xFC04);  // 00C696  move.w #$fc04, -120(a0)
 L_00C69C:
-    tick(50);
     setW(D7, rd16(A0 - 0x78));  // 00C69C  move.w -120(a0), d7
     // 00C6A0  cmpi.l #$20, $113a8.l
     if (rd32(v_snap_frames) != 0x20) goto L_00C6C8;  // 00C6AA  bne $c6c8
-    tick(94);
     A0 -= 0x78;  // 00C6AC  suba.l #$78, a0
     wr32(v_snap_cell, A0);  // 00C6B2  move.l a0, $11322.l
     wr32(v_snap_frames, 0);  // 00C6B8  clr.l $113a8.l
     wr16(0x11390, 0);  // 00C6BE  clr.w $11390.l
     { murphy_move_done(); return; }  // 00C6C4  bra $cf28
 L_00C6C8:
-    tick(66);
     A4 = v_gfx_frame_ptrs;  // 00C6C8  lea.l $1a85e.l, a4
     A4 = A4 + 0x208;  // 00C6CE  lea.l 520(a4), a4
     A2 = rd32(v_murphy_screen);  // 00C6D2  movea.l $11398.l, a2
     A2 -= 0x1E00;  // 00C6D8  suba.l #$1e00, a2
     goto L_00C87E;  // 00C6DE  bra $c87e
 L_00C87E:
-    tick(26);
     // 00C87E  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C87E;  // 00C884  bne $c87e
-    tick(18);
     // 00C886  cmpi.w #$14, d7
     if ((D7 & 0xFFFF) == 0x14) goto L_00C8A0;  // 00C88A  beq $c8a0
-    tick(18);
     // 00C88C  cmpi.w #$2, d7
     if ((D7 & 0xFFFF) != 0x2) goto L_00C8AE;  // 00C890  bne $c8ae
-    tick(44);
     A1 = 0x11598;  // 00C892  lea.l $11598.l, a1
     A1 += rd32(v_snap_frames);  // 00C898  adda.l $113a8.l, a1
     goto L_00C8BA;  // 00C89E  bra $c8ba
 L_00C8A0:
-    tick(44);
     A1 = 0x11618;  // 00C8A0  lea.l $11618.l, a1
     A1 += rd32(v_snap_frames);  // 00C8A6  adda.l $113a8.l, a1
     goto L_00C8BA;  // 00C8AC  bra $c8ba
 L_00C8AE:
-    tick(34);
     A1 = 0x115D8;  // 00C8AE  lea.l $115d8.l, a1
     A1 += rd32(v_snap_frames);  // 00C8B4  adda.l $113a8.l, a1
 L_00C8BA:
-    tick(148);
     wr32(A5 + 0x50, rd32(A1));  // 00C8BA  move.l (a1), 80(a5)
     wr32(A5 + 0x54, A2);  // 00C8BE  move.l a2, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C8C2  move.w #$26, 100(a5)
@@ -7482,10 +5657,8 @@ L_00C8BA:
     wr16(A5 + 0x58, 0x1001);  // 00C8D8  move.w #$1001, 88(a5)
     wr32(v_snap_frames, (rd32(v_snap_frames) + 0x4));  // 00C8DE  addq.l #$4, $113a8.l
 L_00C8E4:
-    tick(26);
     // 00C8E4  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C8E4;  // 00C8EA  bne $c8e4
-    tick(172);
     wr32(A5 + 0x50, rd32(A4));  // 00C8EC  move.l (a4), 80(a5)
     wr32(A5 + 0x54, rd32(v_murphy_screen));  // 00C8F0  move.l $11398.l, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C8F8  move.w #$26, 100(a5)
@@ -7496,82 +5669,62 @@ L_00C8E4:
     wr16(0x1131A, 0);  // 00C914  clr.w $1131a.l
     return;  // 00C91A  rts 
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void murphy_snap_left() {
-    tick(30);
     // 00C6E2  cmpi.w #$1, $112d0.l
     if (rd16(0x112D0) == 0x1) goto L_00F49A;  // 00C6EA  beq $f49a
-    tick(46);
     A0 = rd32(v_murphy_cell);  // 00C6EE  movea.l $1131e.l, a0
     // 00C6F4  cmpi.w #$14, -2(a0)
     if (rd16(A0 - 0x2) != 0x14) goto L_00C708;  // 00C6FA  bne $c708
-    tick(30);
     A6 = A0;  // 00C6FC  movea.l a0, a6
     A6 -= 0x2;  // 00C6FE  subq.l #$2, a6
     call(collect_red_disk, 0xC704);  // 00C700  bsr $bc96
-    tick(10);
     goto L_00C72A;  // 00C704  bra $c72a
 L_00C708:
-    tick(26);
     // 00C708  cmpi.w #$2, -2(a0)
     if (rd16(A0 - 0x2) == 0x2) goto L_00C72A;  // 00C70E  beq $c72a
-    tick(26);
     // 00C710  cmpi.w #$4, -2(a0)
     if (rd16(A0 - 0x2) == 0x4) goto L_00C724;  // 00C716  beq $c724
-    tick(26);
     // 00C718  cmpi.w #$fc04, -2(a0)
     if (rd16(A0 - 0x2) == 0xFC04) goto L_00C72A;  // 00C71E  beq $c72a
-    tick(10);
     { murphy_move_done(); return; }  // 00C720  bra $cf28
 L_00C724:
-    tick(16);
     wr16(A0 - 0x2, 0xFC04);  // 00C724  move.w #$fc04, -2(a0)
 L_00C72A:
-    tick(50);
     setW(D7, rd16(A0 - 0x2));  // 00C72A  move.w -2(a0), d7
     // 00C72E  cmpi.l #$20, $113a8.l
     if (rd32(v_snap_frames) != 0x20) goto L_00C754;  // 00C738  bne $c754
-    tick(86);
     A0 -= 0x2;  // 00C73C  subq.l #$2, a0
     wr32(v_snap_cell, A0);  // 00C73E  move.l a0, $11322.l
     wr32(v_snap_frames, 0);  // 00C744  clr.l $113a8.l
     wr16(0x11390, 0);  // 00C74A  clr.w $11390.l
     { murphy_move_done(); return; }  // 00C750  bra $cf28
 L_00C754:
-    tick(58);
     A4 = v_gfx_frame_ptrs;  // 00C754  lea.l $1a85e.l, a4
     A4 = A4 + 0x124;  // 00C75A  lea.l 292(a4), a4
     A2 = rd32(v_murphy_screen);  // 00C75E  movea.l $11398.l, a2
     A2 -= 0x2;  // 00C764  subq.l #$2, a2
     goto L_00C87E;  // 00C766  bra $c87e
 L_00C87E:
-    tick(26);
     // 00C87E  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C87E;  // 00C884  bne $c87e
-    tick(18);
     // 00C886  cmpi.w #$14, d7
     if ((D7 & 0xFFFF) == 0x14) goto L_00C8A0;  // 00C88A  beq $c8a0
-    tick(18);
     // 00C88C  cmpi.w #$2, d7
     if ((D7 & 0xFFFF) != 0x2) goto L_00C8AE;  // 00C890  bne $c8ae
-    tick(44);
     A1 = 0x11598;  // 00C892  lea.l $11598.l, a1
     A1 += rd32(v_snap_frames);  // 00C898  adda.l $113a8.l, a1
     goto L_00C8BA;  // 00C89E  bra $c8ba
 L_00C8A0:
-    tick(44);
     A1 = 0x11618;  // 00C8A0  lea.l $11618.l, a1
     A1 += rd32(v_snap_frames);  // 00C8A6  adda.l $113a8.l, a1
     goto L_00C8BA;  // 00C8AC  bra $c8ba
 L_00C8AE:
-    tick(34);
     A1 = 0x115D8;  // 00C8AE  lea.l $115d8.l, a1
     A1 += rd32(v_snap_frames);  // 00C8B4  adda.l $113a8.l, a1
 L_00C8BA:
-    tick(148);
     wr32(A5 + 0x50, rd32(A1));  // 00C8BA  move.l (a1), 80(a5)
     wr32(A5 + 0x54, A2);  // 00C8BE  move.l a2, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C8C2  move.w #$26, 100(a5)
@@ -7581,10 +5734,8 @@ L_00C8BA:
     wr16(A5 + 0x58, 0x1001);  // 00C8D8  move.w #$1001, 88(a5)
     wr32(v_snap_frames, (rd32(v_snap_frames) + 0x4));  // 00C8DE  addq.l #$4, $113a8.l
 L_00C8E4:
-    tick(26);
     // 00C8E4  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C8E4;  // 00C8EA  bne $c8e4
-    tick(172);
     wr32(A5 + 0x50, rd32(A4));  // 00C8EC  move.l (a4), 80(a5)
     wr32(A5 + 0x54, rd32(v_murphy_screen));  // 00C8F0  move.l $11398.l, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C8F8  move.w #$26, 100(a5)
@@ -7595,82 +5746,62 @@ L_00C8E4:
     wr16(0x1131A, 0);  // 00C914  clr.w $1131a.l
     return;  // 00C91A  rts 
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void murphy_snap_down() {
-    tick(30);
     // 00C76A  cmpi.w #$1, $112d0.l
     if (rd16(0x112D0) == 0x1) goto L_00F49A;  // 00C772  beq $f49a
-    tick(46);
     A0 = rd32(v_murphy_cell);  // 00C776  movea.l $1131e.l, a0
     // 00C77C  cmpi.w #$14, 120(a0)
     if (rd16(A0 + 0x78) != 0x14) goto L_00C792;  // 00C782  bne $c792
-    tick(30);
     A6 = A0;  // 00C786  movea.l a0, a6
     A6 = A6 + 0x78;  // 00C788  lea.l 120(a6), a6
     call(collect_red_disk, 0xC790);  // 00C78C  bsr $bc96
-    tick(10);
     goto L_00C7B4;  // 00C790  bra $c7b4
 L_00C792:
-    tick(26);
     // 00C792  cmpi.w #$2, 120(a0)
     if (rd16(A0 + 0x78) == 0x2) goto L_00C7B4;  // 00C798  beq $c7b4
-    tick(26);
     // 00C79A  cmpi.w #$4, 120(a0)
     if (rd16(A0 + 0x78) == 0x4) goto L_00C7AE;  // 00C7A0  beq $c7ae
-    tick(26);
     // 00C7A2  cmpi.w #$fc04, 120(a0)
     if (rd16(A0 + 0x78) == 0xFC04) goto L_00C7B4;  // 00C7A8  beq $c7b4
-    tick(10);
     { murphy_move_done(); return; }  // 00C7AA  bra $cf28
 L_00C7AE:
-    tick(16);
     wr16(A0 + 0x78, 0xFC04);  // 00C7AE  move.w #$fc04, 120(a0)
 L_00C7B4:
-    tick(50);
     setW(D7, rd16(A0 + 0x78));  // 00C7B4  move.w 120(a0), d7
     // 00C7B8  cmpi.l #$20, $113a8.l
     if (rd32(v_snap_frames) != 0x20) goto L_00C7E0;  // 00C7C2  bne $c7e0
-    tick(94);
     A0 += 0x78;  // 00C7C4  adda.l #$78, a0
     wr32(v_snap_cell, A0);  // 00C7CA  move.l a0, $11322.l
     wr32(v_snap_frames, 0);  // 00C7D0  clr.l $113a8.l
     wr16(0x11390, 0);  // 00C7D6  clr.w $11390.l
     { murphy_move_done(); return; }  // 00C7DC  bra $cf28
 L_00C7E0:
-    tick(66);
     A4 = v_gfx_frame_ptrs;  // 00C7E0  lea.l $1a85e.l, a4
     A4 = A4 + 0x20C;  // 00C7E6  lea.l 524(a4), a4
     A2 = rd32(v_murphy_screen);  // 00C7EA  movea.l $11398.l, a2
     A2 += 0x1E00;  // 00C7F0  adda.l #$1e00, a2
     goto L_00C87E;  // 00C7F6  bra $c87e
 L_00C87E:
-    tick(26);
     // 00C87E  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C87E;  // 00C884  bne $c87e
-    tick(18);
     // 00C886  cmpi.w #$14, d7
     if ((D7 & 0xFFFF) == 0x14) goto L_00C8A0;  // 00C88A  beq $c8a0
-    tick(18);
     // 00C88C  cmpi.w #$2, d7
     if ((D7 & 0xFFFF) != 0x2) goto L_00C8AE;  // 00C890  bne $c8ae
-    tick(44);
     A1 = 0x11598;  // 00C892  lea.l $11598.l, a1
     A1 += rd32(v_snap_frames);  // 00C898  adda.l $113a8.l, a1
     goto L_00C8BA;  // 00C89E  bra $c8ba
 L_00C8A0:
-    tick(44);
     A1 = 0x11618;  // 00C8A0  lea.l $11618.l, a1
     A1 += rd32(v_snap_frames);  // 00C8A6  adda.l $113a8.l, a1
     goto L_00C8BA;  // 00C8AC  bra $c8ba
 L_00C8AE:
-    tick(34);
     A1 = 0x115D8;  // 00C8AE  lea.l $115d8.l, a1
     A1 += rd32(v_snap_frames);  // 00C8B4  adda.l $113a8.l, a1
 L_00C8BA:
-    tick(148);
     wr32(A5 + 0x50, rd32(A1));  // 00C8BA  move.l (a1), 80(a5)
     wr32(A5 + 0x54, A2);  // 00C8BE  move.l a2, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C8C2  move.w #$26, 100(a5)
@@ -7680,10 +5811,8 @@ L_00C8BA:
     wr16(A5 + 0x58, 0x1001);  // 00C8D8  move.w #$1001, 88(a5)
     wr32(v_snap_frames, (rd32(v_snap_frames) + 0x4));  // 00C8DE  addq.l #$4, $113a8.l
 L_00C8E4:
-    tick(26);
     // 00C8E4  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C8E4;  // 00C8EA  bne $c8e4
-    tick(172);
     wr32(A5 + 0x50, rd32(A4));  // 00C8EC  move.l (a4), 80(a5)
     wr32(A5 + 0x54, rd32(v_murphy_screen));  // 00C8F0  move.l $11398.l, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C8F8  move.w #$26, 100(a5)
@@ -7694,81 +5823,61 @@ L_00C8E4:
     wr16(0x1131A, 0);  // 00C914  clr.w $1131a.l
     return;  // 00C91A  rts 
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void murphy_snap_right() {
-    tick(30);
     // 00C7FA  cmpi.w #$1, $112d0.l
     if (rd16(0x112D0) == 0x1) goto L_00F49A;  // 00C802  beq $f49a
-    tick(46);
     A0 = rd32(v_murphy_cell);  // 00C806  movea.l $1131e.l, a0
     // 00C80C  cmpi.w #$14, 2(a0)
     if (rd16(A0 + 0x2) != 0x14) goto L_00C81E;  // 00C812  bne $c81e
-    tick(30);
     A6 = A0;  // 00C814  movea.l a0, a6
     A6 += 0x2;  // 00C816  addq.l #$2, a6
     call(collect_red_disk, 0xC81C);  // 00C818  bsr $bc96
-    tick(10);
     goto L_00C840;  // 00C81C  bra $c840
 L_00C81E:
-    tick(26);
     // 00C81E  cmpi.w #$2, 2(a0)
     if (rd16(A0 + 0x2) == 0x2) goto L_00C840;  // 00C824  beq $c840
-    tick(26);
     // 00C826  cmpi.w #$4, 2(a0)
     if (rd16(A0 + 0x2) == 0x4) goto L_00C83A;  // 00C82C  beq $c83a
-    tick(26);
     // 00C82E  cmpi.w #$fc04, 2(a0)
     if (rd16(A0 + 0x2) == 0xFC04) goto L_00C840;  // 00C834  beq $c840
-    tick(10);
     { murphy_move_done(); return; }  // 00C836  bra $cf28
 L_00C83A:
-    tick(16);
     wr16(A0 + 0x2, 0xFC04);  // 00C83A  move.w #$fc04, 2(a0)
 L_00C840:
-    tick(50);
     setW(D7, rd16(A0 + 0x2));  // 00C840  move.w 2(a0), d7
     // 00C844  cmpi.l #$20, $113a8.l
     if (rd32(v_snap_frames) != 0x20) goto L_00C86C;  // 00C84E  bne $c86c
-    tick(94);
     A0 += 0x2;  // 00C850  adda.l #$2, a0
     wr32(v_snap_cell, A0);  // 00C856  move.l a0, $11322.l
     wr32(v_snap_frames, 0);  // 00C85C  clr.l $113a8.l
     wr16(0x11390, 0);  // 00C862  clr.w $11390.l
     { murphy_move_done(); return; }  // 00C868  bra $cf28
 L_00C86C:
-    tick(48);
     A4 = v_gfx_frame_ptrs;  // 00C86C  lea.l $1a85e.l, a4
     A4 = A4 + 0x120;  // 00C872  lea.l 288(a4), a4
     A2 = rd32(v_murphy_screen);  // 00C876  movea.l $11398.l, a2
     A2 += 0x2;  // 00C87C  addq.l #$2, a2
 L_00C87E:
-    tick(26);
     // 00C87E  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C87E;  // 00C884  bne $c87e
-    tick(18);
     // 00C886  cmpi.w #$14, d7
     if ((D7 & 0xFFFF) == 0x14) goto L_00C8A0;  // 00C88A  beq $c8a0
-    tick(18);
     // 00C88C  cmpi.w #$2, d7
     if ((D7 & 0xFFFF) != 0x2) goto L_00C8AE;  // 00C890  bne $c8ae
-    tick(44);
     A1 = 0x11598;  // 00C892  lea.l $11598.l, a1
     A1 += rd32(v_snap_frames);  // 00C898  adda.l $113a8.l, a1
     goto L_00C8BA;  // 00C89E  bra $c8ba
 L_00C8A0:
-    tick(44);
     A1 = 0x11618;  // 00C8A0  lea.l $11618.l, a1
     A1 += rd32(v_snap_frames);  // 00C8A6  adda.l $113a8.l, a1
     goto L_00C8BA;  // 00C8AC  bra $c8ba
 L_00C8AE:
-    tick(34);
     A1 = 0x115D8;  // 00C8AE  lea.l $115d8.l, a1
     A1 += rd32(v_snap_frames);  // 00C8B4  adda.l $113a8.l, a1
 L_00C8BA:
-    tick(148);
     wr32(A5 + 0x50, rd32(A1));  // 00C8BA  move.l (a1), 80(a5)
     wr32(A5 + 0x54, A2);  // 00C8BE  move.l a2, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C8C2  move.w #$26, 100(a5)
@@ -7778,10 +5887,8 @@ L_00C8BA:
     wr16(A5 + 0x58, 0x1001);  // 00C8D8  move.w #$1001, 88(a5)
     wr32(v_snap_frames, (rd32(v_snap_frames) + 0x4));  // 00C8DE  addq.l #$4, $113a8.l
 L_00C8E4:
-    tick(26);
     // 00C8E4  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00C8E4;  // 00C8EA  bne $c8e4
-    tick(172);
     wr32(A5 + 0x50, rd32(A4));  // 00C8EC  move.l (a4), 80(a5)
     wr32(A5 + 0x54, rd32(v_murphy_screen));  // 00C8F0  move.l $11398.l, 84(a5)
     wr16(A5 + 0x64, 0x26);  // 00C8F8  move.w #$26, 100(a5)
@@ -7792,27 +5899,21 @@ L_00C8E4:
     wr16(0x1131A, 0);  // 00C914  clr.w $1131a.l
     return;  // 00C91A  rts 
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 // Пересчитать клетку Murphy по его координатам; если в клетке опасный
 // объект (враг, падающий зонк/инфотрон) — гибель.
 void update_murphy_cell() {
-    tick(26);
     // 00C9E8  tst.w $112d4.l
     if (rd16(v_death_anim) == 0) goto L_00C9F2;  // 00C9EE  beq $c9f2
-    tick(16);
     return;  // 00C9F0  rts 
 L_00C9F2:
-    tick(30);
     // 00C9F2  tst.l $1131e.l
     if (rd32(v_murphy_cell) == 0) goto L_00CA06;  // 00C9F8  beq $ca06
-    tick(40);
     A6 = rd32(v_murphy_cell);  // 00C9FA  movea.l $1131e.l, a6
     wr16(A6, rd16(c_tile_empty));  // 00CA00  move.w $113b8.l, (a6)
 L_00CA06:
-    tick(162);
     D5 = 0x0;  // 00CA06  moveq.l #$0, d5
     D6 = 0x0;  // 00CA08  moveq.l #$0, d6
     D7 = 0x0;  // 00CA0A  moveq.l #$0, d7
@@ -7827,63 +5928,44 @@ L_00CA06:
     wr32(v_murphy_cell, A6);  // 00CA2A  move.l a6, $1131e.l
     // 00CA30  cmpi.w #$11, (a6)
     if (rd16(A6) == 0x11) goto L_00CA9C;  // 00CA34  beq $ca9c
-    tick(22);
     // 00CA36  cmpi.w #$8011, (a6)
     if (rd16(A6) == 0x8011) goto L_00CA9C;  // 00CA3A  beq $ca9c
-    tick(22);
     // 00CA3C  cmpi.w #$8022, (a6)
     if (rd16(A6) == 0x8022) goto L_00CA9C;  // 00CA40  beq $ca9c
-    tick(22);
     // 00CA42  cmpi.w #$ff04, (a6)
     if (rd16(A6) == 0xFF04) goto L_00CA9C;  // 00CA46  beq $ca9c
-    tick(22);
     // 00CA48  cmpi.w #$fe04, (a6)
     if (rd16(A6) == 0xFE04) goto L_00CA9C;  // 00CA4C  beq $ca9c
-    tick(22);
     // 00CA4E  cmpi.w #$fd04, (a6)
     if (rd16(A6) == 0xFD04) goto L_00CA9C;  // 00CA52  beq $ca9c
-    tick(22);
     // 00CA54  cmpi.w #$fb04, (a6)
     if (rd16(A6) == 0xFB04) goto L_00CA9C;  // 00CA58  beq $ca9c
-    tick(22);
     // 00CA5A  cmpi.w #$ef01, (a6)
     if (rd16(A6) == 0xEF01) goto L_00CA9C;  // 00CA5E  beq $ca9c
-    tick(26);
     // 00CA60  tst.w $112e2.l
     if (rd16(0x112E2) == 0) goto L_00CA88;  // 00CA66  beq $ca88
-    tick(26);
     // 00CA68  tst.w $11306.l
     if (rd16(v_push_ready) != 0) { place_murphy_in_map(); return; }  // 00CA6E  bne $caa4
-    tick(50);
     wr16(0x112E2, (rd16(0x112E2) + 0x1));  // 00CA70  addq.w #$1, $112e2.l
     // 00CA76  cmpi.w #$12, $112e2.l
     if (rd16(0x112E2) != 0x12) { place_murphy_in_map(); return; }  // 00CA7E  bne $caa4
-    tick(30);
     wr16(0x112E2, 0);  // 00CA80  clr.w $112e2.l
     { place_murphy_in_map(); return; }  // 00CA86  bra $caa4
 L_00CA88:
-    tick(22);
     // 00CA88  cmpi.w #$ee01, (a6)
     if (rd16(A6) == 0xEE01) goto L_00CA9C;  // 00CA8C  beq $ca9c
-    tick(22);
     // 00CA8E  cmpi.w #$ed01, (a6)
     if (rd16(A6) == 0xED01) goto L_00CA9C;  // 00CA92  beq $ca9c
-    tick(22);
     // 00CA94  cmpi.w #$eb01, (a6)
     if (rd16(A6) == 0xEB01) goto L_00CA9C;  // 00CA98  beq $ca9c
-    tick(10);
     { place_murphy_in_map(); return; }  // 00CA9A  bra $caa4
 L_00CA9C:
-    tick(18);
     call(place_murphy_in_map, 0xCA9E);  // 00CA9C  bsr $caa4
-    tick(18);
     call(murphy_die, 0xCAA2);  // 00CA9E  bsr $f21a
-    tick(16);
     return;  // 00CAA2  rts 
 }
 
 void place_murphy_in_map() {
-    tick(152);
     wr16(A6, rd16(c_tile_murphy));  // 00CAA4  move.w $113be.l, (a6)
     wr32(v_murphy_cell, A6);  // 00CAAA  move.l a6, $1131e.l
     A6 = v_cell_screen_ptrs;  // 00CAB0  lea.l $191de.l, a6
@@ -7895,26 +5977,20 @@ void place_murphy_in_map() {
     wr32(v_murphy_screen, rd32(A6));  // 00CAC4  move.l (a6), $11398.l
     // 00CACA  tst.w $11348.l
     if (rd16(v_murphy_moving) != 0) goto L_00CB2A;  // 00CAD0  bne $cb2a
-    tick(26);
     // 00CAD2  tst.w $112d4.l
     if (rd16(v_death_anim) != 0) goto L_00CB2A;  // 00CAD8  bne $cb2a
-    tick(30);
     // 00CADA  cmpi.w #$6, $1131a.l
     if (rd16(0x1131A) == 0x6) { blit_murphy_standing(); return; }  // 00CAE2  beq $caec
-    tick(36);
     wr16(0x1131A, (rd16(0x1131A) + 0x1));  // 00CAE4  addq.w #$1, $1131a.l
     return;  // 00CAEA  rts 
 L_00CB2A:
-    tick(16);
     return;  // 00CB2A  rts 
 }
 
 void blit_murphy_standing() {
 L_00CAEC:
-    tick(26);
     // 00CAEC  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00CAEC;  // 00CAF2  bne $caec
-    tick(176);
     wr16(0x1131A, 0);  // 00CAF4  clr.w $1131a.l
     A0 = rd32(v_gfx_frame_ptrs);  // 00CAFA  movea.l $1a85e.l, a0
     A0 += 0x6;  // 00CB00  addq.l #$6, a0
@@ -7925,72 +6001,53 @@ L_00CAEC:
     wr16(A5 + 0x64, 0x26);  // 00CB18  move.w #$26, 100(a5)
     wr16(A5 + 0x66, 0x76);  // 00CB1E  move.w #$76, 102(a5)
     wr16(A5 + 0x58, 0x1001);  // 00CB24  move.w #$1001, 88(a5)
-    tick(16);
     return;  // 00CB2A  rts 
 }
 
 // Гравитация ($12A0C): если под Murphy пусто — принудительно «вниз».
 void apply_gravity() {
-    tick(26);
     // 00CB2C  tst.b $12a0c.l
     if (rd8(v_gravity) == 0) goto L_00CBC6;  // 00CB32  beq $cbc6
-    tick(50);
     A0 = rd32(v_murphy_cell);  // 00CB36  movea.l $1131e.l, a0
     // 00CB3C  cmpi.w #$4, $118fe.l
     if (rd16(v_input_dir) == 0x4) goto L_00CB62;  // 00CB44  beq $cb62
-    tick(30);
     // 00CB46  cmpi.w #$2, $118fe.l
     if (rd16(v_input_dir) != 0x2) goto L_00CB74;  // 00CB4E  bne $cb74
-    tick(26);
     // 00CB50  cmpi.w #$2, -2(a0)
     if (rd16(A0 - 0x2) != 0x2) goto L_00CB74;  // 00CB56  bne $cb74
-    tick(36);
     wr16(v_input_dir, 0x2);  // 00CB58  move.w #$2, $118fe.l
     return;  // 00CB60  rts 
 L_00CB62:
-    tick(26);
     // 00CB62  cmpi.w #$2, 2(a0)
     if (rd16(A0 + 0x2) != 0x2) goto L_00CB74;  // 00CB68  bne $cb74
-    tick(36);
     wr16(v_input_dir, 0x4);  // 00CB6A  move.w #$4, $118fe.l
     return;  // 00CB72  rts 
 L_00CB74:
-    tick(22);
     // 00CB74  tst.w 120(a0)
     if (rd16(A0 + 0x78) != 0) goto L_00CBC0;  // 00CB78  bne $cbc0
-    tick(26);
     // 00CB7A  tst.w $11348.l
     if (rd16(v_murphy_moving) != 0) goto L_00CBC0;  // 00CB80  bne $cbc0
-    tick(26);
     // 00CB82  cmpi.w #$c, -120(a0)
     if (rd16(A0 - 0x78) == 0xC) goto L_00CBC0;  // 00CB88  beq $cbc0
-    tick(26);
     // 00CB8A  cmpi.w #$2, -120(a0)
     if (rd16(A0 - 0x78) != 0x2) goto L_00CBAE;  // 00CB90  bne $cbae
-    tick(30);
     // 00CB92  cmpi.w #$4, $118fe.l
     if (int16_t(rd16(v_input_dir)) >= 4) goto L_00CBAE;  // 00CB9A  bge $cbae
-    tick(30);
     // 00CB9C  cmpi.w #$2, $118fe.l
     if (rd16(v_input_dir) == 0x2) goto L_00CBAE;  // 00CBA4  beq $cbae
-    tick(26);
     // 00CBA6  tst.w $118fe.l
     if (rd16(v_input_dir) != 0) goto L_00CBC0;  // 00CBAC  bne $cbc0
 L_00CBAE:
-    tick(56);
     wr16(v_input_dir, 0x3);  // 00CBAE  move.w #$3, $118fe.l
     wr16(0x1134C, 0x1);  // 00CBB6  move.w #$1, $1134c.l
     return;  // 00CBBE  rts 
 L_00CBC0:
-    tick(20);
     wr16(0x1134C, 0);  // 00CBC0  clr.w $1134c.l
 L_00CBC6:
-    tick(16);
     return;  // 00CBC6  rts 
 }
 
 void scroll_step_up() {
-    tick(202);
     setW(D0, rd16(v_murphy_screen_y));  // 00CBC8  move.w $1133e.l, d0
     setW(D0, (((D0 & 0xFFFF) << 4) & 0xFFFF));  // 00CBCE  lsl.w #$4, d0
     setW(D0, ((D0 & 0xFFFF) + rd16(v_scroll_y)));  // 00CBD0  add.w $11346.l, d0
@@ -8004,148 +6061,109 @@ void scroll_step_up() {
     D0 = (D0 + D2);  // 00CBF6  add.l d2, d0
     // 00CBF8  tst.w $11358.l
     if (rd16(0x11358) != 0) goto L_00CC0A;  // 00CBFE  bne $cc0a
-    tick(30);
     // 00CC00  cmpi.w #$6, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x6) goto L_00CC1C;  // 00CC08  beq $cc1c
 L_00CC0A:
-    tick(68);
     D0 = (D0 - rd32(0x11350));  // 00CC0A  sub.l $11350.l, d0
     wr32(0x11350, (rd32(0x11350) + 0x3C0));  // 00CC10  addi.l #$3c0, $11350.l
     goto L_00CC22;  // 00CC1A  bra $cc22
 L_00CC1C:
-    tick(28);
     wr32(0x11350, 0);  // 00CC1C  clr.l $11350.l
 L_00CC22:
-    tick(20);
     wr32(0x1132A, D0);  // 00CC22  move.l d0, $1132a.l
 L_00CC28:
-    tick(34);
     D0 = 0x0;  // 00CC28  moveq.l #$0, d0
     // 00CC2A  cmpi.w #$1, $11440.l
     if (rd16(0x11440) == 0x1) goto L_00CC3C;  // 00CC32  beq $cc3c
-    tick(22);
     A0 = 0x1152E;  // 00CC34  lea.l $1152e.l, a0
     goto L_00CC42;  // 00CC3A  bra $cc42
 L_00CC3C:
-    tick(12);
     A0 = 0x1151C;  // 00CC3C  lea.l $1151c.l, a0
 L_00CC42:
-    tick(42);
     A0 += sxw(rd16(0x1143E));  // 00CC42  adda.w $1143e.l, a0
     // 00CC48  cmpi.w #$ffff, (a0)
     if (rd16(A0) != 0xFFFF) goto L_00CC56;  // 00CC4C  bne $cc56
-    tick(30);
     wr16(0x1143E, 0);  // 00CC4E  clr.w $1143e.l
     goto L_00CC28;  // 00CC54  bra $cc28
 L_00CC56:
-    tick(126);
     A1 = v_gfx_frame_ptrs;  // 00CC56  lea.l $1a85e.l, a1
     A1 += sxw(rd16(A0));  // 00CC5C  adda.w (a0), a1
     wr32(0x11326, rd32(A1));  // 00CC5E  move.l (a1), $11326.l
     wr16(0x1143E, (rd16(0x1143E) + 0x2));  // 00CC64  addq.w #$2, $1143e.l
     wr32(0x11326, (rd32(0x11326) + 0x140));  // 00CC6A  addi.l #$140, $11326.l
     call(blit_murphy_frame, 0xCC78);  // 00CC74  bsr $f49c
-    tick(38);
     // 00CC78  cmpi.l #$1e00, $11350.l
     if (rd32(0x11350) == 0x1E00) goto L_00CC86;  // 00CC82  beq $cc86
-    tick(16);
     return;  // 00CC84  rts 
 L_00CC86:
-    tick(66);
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) - 0x1));  // 00CC86  subq.w #$1, $1133e.l
     wr32(0x11350, 0);  // 00CC8C  clr.l $11350.l
     call(murphy_move_done, 0xCC96);  // 00CC92  bsr $cf28
-    tick(16);
     return;  // 00CC96  rts 
 }
 
 void murphy_anim_step() {
-    tick(54);
     D0 = rd32(v_murphy_screen);  // 00CC98  move.l $11398.l, d0
     D0 = (D0 - 0x2);  // 00CC9E  subq.l #$2, d0
     // 00CCA0  tst.w $1137a.l
     if (rd16(0x1137A) == 0) goto L_00CCB4;  // 00CCA6  beq $ccb4
-    tick(26);
     // 00CCA8  tst.w $1135c.l
     if (rd16(0x1135C) == 0) goto L_00CCC0;  // 00CCAE  beq $ccc0
-    tick(10);
     goto L_00CCDA;  // 00CCB2  bra $ccda
 L_00CCB4:
-    tick(26);
     // 00CCB4  tst.w $1135e.l
     if (rd16(0x1135E) == 0) goto L_00CCCE;  // 00CCBA  beq $ccce
-    tick(14);
     setW(D0, ((D0 & 0xFFFF) + 0x2));  // 00CCBC  addq.w #$2, d0
     goto L_00CCDA;  // 00CCBE  bra $ccda
 L_00CCC0:
-    tick(30);
     // 00CCC0  cmpi.w #$8, $1143c.l
     if (int16_t(rd16(0x1143C)) < 8) goto L_00CCDA;  // 00CCC8  blt $ccda
-    tick(18);
     D0 = (D0 + 0x2);  // 00CCCA  addq.l #$2, d0
     goto L_00CCDA;  // 00CCCC  bra $ccda
 L_00CCCE:
-    tick(30);
     // 00CCCE  cmpi.w #$8, $1143c.l
     if (int16_t(rd16(0x1143C)) > 8) goto L_00CCDA;  // 00CCD6  bgt $ccda
-    tick(8);
     D0 = (D0 + 0x2);  // 00CCD8  addq.l #$2, d0
 L_00CCDA:
-    tick(50);
     wr32(0x1132A, D0);  // 00CCDA  move.l d0, $1132a.l
     D0 = 0x0;  // 00CCE0  moveq.l #$0, d0
     // 00CCE2  tst.w $1137a.l
     if (rd16(0x1137A) == 0) goto L_00CD28;  // 00CCE8  beq $cd28
-    tick(30);
     // 00CCEA  cmpi.w #$2, $11442.l
     if (rd16(0x11442) == 0x2) goto L_00CD10;  // 00CCF2  beq $cd10
-    tick(30);
     // 00CCF4  cmpi.w #$4, $11442.l
     if (rd16(0x11442) == 0x4) goto L_00CD18;  // 00CCFC  beq $cd18
-    tick(30);
     // 00CCFE  cmpi.w #$14, $11442.l
     if (rd16(0x11442) == 0x14) goto L_00CD20;  // 00CD06  beq $cd20
-    tick(22);
     A0 = 0x11468;  // 00CD08  lea.l $11468.l, a0
     goto L_00CD64;  // 00CD0E  bra $cd64
 L_00CD10:
-    tick(22);
     A0 = 0x11444;  // 00CD10  lea.l $11444.l, a0
     goto L_00CD64;  // 00CD16  bra $cd64
 L_00CD18:
-    tick(22);
     A0 = 0x1148C;  // 00CD18  lea.l $1148c.l, a0
     goto L_00CD64;  // 00CD1E  bra $cd64
 L_00CD20:
-    tick(22);
     A0 = 0x114B0;  // 00CD20  lea.l $114b0.l, a0
     goto L_00CD64;  // 00CD26  bra $cd64
 L_00CD28:
-    tick(30);
     // 00CD28  cmpi.w #$2, $11442.l
     if (rd16(0x11442) == 0x2) goto L_00CD4E;  // 00CD30  beq $cd4e
-    tick(30);
     // 00CD32  cmpi.w #$4, $11442.l
     if (rd16(0x11442) == 0x4) goto L_00CD56;  // 00CD3A  beq $cd56
-    tick(30);
     // 00CD3C  cmpi.w #$14, $11442.l
     if (rd16(0x11442) == 0x14) goto L_00CD5E;  // 00CD44  beq $cd5e
-    tick(22);
     A0 = 0x1147A;  // 00CD46  lea.l $1147a.l, a0
     goto L_00CD64;  // 00CD4C  bra $cd64
 L_00CD4E:
-    tick(22);
     A0 = 0x11456;  // 00CD4E  lea.l $11456.l, a0
     goto L_00CD64;  // 00CD54  bra $cd64
 L_00CD56:
-    tick(22);
     A0 = 0x1149E;  // 00CD56  lea.l $1149e.l, a0
     goto L_00CD64;  // 00CD5C  bra $cd64
 L_00CD5E:
-    tick(12);
     A0 = 0x114C2;  // 00CD5E  lea.l $114c2.l, a0
 L_00CD64:
-    tick(130);
     A0 += sxw(rd16(0x1143C));  // 00CD64  adda.w $1143c.l, a0
     A1 = v_gfx_frame_ptrs;  // 00CD6A  lea.l $1a85e.l, a1
     A1 += sxw(rd16(A0));  // 00CD70  adda.w (a0), a1
@@ -8153,13 +6171,11 @@ L_00CD64:
     wr16(0x1143C, (rd16(0x1143C) + 0x2));  // 00CD78  addq.w #$2, $1143c.l
     wr16(0x11386, 0x1);  // 00CD7E  move.w #$1, $11386.l
     call(blit_murphy_frame, 0xCD8A);  // 00CD86  bsr $f49c
-    tick(36);
     wr16(0x11386, 0);  // 00CD8A  clr.w $11386.l
     return;  // 00CD90  rts 
 }
 
 void scroll_step_down() {
-    tick(202);
     setW(D0, rd16(v_murphy_screen_y));  // 00CD92  move.w $1133e.l, d0
     setW(D0, (((D0 & 0xFFFF) << 4) & 0xFFFF));  // 00CD98  lsl.w #$4, d0
     setW(D0, ((D0 & 0xFFFF) + rd16(v_scroll_y)));  // 00CD9A  add.w $11346.l, d0
@@ -8173,67 +6189,51 @@ void scroll_step_down() {
     D0 = (D0 + D2);  // 00CDC0  add.l d2, d0
     // 00CDC2  tst.w $1135a.l
     if (rd16(0x1135A) != 0) goto L_00CDD4;  // 00CDC8  bne $cdd4
-    tick(30);
     // 00CDCA  cmpi.w #$6, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x6) goto L_00CDE6;  // 00CDD2  beq $cde6
 L_00CDD4:
-    tick(68);
     D0 = (D0 + rd32(0x11354));  // 00CDD4  add.l $11354.l, d0
     wr32(0x11354, (rd32(0x11354) + 0x3C0));  // 00CDDA  addi.l #$3c0, $11354.l
     goto L_00CDEC;  // 00CDE4  bra $cdec
 L_00CDE6:
-    tick(28);
     wr32(0x11354, 0);  // 00CDE6  clr.l $11354.l
 L_00CDEC:
-    tick(56);
     wr32(0x1132A, D0);  // 00CDEC  move.l d0, $1132a.l
     wr32(0x1132A, (rd32(0x1132A) - 0x3C0));  // 00CDF2  subi.l #$3c0, $1132a.l
 L_00CDFC:
-    tick(34);
     D0 = 0x0;  // 00CDFC  moveq.l #$0, d0
     // 00CDFE  cmpi.w #$1, $11440.l
     if (rd16(0x11440) == 0x1) goto L_00CE10;  // 00CE06  beq $ce10
-    tick(22);
     A0 = 0x1152E;  // 00CE08  lea.l $1152e.l, a0
     goto L_00CE16;  // 00CE0E  bra $ce16
 L_00CE10:
-    tick(12);
     A0 = 0x1151C;  // 00CE10  lea.l $1151c.l, a0
 L_00CE16:
-    tick(42);
     A0 += sxw(rd16(0x1143E));  // 00CE16  adda.w $1143e.l, a0
     // 00CE1C  cmpi.w #$ffff, (a0)
     if (rd16(A0) != 0xFFFF) goto L_00CE2A;  // 00CE20  bne $ce2a
-    tick(30);
     wr16(0x1143E, 0);  // 00CE22  clr.w $1143e.l
     goto L_00CDFC;  // 00CE28  bra $cdfc
 L_00CE2A:
-    tick(90);
     A1 = v_gfx_frame_ptrs;  // 00CE2A  lea.l $1a85e.l, a1
     A1 += sxw(rd16(A0));  // 00CE30  adda.w (a0), a1
     wr32(0x11326, rd32(A1));  // 00CE32  move.l (a1), $11326.l
     wr16(0x1143E, (rd16(0x1143E) + 0x2));  // 00CE38  addq.w #$2, $1143e.l
     call(blit_murphy_frame, 0xCE42);  // 00CE3E  bsr $f49c
-    tick(38);
     // 00CE42  cmpi.l #$1e00, $11354.l
     if (rd32(0x11354) == 0x1E00) goto L_00CE50;  // 00CE4C  beq $ce50
-    tick(16);
     return;  // 00CE4E  rts 
 L_00CE50:
-    tick(66);
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) + 0x1));  // 00CE50  addq.w #$1, $1133e.l
     wr32(0x11354, 0);  // 00CE56  clr.l $11354.l
     call(murphy_move_done, 0xCE60);  // 00CE5C  bsr $cf28
-    tick(16);
     return;  // 00CE60  rts 
 }
 
 void bplptr_up_one_line_block() {
-    tick(20);
     A0 = 0x1B6E6;  // 00CE62  lea.l $1b6e6.l, a0
     setW(D1, 0x3);  // 00CE68  move.w #$3, d1
 L_00CE6C:
-    tick(96);
     setW(D0, rd16(A0 + 0x2));  // 00CE6C  move.w 2(a0), d0
     D0 = ((D0 << 16) | (D0 >> 16));  // 00CE70  swap.w d0
     setW(D0, rd16(A0 + 0x6));  // 00CE72  move.w 6(a0), d0
@@ -8244,16 +6244,13 @@ L_00CE6C:
     wr16(A0 + 0x6, (D0 & 0xFFFF));  // 00CE84  move.w d0, 6(a0)
     A0 += 0x8;  // 00CE88  addq.l #$8, a0
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_00CE6C;  // 00CE8A  dbf.w d1, $ce6c
-    tick(16);
     return;  // 00CE8E  rts 
 }
 
 void bplptr_down_one_line_block() {
-    tick(20);
     A0 = 0x1B6E6;  // 00CE90  lea.l $1b6e6.l, a0
     setW(D1, 0x3);  // 00CE96  move.w #$3, d1
 L_00CE9A:
-    tick(96);
     setW(D0, rd16(A0 + 0x2));  // 00CE9A  move.w 2(a0), d0
     D0 = ((D0 << 16) | (D0 >> 16));  // 00CE9E  swap.w d0
     setW(D0, rd16(A0 + 0x6));  // 00CEA0  move.w 6(a0), d0
@@ -8264,54 +6261,42 @@ L_00CE9A:
     wr16(A0 + 0x6, (D0 & 0xFFFF));  // 00CEB2  move.w d0, 6(a0)
     A0 += 0x8;  // 00CEB6  addq.l #$8, a0
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_00CE9A;  // 00CEB8  dbf.w d1, $ce9a
-    tick(16);
     return;  // 00CEBC  rts 
 }
 
 void fine_scroll_left() {
-    tick(30);
     // 00CEBE  cmpi.b #$ee, $1b6d9.l
     if (rd8(0x1B6D9) == 0xEE) goto L_00CED2;  // 00CEC6  beq $ced2
-    tick(40);
     wr8(0x1B6D9, (rd8(0x1B6D9) + 0x22));  // 00CEC8  addi.b #$22, $1b6d9.l
     return;  // 00CED0  rts 
 L_00CED2:
-    tick(40);
     wr8(0x1B6D9, 0);  // 00CED2  clr.b $1b6d9.l
     A0 = 0x1B6E6;  // 00CED8  lea.l $1b6e6.l, a0
     setW(D0, 0x3);  // 00CEDE  move.w #$3, d0
 L_00CEE2:
-    tick(44);
     wr16(A0 + 0x6, (rd16(A0 + 0x6) - 0x2));  // 00CEE2  subq.w #$2, 6(a0)
     A0 += 0x8;  // 00CEE6  adda.l #$8, a0
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00CEE2;  // 00CEEC  dbf.w d0, $cee2
-    tick(16);
     return;  // 00CEF0  rts 
 }
 
 void fine_scroll_right() {
-    tick(26);
     // 00CEF2  tst.b $1b6d9.l
     if (rd8(0x1B6D9) == 0) goto L_00CF04;  // 00CEF8  beq $cf04
-    tick(40);
     wr8(0x1B6D9, (rd8(0x1B6D9) - 0x22));  // 00CEFA  subi.b #$22, $1b6d9.l
     return;  // 00CF02  rts 
 L_00CF04:
-    tick(40);
     wr8(0x1B6D9, 0xEE);  // 00CF04  move.b #$ee, $1b6d9.l
     A0 = 0x1B6E6;  // 00CF0C  lea.l $1b6e6.l, a0
     setW(D0, 0x3);  // 00CF12  move.w #$3, d0
 L_00CF16:
-    tick(48);
     wr16(A0 + 0x6, (rd16(A0 + 0x6) + 0x2));  // 00CF16  addi.w #$2, 6(a0)
     A0 += 0x8;  // 00CF1C  adda.l #$8, a0
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00CF16;  // 00CF22  dbf.w d0, $cf16
-    tick(16);
     return;  // 00CF26  rts 
 }
 
 void murphy_move_done() {
-    tick(124);
     wr16(0x11924, rd16(v_input_dir));  // 00CF28  move.w $118fe.l, $11924.l
     wr16(0x1134A, 0);  // 00CF32  clr.w $1134a.l
     wr16(v_murphy_moving, 0);  // 00CF38  clr.w $11348.l
@@ -8324,27 +6309,21 @@ void murphy_move_done() {
 // после шага проверяются клетки налево, прямо, направо, назад; Murphy в
 // проверяемой клетке гибнет; смена направления — через анимацию поворота.
 void update_sniksnaks() {
-    tick(30);
     D0 = 0x0;  // 00CF72  moveq.l #$0, d0
     A2 = 0x1821A;  // 00CF74  lea.l $1821a.l, a2
     A6 = A2;  // 00CF7A  movea.l a2, a6
     goto L_00CF82;  // 00CF7C  bra $cf82
 L_00CF7E:
-    tick(12);
     A6 += 0x8;  // 00CF7E  addq.l #$8, a6
     A2 = A6;  // 00CF80  movea.l a6, a2
 L_00CF82:
-    tick(22);
     // 00CF82  tst.l (a2)
     if (rd32(A2) == 0) goto L_00D034;  // 00CF84  beq $d034
-    tick(22);
     // 00CF88  cmpi.w #$ffff, (a2)
     if (rd16(A2) == 0xFFFF) goto L_00CF7E;  // 00CF8C  beq $cf7e
-    tick(22);
     // 00CF8E  tst.b 4(a2)
     if (rd8(A2 + 0x4) != 0) goto L_00D564;  // 00CF92  bne $d564
 L_00CF96:
-    tick(72);
     A0 = v_cell_screen_ptrs;  // 00CF96  lea.l $191de.l, a0
     A1 = v_map;  // 00CF9C  lea.l $11928.l, a1
     setW(D0, rd16(A2 + 0x2));  // 00CFA2  move.w 2(a2), d0
@@ -8354,199 +6333,136 @@ L_00CF96:
     if (rd16(A1) != 0x8888) goto L_00CFCC;  // 00CFAE  bne $cfcc
     { enemy_destroyed(); return; }
 L_00CFCC:
-    tick(22);
     // 00CFCC  cmpi.w #$3, (a1)
     if (rd16(A1) != 0x3) goto L_00CFDC;  // 00CFD0  bne $cfdc
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00CFD2  move.w #$1, $112da.l
     { enemy_destroyed(); return; }  // 00CFDA  bra $cfb0
 L_00CFDC:
-    tick(22);
     // 00CFDC  tst.b 1(a2)
     if (rd8(A2 + 0x1) == 0) goto L_00D036;  // 00CFE0  beq $d036
-    tick(26);
     // 00CFE2  cmpi.b #$5, 1(a2)
     if (rd8(A2 + 0x1) == 0x5) goto L_00D036;  // 00CFE8  beq $d036
-    tick(26);
     // 00CFEA  cmpi.b #$6, 1(a2)
     if (rd8(A2 + 0x1) == 0x6) goto L_00D082;  // 00CFF0  beq $d082
-    tick(26);
     // 00CFF4  cmpi.b #$7, 1(a2)
     if (rd8(A2 + 0x1) == 0x7) goto L_00D0CE;  // 00CFFA  beq $d0ce
-    tick(26);
     // 00CFFE  cmpi.b #$8, 1(a2)
     if (rd8(A2 + 0x1) == 0x8) goto L_00D116;  // 00D004  beq $d116
-    tick(26);
     // 00D008  cmpi.b #$1, 1(a2)
     if (rd8(A2 + 0x1) == 0x1) goto L_00D258;  // 00D00E  beq $d258
-    tick(26);
     // 00D012  cmpi.b #$2, 1(a2)
     if (rd8(A2 + 0x1) == 0x2) goto L_00D16A;  // 00D018  beq $d16a
-    tick(26);
     // 00D01C  cmpi.b #$3, 1(a2)
     if (rd8(A2 + 0x1) == 0x3) goto L_00D36A;  // 00D022  beq $d36a
-    tick(26);
     // 00D026  cmpi.b #$4, 1(a2)
     if (rd8(A2 + 0x1) == 0x4) goto L_00D454;  // 00D02C  beq $d454
-    tick(10);
     goto L_00CF7E;  // 00D030  bra $cf7e
 L_00D034:
-    tick(16);
     return;  // 00D034  rts 
 L_00D036:
-    tick(22);
     // 00D036  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00D16A;  // 00D03A  beq $d16a
-    tick(26);
     // 00D03E  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00D15E;  // 00D044  beq $d15e
-    tick(22);
     // 00D048  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D258;  // 00D04C  beq $d258
-    tick(26);
     // 00D050  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00D24C;  // 00D056  beq $d24c
-    tick(22);
     // 00D05A  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00D36A;  // 00D05E  beq $d36a
-    tick(26);
     // 00D062  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00D35E;  // 00D068  beq $d35e
-    tick(22);
     // 00D06C  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D454;  // 00D070  beq $d454
-    tick(26);
     // 00D074  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00D448;  // 00D07A  beq $d448
-    tick(10);
     goto L_00D894;  // 00D07E  bra $d894
 L_00D082:
-    tick(22);
     // 00D082  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D454;  // 00D086  beq $d454
-    tick(26);
     // 00D08A  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00D448;  // 00D090  beq $d448
-    tick(22);
     // 00D094  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00D16A;  // 00D098  beq $d16a
-    tick(26);
     // 00D09C  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00D15E;  // 00D0A2  beq $d15e
-    tick(22);
     // 00D0A6  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D258;  // 00D0AA  beq $d258
-    tick(26);
     // 00D0AE  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00D24C;  // 00D0B4  beq $d24c
-    tick(22);
     // 00D0B8  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00D36A;  // 00D0BC  beq $d36a
-    tick(26);
     // 00D0C0  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00D35E;  // 00D0C6  beq $d35e
-    tick(10);
     goto L_00D894;  // 00D0CA  bra $d894
 L_00D0CE:
-    tick(22);
     // 00D0CE  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00D36A;  // 00D0D2  beq $d36a
-    tick(26);
     // 00D0D6  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00D35E;  // 00D0DC  beq $d35e
-    tick(22);
     // 00D0E0  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D454;  // 00D0E4  beq $d454
-    tick(26);
     // 00D0E8  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00D448;  // 00D0EE  beq $d448
-    tick(22);
     // 00D0F2  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00D16A;  // 00D0F6  beq $d16a
-    tick(26);
     // 00D0F8  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00D15E;  // 00D0FE  beq $d15e
-    tick(22);
     // 00D100  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D258;  // 00D104  beq $d258
-    tick(26);
     // 00D108  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00D24C;  // 00D10E  beq $d24c
-    tick(10);
     goto L_00D894;  // 00D112  bra $d894
 L_00D116:
-    tick(22);
     // 00D116  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D258;  // 00D11A  beq $d258
-    tick(26);
     // 00D11E  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00D24C;  // 00D124  beq $d24c
-    tick(22);
     // 00D128  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00D36A;  // 00D12C  beq $d36a
-    tick(26);
     // 00D130  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00D35E;  // 00D136  beq $d35e
-    tick(22);
     // 00D13A  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D454;  // 00D13E  beq $d454
-    tick(26);
     // 00D142  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00D448;  // 00D148  beq $d448
-    tick(22);
     // 00D14C  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00D16A;  // 00D150  beq $d16a
-    tick(26);
     // 00D152  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00D15E;  // 00D158  beq $d15e
-    tick(10);
     goto L_00D894;  // 00D15A  bra $d894
 L_00D15E:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D15E  move.w #$1, $112da.l
     { enemy_destroyed(); return; }  // 00D166  bra $cfb0
 L_00D16A:
-    tick(42);
     wr8(A2 + 0x1, 0x2);  // 00D16A  move.b #$2, 1(a2)
     // 00D170  cmpi.b #$1, 5(a2)
     if (rd8(A2 + 0x5) == 0x1) goto L_00D188;  // 00D176  beq $d188
-    tick(22);
     // 00D178  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00D188;  // 00D17C  beq $d188
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00D17E  move.b #$1, 4(a2)
     goto L_00CF7E;  // 00D184  bra $cf7e
 L_00D188:
-    tick(22);
     // 00D188  cmpi.w #$8888, (a1)
     if (rd16(A1) == 0x8888) goto L_00D1AA;  // 00D18C  beq $d1aa
-    tick(26);
     // 00D18E  cmpi.w #$8888, -2(a1)
     if (rd16(A1 - 0x2) != 0x8888) goto L_00D1BC;  // 00D194  bne $d1bc
-    tick(18);
     call(explosion_slot_free, 0xD19A);  // 00D196  bsr $f8b8
-    tick(26);
     // 00D19A  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D1BC;  // 00D1A0  bne $d1bc
-    tick(26);
     wr16(A1 - 0x2, 0);  // 00D1A2  clr.w -2(a1)
     { enemy_destroyed(); return; }  // 00D1A6  bra $cfb0
 L_00D1AA:
-    tick(18);
     call(explosion_slot_free, 0xD1AE);  // 00D1AA  bsr $f8b8
-    tick(26);
     // 00D1AE  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D1BC;  // 00D1B4  bne $d1bc
-    tick(22);
     wr16(A1, 0);  // 00D1B6  clr.w (a1)
     { enemy_destroyed(); return; }  // 00D1B8  bra $cfb0
 L_00D1BC:
-    tick(62);
     wr32(A1 - 0x2, 0x80118011);  // 00D1BC  move.l #$80118011, -2(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00D1C4  addi.b #$1, (a2)
     // 00D1C8  cmpi.b #$8, (a2)
     if (rd8(A2) != 0x8) goto L_00D1F4;  // 00D1CC  bne $d1f4
-    tick(118);
     wr8(A2 + 0x5, 0x1);  // 00D1CE  move.b #$1, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00D1D4  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) - 0x4));  // 00D1DA  subi.w #$4, 2(a2)
@@ -8556,7 +6472,6 @@ L_00D1BC:
     wr8(A2 + 0x1, 0x6);  // 00D1EA  move.b #$6, 1(a2)
     goto L_00CF7E;  // 00D1F0  bra $cf7e
 L_00D1F4:
-    tick(106);
     D0 = 0x0;  // 00D1F4  moveq.l #$0, d0
     A0 = v_cell_screen_ptrs;  // 00D1F6  lea.l $191de.l, a0
     A1 = v_gfx_frame_ptrs;  // 00D1FC  lea.l $1a85e.l, a1
@@ -8571,10 +6486,8 @@ L_00D1F4:
     setW(D0, rd16(A3));  // 00D218  move.w (a3), d0
     A1 += D0;  // 00D21A  adda.l d0, a1
 L_00D21C:
-    tick(26);
     // 00D21C  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00D21C;  // 00D222  bne $d21c
-    tick(138);
     wr32(A5 + 0x50, rd32(A1));  // 00D224  move.l (a1), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00D228  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00D22C  clr.w 66(a5)
@@ -8584,56 +6497,41 @@ L_00D21C:
     wr16(A5 + 0x58, 0x1002);  // 00D242  move.w #$1002, 88(a5)
     goto L_00CF7E;  // 00D248  bra $cf7e
 L_00D24C:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D24C  move.w #$1, $112da.l
     { enemy_destroyed(); return; }  // 00D254  bra $cfb0
 L_00D258:
-    tick(26);
     // 00D258  cmpi.b #$2, 5(a2)
     if (rd8(A2 + 0x5) == 0x2) goto L_00D270;  // 00D25E  beq $d270
-    tick(22);
     // 00D260  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00D270;  // 00D264  beq $d270
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00D266  move.b #$1, 4(a2)
     goto L_00CF7E;  // 00D26C  bra $cf7e
 L_00D270:
-    tick(18);
     // 00D270  tst.b (a2)
     if (rd8(A2) != 0) goto L_00D28C;  // 00D272  bne $d28c
-    tick(22);
     // 00D274  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D28C;  // 00D278  beq $d28c
-    tick(26);
     // 00D27A  cmpi.w #$11, 120(a1)
     if (rd16(A1 + 0x78) == 0x11) goto L_00D28C;  // 00D280  beq $d28c
-    tick(30);
     wr16(0x189EA, 0x1);  // 00D282  move.w #$1, $189ea.l
     goto L_00D292;  // 00D28A  bra $d292
 L_00D28C:
-    tick(20);
     wr16(0x189EA, 0);  // 00D28C  clr.w $189ea.l
 L_00D292:
-    tick(42);
     wr8(A2 + 0x1, 0x1);  // 00D292  move.b #$1, 1(a2)
     // 00D298  cmpi.w #$8888, -120(a1)
     if (rd16(A1 - 0x78) != 0x8888) goto L_00D2B4;  // 00D29E  bne $d2b4
-    tick(18);
     call(explosion_slot_free, 0xD2A4);  // 00D2A0  bsr $f8b8
-    tick(26);
     // 00D2A4  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D2B4;  // 00D2AA  bne $d2b4
-    tick(26);
     wr16(A1 - 0x78, 0);  // 00D2AC  clr.w -120(a1)
     { enemy_destroyed(); return; }  // 00D2B0  bra $cfb0
 L_00D2B4:
-    tick(66);
     wr16(A1, 0x8011);  // 00D2B4  move.w #$8011, (a1)
     wr16(A1 - 0x78, 0x8022);  // 00D2B8  move.w #$8022, -120(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00D2BE  addi.b #$1, (a2)
     // 00D2C2  cmpi.b #$9, (a2)
     if (rd8(A2) != 0x9) goto L_00D2EC;  // 00D2C6  bne $d2ec
-    tick(108);
     wr8(A2 + 0x5, 0x2);  // 00D2C8  move.b #$2, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00D2CE  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) - 0xF0));  // 00D2D4  subi.w #$f0, 2(a2)
@@ -8642,56 +6540,40 @@ L_00D2B4:
     wr8(A2, 0x1);  // 00D2E2  move.b #$1, (a2)
     wr8(A2 + 0x1, 0x5);  // 00D2E6  move.b #$5, 1(a2)
 L_00D2EC:
-    tick(18);
     call(blit_enemy_vertical, 0xD2EE);  // 00D2EC  bsr $d2f2
-    tick(10);
     goto L_00CF7E;  // 00D2EE  bra $cf7e
 L_00D35E:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D35E  move.w #$1, $112da.l
     { enemy_destroyed(); return; }  // 00D366  bra $cfb0
 L_00D36A:
-    tick(42);
     wr8(A2 + 0x1, 0x3);  // 00D36A  move.b #$3, 1(a2)
     // 00D370  cmpi.b #$3, 5(a2)
     if (rd8(A2 + 0x5) == 0x3) goto L_00D388;  // 00D376  beq $d388
-    tick(22);
     // 00D378  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00D388;  // 00D37C  beq $d388
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00D37E  move.b #$1, 4(a2)
     goto L_00CF7E;  // 00D384  bra $cf7e
 L_00D388:
-    tick(22);
     // 00D388  cmpi.w #$8888, (a1)
     if (rd16(A1) == 0x8888) goto L_00D3AA;  // 00D38C  beq $d3aa
-    tick(26);
     // 00D38E  cmpi.w #$8888, 2(a1)
     if (rd16(A1 + 0x2) != 0x8888) goto L_00D3BC;  // 00D394  bne $d3bc
-    tick(18);
     call(explosion_slot_free, 0xD39A);  // 00D396  bsr $f8b8
-    tick(26);
     // 00D39A  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D3BC;  // 00D3A0  bne $d3bc
-    tick(26);
     wr16(A1 + 0x2, 0);  // 00D3A2  clr.w 2(a1)
     { enemy_destroyed(); return; }  // 00D3A6  bra $cfb0
 L_00D3AA:
-    tick(18);
     call(explosion_slot_free, 0xD3AE);  // 00D3AA  bsr $f8b8
-    tick(26);
     // 00D3AE  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D3BC;  // 00D3B4  bne $d3bc
-    tick(22);
     wr16(A1, 0);  // 00D3B6  clr.w (a1)
     { enemy_destroyed(); return; }  // 00D3B8  bra $cfb0
 L_00D3BC:
-    tick(58);
     wr32(A1, 0x80118011);  // 00D3BC  move.l #$80118011, (a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00D3C2  addi.b #$1, (a2)
     // 00D3C6  cmpi.b #$8, (a2)
     if (rd8(A2) != 0x8) goto L_00D3F2;  // 00D3CA  bne $d3f2
-    tick(118);
     wr8(A2 + 0x5, 0x3);  // 00D3CC  move.b #$3, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00D3D2  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) + 0x4));  // 00D3D8  addi.w #$4, 2(a2)
@@ -8701,7 +6583,6 @@ L_00D3BC:
     wr8(A2 + 0x1, 0x8);  // 00D3E8  move.b #$8, 1(a2)
     goto L_00CF7E;  // 00D3EE  bra $cf7e
 L_00D3F2:
-    tick(98);
     D0 = 0x0;  // 00D3F2  moveq.l #$0, d0
     A0 = v_cell_screen_ptrs;  // 00D3F4  lea.l $191de.l, a0
     A1 = v_gfx_frame_ptrs;  // 00D3FA  lea.l $1a85e.l, a1
@@ -8715,10 +6596,8 @@ L_00D3F2:
     setW(D0, rd16(A3));  // 00D414  move.w (a3), d0
     A1 += D0;  // 00D416  adda.l d0, a1
 L_00D418:
-    tick(26);
     // 00D418  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00D418;  // 00D41E  bne $d418
-    tick(138);
     wr32(A5 + 0x50, rd32(A1));  // 00D420  move.l (a1), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00D424  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00D428  clr.w 66(a5)
@@ -8728,56 +6607,41 @@ L_00D418:
     wr16(A5 + 0x58, 0x1002);  // 00D43E  move.w #$1002, 88(a5)
     goto L_00CF7E;  // 00D444  bra $cf7e
 L_00D448:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D448  move.w #$1, $112da.l
     { enemy_destroyed(); return; }  // 00D450  bra $cfb0
 L_00D454:
-    tick(26);
     // 00D454  cmpi.b #$4, 5(a2)
     if (rd8(A2 + 0x5) == 0x4) goto L_00D46C;  // 00D45A  beq $d46c
-    tick(22);
     // 00D45C  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00D46C;  // 00D460  beq $d46c
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00D462  move.b #$1, 4(a2)
     goto L_00CF7E;  // 00D468  bra $cf7e
 L_00D46C:
-    tick(18);
     // 00D46C  tst.b (a2)
     if (rd8(A2) != 0) goto L_00D488;  // 00D46E  bne $d488
-    tick(22);
     // 00D470  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D488;  // 00D474  beq $d488
-    tick(26);
     // 00D476  cmpi.w #$11, -120(a1)
     if (rd16(A1 - 0x78) == 0x11) goto L_00D488;  // 00D47C  beq $d488
-    tick(30);
     wr16(0x189EC, 0x1);  // 00D47E  move.w #$1, $189ec.l
     goto L_00D48E;  // 00D486  bra $d48e
 L_00D488:
-    tick(20);
     wr16(0x189EC, 0);  // 00D488  clr.w $189ec.l
 L_00D48E:
-    tick(42);
     wr8(A2 + 0x1, 0x4);  // 00D48E  move.b #$4, 1(a2)
     // 00D494  cmpi.w #$8888, 120(a1)
     if (rd16(A1 + 0x78) != 0x8888) goto L_00D4B0;  // 00D49A  bne $d4b0
-    tick(18);
     call(explosion_slot_free, 0xD4A0);  // 00D49C  bsr $f8b8
-    tick(26);
     // 00D4A0  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D4B0;  // 00D4A6  bne $d4b0
-    tick(26);
     wr16(A1 + 0x78, 0);  // 00D4A8  clr.w 120(a1)
     { enemy_destroyed(); return; }  // 00D4AC  bra $cfb0
 L_00D4B0:
-    tick(66);
     wr16(A1, 0x8022);  // 00D4B0  move.w #$8022, (a1)
     wr16(A1 + 0x78, 0x8011);  // 00D4B4  move.w #$8011, 120(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00D4BA  addi.b #$1, (a2)
     // 00D4BE  cmpi.b #$9, (a2)
     if (rd8(A2) != 0x9) goto L_00D4E8;  // 00D4C2  bne $d4e8
-    tick(108);
     wr8(A2 + 0x5, 0x4);  // 00D4C4  move.b #$4, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00D4CA  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) + 0xF0));  // 00D4D0  addi.w #$f0, 2(a2)
@@ -8786,12 +6650,9 @@ L_00D4B0:
     wr8(A2, 0x1);  // 00D4DE  move.b #$1, (a2)
     wr8(A2 + 0x1, 0x7);  // 00D4E2  move.b #$7, 1(a2)
 L_00D4E8:
-    tick(18);
     call(blit_enemy_vertical_down, 0xD4EA);  // 00D4E8  bsr $d4ee
-    tick(10);
     goto L_00CF7E;  // 00D4EA  bra $cf7e
 L_00D564:
-    tick(64);
     D0 = 0x0;  // 00D564  moveq.l #$0, d0
     A1 = v_map;  // 00D566  lea.l $11928.l, a1
     setW(D0, rd16(A2 + 0x2));  // 00D56C  move.w 2(a2), d0
@@ -8799,82 +6660,61 @@ L_00D564:
     A1 += D0;  // 00D572  adda.l d0, a1
     // 00D574  cmpi.w #$ef01, (a1)
     if (rd16(A1) == 0xEF01) goto L_00D580;  // 00D578  beq $d580
-    tick(22);
     // 00D57A  cmpi.w #$eb01, (a1)
     if (rd16(A1) != 0xEB01) goto L_00D586;  // 00D57E  bne $d586
 L_00D580:
-    tick(30);
     wr16(A1, 0);  // 00D580  clr.w (a1)
     call(enemy_destroyed, 0xD586);  // 00D582  bsr $cfb0
 L_00D586:
-    tick(22);
     // 00D586  cmpi.w #$8888, (a1)
     if (rd16(A1) != 0x8888) goto L_00D5AA;  // 00D58A  bne $d5aa
-    tick(38);
     wr16(A1, 0);  // 00D58C  clr.w (a1)
     // 00D58E  cmpi.w #$7777, 2(a1)
     if (rd16(A1 + 0x2) != 0x7777) goto L_00D59A;  // 00D594  bne $d59a
-    tick(16);
     wr16(A1 + 0x2, 0);  // 00D596  clr.w 2(a1)
 L_00D59A:
-    tick(26);
     // 00D59A  cmpi.w #$7777, -2(a1)
     if (rd16(A1 - 0x2) != 0x7777) goto L_00D5A6;  // 00D5A0  bne $d5a6
-    tick(16);
     wr16(A1 - 0x2, 0);  // 00D5A2  clr.w -2(a1)
 L_00D5A6:
-    tick(18);
     call(enemy_destroyed, 0xD5AA);  // 00D5A6  bsr $cfb0
 L_00D5AA:
-    tick(26);
     // 00D5AA  cmpi.b #$a, 6(a2)
     if (rd8(A2 + 0x6) == 0xA) goto L_00D8A6;  // 00D5B0  beq $d8a6
-    tick(22);
     // 00D5B4  tst.b 7(a2)
     if (rd8(A2 + 0x7) == 0) goto L_00D674;  // 00D5B8  beq $d674
 L_00D5BC:
-    tick(26);
     // 00D5BC  cmpi.b #$4, 4(a2)
     if (int8_t(rd8(A2 + 0x4)) < 4) goto L_00D624;  // 00D5C2  blt $d624
 L_00D5C4:
-    tick(26);
     // 00D5C4  cmpi.b #$5, 6(a2)
     if (int8_t(rd8(A2 + 0x6)) >= 5) goto L_00D7F4;  // 00D5CA  bge $d7f4
-    tick(26);
     // 00D5CE  cmpi.b #$1, 6(a2)
     if (rd8(A2 + 0x6) == 0x1) goto L_00D5F6;  // 00D5D4  beq $d5f6
-    tick(26);
     // 00D5D6  cmpi.b #$2, 6(a2)
     if (rd8(A2 + 0x6) == 0x2) goto L_00D602;  // 00D5DC  beq $d602
-    tick(26);
     // 00D5DE  cmpi.b #$3, 6(a2)
     if (rd8(A2 + 0x6) == 0x3) goto L_00D612;  // 00D5E4  beq $d612
-    tick(54);
     wr16(A1 + 0x78, 0);  // 00D5E6  clr.w 120(a1)
     wr8(A2 + 0x1, 0x4);  // 00D5EA  move.b #$4, 1(a2)
     wr8(A2, 0x1);  // 00D5F0  move.b #$1, (a2)
     goto L_00D61C;  // 00D5F4  bra $d61c
 L_00D5F6:
-    tick(42);
     wr16(A1 - 0x2, 0);  // 00D5F6  clr.w -2(a1)
     wr8(A2 + 0x1, 0x2);  // 00D5FA  move.b #$2, 1(a2)
     goto L_00D61C;  // 00D600  bra $d61c
 L_00D602:
-    tick(54);
     wr16(A1 - 0x78, 0);  // 00D602  clr.w -120(a1)
     wr8(A2 + 0x1, 0x1);  // 00D606  move.b #$1, 1(a2)
     wr8(A2, 0x1);  // 00D60C  move.b #$1, (a2)
     goto L_00D61C;  // 00D610  bra $d61c
 L_00D612:
-    tick(32);
     wr16(A1 + 0x2, 0);  // 00D612  clr.w 2(a1)
     wr8(A2 + 0x1, 0x3);  // 00D616  move.b #$3, 1(a2)
 L_00D61C:
-    tick(34);
     wr32(A2 + 0x4, 0);  // 00D61C  clr.l 4(a2)
     goto L_00CF96;  // 00D620  bra $cf96
 L_00D624:
-    tick(74);
     A4 = 0x1180E;  // 00D624  lea.l $1180e.l, a4
     D0 = 0x0;  // 00D62A  moveq.l #$0, d0
     setB(D0, rd8(A2 + 0x7));  // 00D62C  move.b 7(a2), d0
@@ -8884,10 +6724,8 @@ L_00D624:
     setW(D0, rd16(A2 + 0x2));  // 00D63A  move.w 2(a2), d0
     A0 += D0;  // 00D63E  adda.l d0, a0
 L_00D640:
-    tick(26);
     // 00D640  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00D640;  // 00D646  bne $d640
-    tick(154);
     wr32(A5 + 0x50, rd32(A4));  // 00D648  move.l (a4), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00D64C  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00D650  clr.w 66(a5)
@@ -8898,272 +6736,203 @@ L_00D640:
     wr8(A2 + 0x4, (rd8(A2 + 0x4) + 0x1));  // 00D66C  addq.b #$1, 4(a2)
     goto L_00CF7E;  // 00D670  bra $cf7e
 L_00D674:
-    tick(26);
     // 00D674  cmpi.b #$1, 5(a2)
     if (rd8(A2 + 0x5) == 0x1) goto L_00D69C;  // 00D67A  beq $d69c
-    tick(26);
     // 00D67C  cmpi.b #$2, 5(a2)
     if (rd8(A2 + 0x5) == 0x2) goto L_00D6F2;  // 00D682  beq $d6f2
-    tick(26);
     // 00D684  cmpi.b #$3, 5(a2)
     if (rd8(A2 + 0x5) == 0x3) goto L_00D748;  // 00D68A  beq $d748
-    tick(26);
     // 00D68E  cmpi.b #$4, 5(a2)
     if (rd8(A2 + 0x5) == 0x4) goto L_00D79E;  // 00D694  beq $d79e
-    tick(10);
     goto L_00CF7E;  // 00D698  bra $cf7e
 L_00D69C:
-    tick(22);
     // 00D69C  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00D6B8;  // 00D6A0  bne $d6b8
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00D6A2  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x4);  // 00D6A8  move.b #$4, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00D6AE  move.w #$8011, 120(a1)
     goto L_00D5BC;  // 00D6B4  bra $d5bc
 L_00D6B8:
-    tick(22);
     // 00D6B8  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00D6D4;  // 00D6BC  bne $d6d4
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00D6BE  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x2);  // 00D6C4  move.b #$2, 6(a2)
     wr16(A1 - 0x78, 0x8011);  // 00D6CA  move.w #$8011, -120(a1)
     goto L_00D5BC;  // 00D6D0  bra $d5bc
 L_00D6D4:
-    tick(22);
     // 00D6D4  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00D894;  // 00D6D8  bne $d894
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00D6DC  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x5);  // 00D6E2  move.b #$5, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00D6E8  move.w #$8011, 2(a1)
     goto L_00D5BC;  // 00D6EE  bra $d5bc
 L_00D6F2:
-    tick(22);
     // 00D6F2  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00D70E;  // 00D6F6  bne $d70e
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00D6F8  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x1);  // 00D6FE  move.b #$1, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00D704  move.w #$8011, -2(a1)
     goto L_00D5BC;  // 00D70A  bra $d5bc
 L_00D70E:
-    tick(22);
     // 00D70E  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00D72A;  // 00D712  bne $d72a
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00D714  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x3);  // 00D71A  move.b #$3, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00D720  move.w #$8011, 2(a1)
     goto L_00D5BC;  // 00D726  bra $d5bc
 L_00D72A:
-    tick(22);
     // 00D72A  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00D894;  // 00D72E  bne $d894
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00D732  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x6);  // 00D738  move.b #$6, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00D73E  move.w #$8011, 120(a1)
     goto L_00D5BC;  // 00D744  bra $d5bc
 L_00D748:
-    tick(22);
     // 00D748  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00D764;  // 00D74C  bne $d764
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00D74E  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x2);  // 00D754  move.b #$2, 6(a2)
     wr16(A1 - 0x78, 0x8011);  // 00D75A  move.w #$8011, -120(a1)
     goto L_00D5BC;  // 00D760  bra $d5bc
 L_00D764:
-    tick(22);
     // 00D764  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00D780;  // 00D768  bne $d780
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00D76A  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x4);  // 00D770  move.b #$4, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00D776  move.w #$8011, 120(a1)
     goto L_00D5BC;  // 00D77C  bra $d5bc
 L_00D780:
-    tick(22);
     // 00D780  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00D894;  // 00D784  bne $d894
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00D788  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x7);  // 00D78E  move.b #$7, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00D794  move.w #$8011, -2(a1)
     goto L_00D5BC;  // 00D79A  bra $d5bc
 L_00D79E:
-    tick(22);
     // 00D79E  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00D7BA;  // 00D7A2  bne $d7ba
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00D7A4  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x3);  // 00D7AA  move.b #$3, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00D7B0  move.w #$8011, 2(a1)
     goto L_00D5BC;  // 00D7B6  bra $d5bc
 L_00D7BA:
-    tick(22);
     // 00D7BA  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00D7D6;  // 00D7BE  bne $d7d6
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00D7C0  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x1);  // 00D7C6  move.b #$1, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00D7CC  move.w #$8011, -2(a1)
     goto L_00D5BC;  // 00D7D2  bra $d5bc
 L_00D7D6:
-    tick(22);
     // 00D7D6  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00D894;  // 00D7DA  bne $d894
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00D7DE  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x8);  // 00D7E4  move.b #$8, 6(a2)
     wr16(A1 - 0x78, 0x8022);  // 00D7EA  move.w #$8022, -120(a1)
     goto L_00D5BC;  // 00D7F0  bra $d5bc
 L_00D7F4:
-    tick(26);
     // 00D7F4  cmpi.b #$5, 6(a2)
     if (rd8(A2 + 0x6) == 0x5) goto L_00D814;  // 00D7FA  beq $d814
-    tick(26);
     // 00D7FC  cmpi.b #$6, 6(a2)
     if (rd8(A2 + 0x6) == 0x6) goto L_00D834;  // 00D802  beq $d834
-    tick(26);
     // 00D804  cmpi.b #$7, 6(a2)
     if (rd8(A2 + 0x6) == 0x7) goto L_00D854;  // 00D80A  beq $d854
-    tick(26);
     // 00D80C  cmpi.b #$8, 6(a2)
     if (rd8(A2 + 0x6) == 0x8) goto L_00D874;  // 00D812  beq $d874
 L_00D814:
-    tick(26);
     // 00D814  cmpi.b #$7, 7(a2)
     if (rd8(A2 + 0x7) == 0x7) goto L_00D82A;  // 00D81A  beq $d82a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D81C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D822  addq.b #$1, 7(a2)
     goto L_00D624;  // 00D826  bra $d624
 L_00D82A:
-    tick(26);
     wr8(A2 + 0x6, 0x3);  // 00D82A  move.b #$3, 6(a2)
     goto L_00D5C4;  // 00D830  bra $d5c4
 L_00D834:
-    tick(26);
     // 00D834  cmpi.b #$5, 7(a2)
     if (rd8(A2 + 0x7) == 0x5) goto L_00D84A;  // 00D83A  beq $d84a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D83C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D842  addq.b #$1, 7(a2)
     goto L_00D624;  // 00D846  bra $d624
 L_00D84A:
-    tick(26);
     wr8(A2 + 0x6, 0x4);  // 00D84A  move.b #$4, 6(a2)
     goto L_00D5C4;  // 00D850  bra $d5c4
 L_00D854:
-    tick(26);
     // 00D854  cmpi.b #$b, 7(a2)
     if (rd8(A2 + 0x7) == 0xB) goto L_00D86A;  // 00D85A  beq $d86a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D85C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D862  addq.b #$1, 7(a2)
     goto L_00D624;  // 00D866  bra $d624
 L_00D86A:
-    tick(26);
     wr8(A2 + 0x6, 0x1);  // 00D86A  move.b #$1, 6(a2)
     goto L_00D5C4;  // 00D870  bra $d5c4
 L_00D874:
-    tick(26);
     // 00D874  cmpi.b #$9, 7(a2)
     if (rd8(A2 + 0x7) == 0x9) goto L_00D88A;  // 00D87A  beq $d88a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D87C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D882  addq.b #$1, 7(a2)
     goto L_00D624;  // 00D886  bra $d624
 L_00D88A:
-    tick(26);
     wr8(A2 + 0x6, 0x2);  // 00D88A  move.b #$2, 6(a2)
     goto L_00D5C4;  // 00D890  bra $d5c4
 L_00D894:
-    tick(48);
     wr8(A2 + 0x6, 0xA);  // 00D894  move.b #$a, 6(a2)
     wr8(A2 + 0x7, 0x1);  // 00D89A  move.b #$1, 7(a2)
     wr8(A2 + 0x4, 0x1);  // 00D8A0  move.b #$1, 4(a2)
 L_00D8A6:
-    tick(26);
     // 00D8A6  cmpi.b #$6, 4(a2)
     if (int8_t(rd8(A2 + 0x4)) < 6) goto L_00D624;  // 00D8AC  blt $d624
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D8B0  move.b #$1, 4(a2)
     // 00D8B6  cmpi.b #$3, 7(a2)
     if (rd8(A2 + 0x7) == 0x3) goto L_00D8F0;  // 00D8BC  beq $d8f0
-    tick(26);
     // 00D8BE  cmpi.b #$5, 7(a2)
     if (rd8(A2 + 0x7) == 0x5) goto L_00D914;  // 00D8C4  beq $d914
-    tick(26);
     // 00D8C6  cmpi.b #$7, 7(a2)
     if (rd8(A2 + 0x7) == 0x7) goto L_00D938;  // 00D8CC  beq $d938
-    tick(26);
     // 00D8CE  cmpi.b #$8, 7(a2)
     if (rd8(A2 + 0x7) == 0x8) goto L_00D95C;  // 00D8D4  beq $d95c
 L_00D8D8:
-    tick(42);
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D8D8  addq.b #$1, 7(a2)
     // 00D8DC  cmpi.b #$9, 7(a2)
     if (rd8(A2 + 0x7) != 0x9) goto L_00D624;  // 00D8E2  bne $d624
-    tick(26);
     wr8(A2 + 0x7, 0x1);  // 00D8E6  move.b #$1, 7(a2)
     goto L_00D624;  // 00D8EC  bra $d624
 L_00D8F0:
-    tick(26);
     // 00D8F0  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) != 0x3) goto L_00D900;  // 00D8F6  bne $d900
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00D8F8  move.w #$1, $112da.l
 L_00D900:
-    tick(22);
     // 00D900  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00D8D8;  // 00D904  bne $d8d8
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00D906  clr.l 4(a2)
     wr8(A2 + 0x1, 0x2);  // 00D90A  move.b #$2, 1(a2)
     goto L_00CF96;  // 00D910  bra $cf96
 L_00D914:
-    tick(26);
     // 00D914  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) != 0x3) goto L_00D924;  // 00D91A  bne $d924
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00D91C  move.w #$1, $112da.l
 L_00D924:
-    tick(22);
     // 00D924  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00D8D8;  // 00D928  bne $d8d8
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00D92A  clr.l 4(a2)
     wr8(A2 + 0x1, 0x4);  // 00D92E  move.b #$4, 1(a2)
     goto L_00CF96;  // 00D934  bra $cf96
 L_00D938:
-    tick(26);
     // 00D938  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) != 0x3) goto L_00D948;  // 00D93E  bne $d948
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00D940  move.w #$1, $112da.l
 L_00D948:
-    tick(22);
     // 00D948  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00D8D8;  // 00D94C  bne $d8d8
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00D94E  clr.l 4(a2)
     wr8(A2 + 0x1, 0x3);  // 00D952  move.b #$3, 1(a2)
     goto L_00CF96;  // 00D958  bra $cf96
 L_00D95C:
-    tick(26);
     // 00D95C  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) != 0x3) goto L_00D96C;  // 00D962  bne $d96c
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00D964  move.w #$1, $112da.l
 L_00D96C:
-    tick(22);
     // 00D96C  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00D8D8;  // 00D970  bne $d8d8
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00D974  clr.l 4(a2)
     wr8(A2 + 0x1, 0x1);  // 00D978  move.b #$1, 1(a2)
     goto L_00CF96;  // 00D97E  bra $cf96
@@ -9172,20 +6941,15 @@ L_00D96C:
 void enemy_destroyed() {
     goto L_00CFB0;
 L_00CF7E:
-    tick(12);
     A6 += 0x8;  // 00CF7E  addq.l #$8, a6
     A2 = A6;  // 00CF80  movea.l a6, a2
-    tick(22);
     // 00CF82  tst.l (a2)
     if (rd32(A2) == 0) goto L_00D034;  // 00CF84  beq $d034
-    tick(22);
     // 00CF88  cmpi.w #$ffff, (a2)
     if (rd16(A2) == 0xFFFF) goto L_00CF7E;  // 00CF8C  beq $cf7e
-    tick(22);
     // 00CF8E  tst.b 4(a2)
     if (rd8(A2 + 0x4) != 0) goto L_00D564;  // 00CF92  bne $d564
 L_00CF96:
-    tick(72);
     A0 = v_cell_screen_ptrs;  // 00CF96  lea.l $191de.l, a0
     A1 = v_map;  // 00CF9C  lea.l $11928.l, a1
     setW(D0, rd16(A2 + 0x2));  // 00CFA2  move.w 2(a2), d0
@@ -9194,7 +6958,6 @@ L_00CF96:
     // 00CFAA  cmpi.w #$8888, (a1)
     if (rd16(A1) != 0x8888) goto L_00CFCC;  // 00CFAE  bne $cfcc
 L_00CFB0:
-    tick(80);
     wr16(A2, 0xFFFF);  // 00CFB0  move.w #$ffff, (a2)
     A0 = A1;  // 00CFB4  movea.l a1, a0
     D0 = 0x0;  // 00CFB6  moveq.l #$0, d0
@@ -9203,202 +6966,138 @@ L_00CFB0:
     A3 += D0;  // 00CFC2  adda.l d0, a3
     A1 = rd32(A3);  // 00CFC4  movea.l (a3), a1
     call(start_explosion, 0xCFCA);  // 00CFC6  bsr $f8e6
-    tick(10);
     goto L_00CF7E;  // 00CFCA  bra $cf7e
 L_00CFCC:
-    tick(22);
     // 00CFCC  cmpi.w #$3, (a1)
     if (rd16(A1) != 0x3) goto L_00CFDC;  // 00CFD0  bne $cfdc
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00CFD2  move.w #$1, $112da.l
     goto L_00CFB0;  // 00CFDA  bra $cfb0
 L_00CFDC:
-    tick(22);
     // 00CFDC  tst.b 1(a2)
     if (rd8(A2 + 0x1) == 0) goto L_00D036;  // 00CFE0  beq $d036
-    tick(26);
     // 00CFE2  cmpi.b #$5, 1(a2)
     if (rd8(A2 + 0x1) == 0x5) goto L_00D036;  // 00CFE8  beq $d036
-    tick(26);
     // 00CFEA  cmpi.b #$6, 1(a2)
     if (rd8(A2 + 0x1) == 0x6) goto L_00D082;  // 00CFF0  beq $d082
-    tick(26);
     // 00CFF4  cmpi.b #$7, 1(a2)
     if (rd8(A2 + 0x1) == 0x7) goto L_00D0CE;  // 00CFFA  beq $d0ce
-    tick(26);
     // 00CFFE  cmpi.b #$8, 1(a2)
     if (rd8(A2 + 0x1) == 0x8) goto L_00D116;  // 00D004  beq $d116
-    tick(26);
     // 00D008  cmpi.b #$1, 1(a2)
     if (rd8(A2 + 0x1) == 0x1) goto L_00D258;  // 00D00E  beq $d258
-    tick(26);
     // 00D012  cmpi.b #$2, 1(a2)
     if (rd8(A2 + 0x1) == 0x2) goto L_00D16A;  // 00D018  beq $d16a
-    tick(26);
     // 00D01C  cmpi.b #$3, 1(a2)
     if (rd8(A2 + 0x1) == 0x3) goto L_00D36A;  // 00D022  beq $d36a
-    tick(26);
     // 00D026  cmpi.b #$4, 1(a2)
     if (rd8(A2 + 0x1) == 0x4) goto L_00D454;  // 00D02C  beq $d454
-    tick(10);
     goto L_00CF7E;  // 00D030  bra $cf7e
 L_00D034:
-    tick(16);
     return;  // 00D034  rts 
 L_00D036:
-    tick(22);
     // 00D036  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00D16A;  // 00D03A  beq $d16a
-    tick(26);
     // 00D03E  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00D15E;  // 00D044  beq $d15e
-    tick(22);
     // 00D048  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D258;  // 00D04C  beq $d258
-    tick(26);
     // 00D050  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00D24C;  // 00D056  beq $d24c
-    tick(22);
     // 00D05A  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00D36A;  // 00D05E  beq $d36a
-    tick(26);
     // 00D062  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00D35E;  // 00D068  beq $d35e
-    tick(22);
     // 00D06C  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D454;  // 00D070  beq $d454
-    tick(26);
     // 00D074  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00D448;  // 00D07A  beq $d448
-    tick(10);
     goto L_00D894;  // 00D07E  bra $d894
 L_00D082:
-    tick(22);
     // 00D082  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D454;  // 00D086  beq $d454
-    tick(26);
     // 00D08A  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00D448;  // 00D090  beq $d448
-    tick(22);
     // 00D094  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00D16A;  // 00D098  beq $d16a
-    tick(26);
     // 00D09C  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00D15E;  // 00D0A2  beq $d15e
-    tick(22);
     // 00D0A6  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D258;  // 00D0AA  beq $d258
-    tick(26);
     // 00D0AE  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00D24C;  // 00D0B4  beq $d24c
-    tick(22);
     // 00D0B8  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00D36A;  // 00D0BC  beq $d36a
-    tick(26);
     // 00D0C0  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00D35E;  // 00D0C6  beq $d35e
-    tick(10);
     goto L_00D894;  // 00D0CA  bra $d894
 L_00D0CE:
-    tick(22);
     // 00D0CE  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00D36A;  // 00D0D2  beq $d36a
-    tick(26);
     // 00D0D6  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00D35E;  // 00D0DC  beq $d35e
-    tick(22);
     // 00D0E0  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D454;  // 00D0E4  beq $d454
-    tick(26);
     // 00D0E8  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00D448;  // 00D0EE  beq $d448
-    tick(22);
     // 00D0F2  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00D16A;  // 00D0F6  beq $d16a
-    tick(26);
     // 00D0F8  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00D15E;  // 00D0FE  beq $d15e
-    tick(22);
     // 00D100  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D258;  // 00D104  beq $d258
-    tick(26);
     // 00D108  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00D24C;  // 00D10E  beq $d24c
-    tick(10);
     goto L_00D894;  // 00D112  bra $d894
 L_00D116:
-    tick(22);
     // 00D116  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D258;  // 00D11A  beq $d258
-    tick(26);
     // 00D11E  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00D24C;  // 00D124  beq $d24c
-    tick(22);
     // 00D128  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00D36A;  // 00D12C  beq $d36a
-    tick(26);
     // 00D130  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00D35E;  // 00D136  beq $d35e
-    tick(22);
     // 00D13A  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D454;  // 00D13E  beq $d454
-    tick(26);
     // 00D142  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00D448;  // 00D148  beq $d448
-    tick(22);
     // 00D14C  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00D16A;  // 00D150  beq $d16a
-    tick(26);
     // 00D152  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00D15E;  // 00D158  beq $d15e
-    tick(10);
     goto L_00D894;  // 00D15A  bra $d894
 L_00D15E:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D15E  move.w #$1, $112da.l
     goto L_00CFB0;  // 00D166  bra $cfb0
 L_00D16A:
-    tick(42);
     wr8(A2 + 0x1, 0x2);  // 00D16A  move.b #$2, 1(a2)
     // 00D170  cmpi.b #$1, 5(a2)
     if (rd8(A2 + 0x5) == 0x1) goto L_00D188;  // 00D176  beq $d188
-    tick(22);
     // 00D178  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00D188;  // 00D17C  beq $d188
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00D17E  move.b #$1, 4(a2)
     goto L_00CF7E;  // 00D184  bra $cf7e
 L_00D188:
-    tick(22);
     // 00D188  cmpi.w #$8888, (a1)
     if (rd16(A1) == 0x8888) goto L_00D1AA;  // 00D18C  beq $d1aa
-    tick(26);
     // 00D18E  cmpi.w #$8888, -2(a1)
     if (rd16(A1 - 0x2) != 0x8888) goto L_00D1BC;  // 00D194  bne $d1bc
-    tick(18);
     call(explosion_slot_free, 0xD19A);  // 00D196  bsr $f8b8
-    tick(26);
     // 00D19A  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D1BC;  // 00D1A0  bne $d1bc
-    tick(26);
     wr16(A1 - 0x2, 0);  // 00D1A2  clr.w -2(a1)
     goto L_00CFB0;  // 00D1A6  bra $cfb0
 L_00D1AA:
-    tick(18);
     call(explosion_slot_free, 0xD1AE);  // 00D1AA  bsr $f8b8
-    tick(26);
     // 00D1AE  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D1BC;  // 00D1B4  bne $d1bc
-    tick(22);
     wr16(A1, 0);  // 00D1B6  clr.w (a1)
     goto L_00CFB0;  // 00D1B8  bra $cfb0
 L_00D1BC:
-    tick(62);
     wr32(A1 - 0x2, 0x80118011);  // 00D1BC  move.l #$80118011, -2(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00D1C4  addi.b #$1, (a2)
     // 00D1C8  cmpi.b #$8, (a2)
     if (rd8(A2) != 0x8) goto L_00D1F4;  // 00D1CC  bne $d1f4
-    tick(118);
     wr8(A2 + 0x5, 0x1);  // 00D1CE  move.b #$1, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00D1D4  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) - 0x4));  // 00D1DA  subi.w #$4, 2(a2)
@@ -9408,7 +7107,6 @@ L_00D1BC:
     wr8(A2 + 0x1, 0x6);  // 00D1EA  move.b #$6, 1(a2)
     goto L_00CF7E;  // 00D1F0  bra $cf7e
 L_00D1F4:
-    tick(106);
     D0 = 0x0;  // 00D1F4  moveq.l #$0, d0
     A0 = v_cell_screen_ptrs;  // 00D1F6  lea.l $191de.l, a0
     A1 = v_gfx_frame_ptrs;  // 00D1FC  lea.l $1a85e.l, a1
@@ -9423,10 +7121,8 @@ L_00D1F4:
     setW(D0, rd16(A3));  // 00D218  move.w (a3), d0
     A1 += D0;  // 00D21A  adda.l d0, a1
 L_00D21C:
-    tick(26);
     // 00D21C  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00D21C;  // 00D222  bne $d21c
-    tick(138);
     wr32(A5 + 0x50, rd32(A1));  // 00D224  move.l (a1), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00D228  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00D22C  clr.w 66(a5)
@@ -9436,56 +7132,41 @@ L_00D21C:
     wr16(A5 + 0x58, 0x1002);  // 00D242  move.w #$1002, 88(a5)
     goto L_00CF7E;  // 00D248  bra $cf7e
 L_00D24C:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D24C  move.w #$1, $112da.l
     goto L_00CFB0;  // 00D254  bra $cfb0
 L_00D258:
-    tick(26);
     // 00D258  cmpi.b #$2, 5(a2)
     if (rd8(A2 + 0x5) == 0x2) goto L_00D270;  // 00D25E  beq $d270
-    tick(22);
     // 00D260  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00D270;  // 00D264  beq $d270
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00D266  move.b #$1, 4(a2)
     goto L_00CF7E;  // 00D26C  bra $cf7e
 L_00D270:
-    tick(18);
     // 00D270  tst.b (a2)
     if (rd8(A2) != 0) goto L_00D28C;  // 00D272  bne $d28c
-    tick(22);
     // 00D274  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00D28C;  // 00D278  beq $d28c
-    tick(26);
     // 00D27A  cmpi.w #$11, 120(a1)
     if (rd16(A1 + 0x78) == 0x11) goto L_00D28C;  // 00D280  beq $d28c
-    tick(30);
     wr16(0x189EA, 0x1);  // 00D282  move.w #$1, $189ea.l
     goto L_00D292;  // 00D28A  bra $d292
 L_00D28C:
-    tick(20);
     wr16(0x189EA, 0);  // 00D28C  clr.w $189ea.l
 L_00D292:
-    tick(42);
     wr8(A2 + 0x1, 0x1);  // 00D292  move.b #$1, 1(a2)
     // 00D298  cmpi.w #$8888, -120(a1)
     if (rd16(A1 - 0x78) != 0x8888) goto L_00D2B4;  // 00D29E  bne $d2b4
-    tick(18);
     call(explosion_slot_free, 0xD2A4);  // 00D2A0  bsr $f8b8
-    tick(26);
     // 00D2A4  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D2B4;  // 00D2AA  bne $d2b4
-    tick(26);
     wr16(A1 - 0x78, 0);  // 00D2AC  clr.w -120(a1)
     goto L_00CFB0;  // 00D2B0  bra $cfb0
 L_00D2B4:
-    tick(66);
     wr16(A1, 0x8011);  // 00D2B4  move.w #$8011, (a1)
     wr16(A1 - 0x78, 0x8022);  // 00D2B8  move.w #$8022, -120(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00D2BE  addi.b #$1, (a2)
     // 00D2C2  cmpi.b #$9, (a2)
     if (rd8(A2) != 0x9) goto L_00D2EC;  // 00D2C6  bne $d2ec
-    tick(108);
     wr8(A2 + 0x5, 0x2);  // 00D2C8  move.b #$2, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00D2CE  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) - 0xF0));  // 00D2D4  subi.w #$f0, 2(a2)
@@ -9494,56 +7175,40 @@ L_00D2B4:
     wr8(A2, 0x1);  // 00D2E2  move.b #$1, (a2)
     wr8(A2 + 0x1, 0x5);  // 00D2E6  move.b #$5, 1(a2)
 L_00D2EC:
-    tick(18);
     call(blit_enemy_vertical, 0xD2EE);  // 00D2EC  bsr $d2f2
-    tick(10);
     goto L_00CF7E;  // 00D2EE  bra $cf7e
 L_00D35E:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D35E  move.w #$1, $112da.l
     goto L_00CFB0;  // 00D366  bra $cfb0
 L_00D36A:
-    tick(42);
     wr8(A2 + 0x1, 0x3);  // 00D36A  move.b #$3, 1(a2)
     // 00D370  cmpi.b #$3, 5(a2)
     if (rd8(A2 + 0x5) == 0x3) goto L_00D388;  // 00D376  beq $d388
-    tick(22);
     // 00D378  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00D388;  // 00D37C  beq $d388
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00D37E  move.b #$1, 4(a2)
     goto L_00CF7E;  // 00D384  bra $cf7e
 L_00D388:
-    tick(22);
     // 00D388  cmpi.w #$8888, (a1)
     if (rd16(A1) == 0x8888) goto L_00D3AA;  // 00D38C  beq $d3aa
-    tick(26);
     // 00D38E  cmpi.w #$8888, 2(a1)
     if (rd16(A1 + 0x2) != 0x8888) goto L_00D3BC;  // 00D394  bne $d3bc
-    tick(18);
     call(explosion_slot_free, 0xD39A);  // 00D396  bsr $f8b8
-    tick(26);
     // 00D39A  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D3BC;  // 00D3A0  bne $d3bc
-    tick(26);
     wr16(A1 + 0x2, 0);  // 00D3A2  clr.w 2(a1)
     goto L_00CFB0;  // 00D3A6  bra $cfb0
 L_00D3AA:
-    tick(18);
     call(explosion_slot_free, 0xD3AE);  // 00D3AA  bsr $f8b8
-    tick(26);
     // 00D3AE  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D3BC;  // 00D3B4  bne $d3bc
-    tick(22);
     wr16(A1, 0);  // 00D3B6  clr.w (a1)
     goto L_00CFB0;  // 00D3B8  bra $cfb0
 L_00D3BC:
-    tick(58);
     wr32(A1, 0x80118011);  // 00D3BC  move.l #$80118011, (a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00D3C2  addi.b #$1, (a2)
     // 00D3C6  cmpi.b #$8, (a2)
     if (rd8(A2) != 0x8) goto L_00D3F2;  // 00D3CA  bne $d3f2
-    tick(118);
     wr8(A2 + 0x5, 0x3);  // 00D3CC  move.b #$3, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00D3D2  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) + 0x4));  // 00D3D8  addi.w #$4, 2(a2)
@@ -9553,7 +7218,6 @@ L_00D3BC:
     wr8(A2 + 0x1, 0x8);  // 00D3E8  move.b #$8, 1(a2)
     goto L_00CF7E;  // 00D3EE  bra $cf7e
 L_00D3F2:
-    tick(98);
     D0 = 0x0;  // 00D3F2  moveq.l #$0, d0
     A0 = v_cell_screen_ptrs;  // 00D3F4  lea.l $191de.l, a0
     A1 = v_gfx_frame_ptrs;  // 00D3FA  lea.l $1a85e.l, a1
@@ -9567,10 +7231,8 @@ L_00D3F2:
     setW(D0, rd16(A3));  // 00D414  move.w (a3), d0
     A1 += D0;  // 00D416  adda.l d0, a1
 L_00D418:
-    tick(26);
     // 00D418  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00D418;  // 00D41E  bne $d418
-    tick(138);
     wr32(A5 + 0x50, rd32(A1));  // 00D420  move.l (a1), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00D424  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00D428  clr.w 66(a5)
@@ -9580,56 +7242,41 @@ L_00D418:
     wr16(A5 + 0x58, 0x1002);  // 00D43E  move.w #$1002, 88(a5)
     goto L_00CF7E;  // 00D444  bra $cf7e
 L_00D448:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D448  move.w #$1, $112da.l
     goto L_00CFB0;  // 00D450  bra $cfb0
 L_00D454:
-    tick(26);
     // 00D454  cmpi.b #$4, 5(a2)
     if (rd8(A2 + 0x5) == 0x4) goto L_00D46C;  // 00D45A  beq $d46c
-    tick(22);
     // 00D45C  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00D46C;  // 00D460  beq $d46c
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00D462  move.b #$1, 4(a2)
     goto L_00CF7E;  // 00D468  bra $cf7e
 L_00D46C:
-    tick(18);
     // 00D46C  tst.b (a2)
     if (rd8(A2) != 0) goto L_00D488;  // 00D46E  bne $d488
-    tick(22);
     // 00D470  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00D488;  // 00D474  beq $d488
-    tick(26);
     // 00D476  cmpi.w #$11, -120(a1)
     if (rd16(A1 - 0x78) == 0x11) goto L_00D488;  // 00D47C  beq $d488
-    tick(30);
     wr16(0x189EC, 0x1);  // 00D47E  move.w #$1, $189ec.l
     goto L_00D48E;  // 00D486  bra $d48e
 L_00D488:
-    tick(20);
     wr16(0x189EC, 0);  // 00D488  clr.w $189ec.l
 L_00D48E:
-    tick(42);
     wr8(A2 + 0x1, 0x4);  // 00D48E  move.b #$4, 1(a2)
     // 00D494  cmpi.w #$8888, 120(a1)
     if (rd16(A1 + 0x78) != 0x8888) goto L_00D4B0;  // 00D49A  bne $d4b0
-    tick(18);
     call(explosion_slot_free, 0xD4A0);  // 00D49C  bsr $f8b8
-    tick(26);
     // 00D4A0  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00D4B0;  // 00D4A6  bne $d4b0
-    tick(26);
     wr16(A1 + 0x78, 0);  // 00D4A8  clr.w 120(a1)
     goto L_00CFB0;  // 00D4AC  bra $cfb0
 L_00D4B0:
-    tick(66);
     wr16(A1, 0x8022);  // 00D4B0  move.w #$8022, (a1)
     wr16(A1 + 0x78, 0x8011);  // 00D4B4  move.w #$8011, 120(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00D4BA  addi.b #$1, (a2)
     // 00D4BE  cmpi.b #$9, (a2)
     if (rd8(A2) != 0x9) goto L_00D4E8;  // 00D4C2  bne $d4e8
-    tick(108);
     wr8(A2 + 0x5, 0x4);  // 00D4C4  move.b #$4, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00D4CA  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) + 0xF0));  // 00D4D0  addi.w #$f0, 2(a2)
@@ -9638,12 +7285,9 @@ L_00D4B0:
     wr8(A2, 0x1);  // 00D4DE  move.b #$1, (a2)
     wr8(A2 + 0x1, 0x7);  // 00D4E2  move.b #$7, 1(a2)
 L_00D4E8:
-    tick(18);
     call(blit_enemy_vertical_down, 0xD4EA);  // 00D4E8  bsr $d4ee
-    tick(10);
     goto L_00CF7E;  // 00D4EA  bra $cf7e
 L_00D564:
-    tick(64);
     D0 = 0x0;  // 00D564  moveq.l #$0, d0
     A1 = v_map;  // 00D566  lea.l $11928.l, a1
     setW(D0, rd16(A2 + 0x2));  // 00D56C  move.w 2(a2), d0
@@ -9651,82 +7295,61 @@ L_00D564:
     A1 += D0;  // 00D572  adda.l d0, a1
     // 00D574  cmpi.w #$ef01, (a1)
     if (rd16(A1) == 0xEF01) goto L_00D580;  // 00D578  beq $d580
-    tick(22);
     // 00D57A  cmpi.w #$eb01, (a1)
     if (rd16(A1) != 0xEB01) goto L_00D586;  // 00D57E  bne $d586
 L_00D580:
-    tick(30);
     wr16(A1, 0);  // 00D580  clr.w (a1)
     call(enemy_destroyed, 0xD586);  // 00D582  bsr $cfb0
 L_00D586:
-    tick(22);
     // 00D586  cmpi.w #$8888, (a1)
     if (rd16(A1) != 0x8888) goto L_00D5AA;  // 00D58A  bne $d5aa
-    tick(38);
     wr16(A1, 0);  // 00D58C  clr.w (a1)
     // 00D58E  cmpi.w #$7777, 2(a1)
     if (rd16(A1 + 0x2) != 0x7777) goto L_00D59A;  // 00D594  bne $d59a
-    tick(16);
     wr16(A1 + 0x2, 0);  // 00D596  clr.w 2(a1)
 L_00D59A:
-    tick(26);
     // 00D59A  cmpi.w #$7777, -2(a1)
     if (rd16(A1 - 0x2) != 0x7777) goto L_00D5A6;  // 00D5A0  bne $d5a6
-    tick(16);
     wr16(A1 - 0x2, 0);  // 00D5A2  clr.w -2(a1)
 L_00D5A6:
-    tick(18);
     call(enemy_destroyed, 0xD5AA);  // 00D5A6  bsr $cfb0
 L_00D5AA:
-    tick(26);
     // 00D5AA  cmpi.b #$a, 6(a2)
     if (rd8(A2 + 0x6) == 0xA) goto L_00D8A6;  // 00D5B0  beq $d8a6
-    tick(22);
     // 00D5B4  tst.b 7(a2)
     if (rd8(A2 + 0x7) == 0) goto L_00D674;  // 00D5B8  beq $d674
 L_00D5BC:
-    tick(26);
     // 00D5BC  cmpi.b #$4, 4(a2)
     if (int8_t(rd8(A2 + 0x4)) < 4) goto L_00D624;  // 00D5C2  blt $d624
 L_00D5C4:
-    tick(26);
     // 00D5C4  cmpi.b #$5, 6(a2)
     if (int8_t(rd8(A2 + 0x6)) >= 5) goto L_00D7F4;  // 00D5CA  bge $d7f4
-    tick(26);
     // 00D5CE  cmpi.b #$1, 6(a2)
     if (rd8(A2 + 0x6) == 0x1) goto L_00D5F6;  // 00D5D4  beq $d5f6
-    tick(26);
     // 00D5D6  cmpi.b #$2, 6(a2)
     if (rd8(A2 + 0x6) == 0x2) goto L_00D602;  // 00D5DC  beq $d602
-    tick(26);
     // 00D5DE  cmpi.b #$3, 6(a2)
     if (rd8(A2 + 0x6) == 0x3) goto L_00D612;  // 00D5E4  beq $d612
-    tick(54);
     wr16(A1 + 0x78, 0);  // 00D5E6  clr.w 120(a1)
     wr8(A2 + 0x1, 0x4);  // 00D5EA  move.b #$4, 1(a2)
     wr8(A2, 0x1);  // 00D5F0  move.b #$1, (a2)
     goto L_00D61C;  // 00D5F4  bra $d61c
 L_00D5F6:
-    tick(42);
     wr16(A1 - 0x2, 0);  // 00D5F6  clr.w -2(a1)
     wr8(A2 + 0x1, 0x2);  // 00D5FA  move.b #$2, 1(a2)
     goto L_00D61C;  // 00D600  bra $d61c
 L_00D602:
-    tick(54);
     wr16(A1 - 0x78, 0);  // 00D602  clr.w -120(a1)
     wr8(A2 + 0x1, 0x1);  // 00D606  move.b #$1, 1(a2)
     wr8(A2, 0x1);  // 00D60C  move.b #$1, (a2)
     goto L_00D61C;  // 00D610  bra $d61c
 L_00D612:
-    tick(32);
     wr16(A1 + 0x2, 0);  // 00D612  clr.w 2(a1)
     wr8(A2 + 0x1, 0x3);  // 00D616  move.b #$3, 1(a2)
 L_00D61C:
-    tick(34);
     wr32(A2 + 0x4, 0);  // 00D61C  clr.l 4(a2)
     goto L_00CF96;  // 00D620  bra $cf96
 L_00D624:
-    tick(74);
     A4 = 0x1180E;  // 00D624  lea.l $1180e.l, a4
     D0 = 0x0;  // 00D62A  moveq.l #$0, d0
     setB(D0, rd8(A2 + 0x7));  // 00D62C  move.b 7(a2), d0
@@ -9736,10 +7359,8 @@ L_00D624:
     setW(D0, rd16(A2 + 0x2));  // 00D63A  move.w 2(a2), d0
     A0 += D0;  // 00D63E  adda.l d0, a0
 L_00D640:
-    tick(26);
     // 00D640  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00D640;  // 00D646  bne $d640
-    tick(154);
     wr32(A5 + 0x50, rd32(A4));  // 00D648  move.l (a4), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00D64C  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00D650  clr.w 66(a5)
@@ -9750,279 +7371,209 @@ L_00D640:
     wr8(A2 + 0x4, (rd8(A2 + 0x4) + 0x1));  // 00D66C  addq.b #$1, 4(a2)
     goto L_00CF7E;  // 00D670  bra $cf7e
 L_00D674:
-    tick(26);
     // 00D674  cmpi.b #$1, 5(a2)
     if (rd8(A2 + 0x5) == 0x1) goto L_00D69C;  // 00D67A  beq $d69c
-    tick(26);
     // 00D67C  cmpi.b #$2, 5(a2)
     if (rd8(A2 + 0x5) == 0x2) goto L_00D6F2;  // 00D682  beq $d6f2
-    tick(26);
     // 00D684  cmpi.b #$3, 5(a2)
     if (rd8(A2 + 0x5) == 0x3) goto L_00D748;  // 00D68A  beq $d748
-    tick(26);
     // 00D68E  cmpi.b #$4, 5(a2)
     if (rd8(A2 + 0x5) == 0x4) goto L_00D79E;  // 00D694  beq $d79e
-    tick(10);
     goto L_00CF7E;  // 00D698  bra $cf7e
 L_00D69C:
-    tick(22);
     // 00D69C  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00D6B8;  // 00D6A0  bne $d6b8
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00D6A2  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x4);  // 00D6A8  move.b #$4, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00D6AE  move.w #$8011, 120(a1)
     goto L_00D5BC;  // 00D6B4  bra $d5bc
 L_00D6B8:
-    tick(22);
     // 00D6B8  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00D6D4;  // 00D6BC  bne $d6d4
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00D6BE  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x2);  // 00D6C4  move.b #$2, 6(a2)
     wr16(A1 - 0x78, 0x8011);  // 00D6CA  move.w #$8011, -120(a1)
     goto L_00D5BC;  // 00D6D0  bra $d5bc
 L_00D6D4:
-    tick(22);
     // 00D6D4  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00D894;  // 00D6D8  bne $d894
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00D6DC  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x5);  // 00D6E2  move.b #$5, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00D6E8  move.w #$8011, 2(a1)
     goto L_00D5BC;  // 00D6EE  bra $d5bc
 L_00D6F2:
-    tick(22);
     // 00D6F2  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00D70E;  // 00D6F6  bne $d70e
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00D6F8  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x1);  // 00D6FE  move.b #$1, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00D704  move.w #$8011, -2(a1)
     goto L_00D5BC;  // 00D70A  bra $d5bc
 L_00D70E:
-    tick(22);
     // 00D70E  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00D72A;  // 00D712  bne $d72a
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00D714  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x3);  // 00D71A  move.b #$3, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00D720  move.w #$8011, 2(a1)
     goto L_00D5BC;  // 00D726  bra $d5bc
 L_00D72A:
-    tick(22);
     // 00D72A  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00D894;  // 00D72E  bne $d894
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00D732  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x6);  // 00D738  move.b #$6, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00D73E  move.w #$8011, 120(a1)
     goto L_00D5BC;  // 00D744  bra $d5bc
 L_00D748:
-    tick(22);
     // 00D748  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00D764;  // 00D74C  bne $d764
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00D74E  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x2);  // 00D754  move.b #$2, 6(a2)
     wr16(A1 - 0x78, 0x8011);  // 00D75A  move.w #$8011, -120(a1)
     goto L_00D5BC;  // 00D760  bra $d5bc
 L_00D764:
-    tick(22);
     // 00D764  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00D780;  // 00D768  bne $d780
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00D76A  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x4);  // 00D770  move.b #$4, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00D776  move.w #$8011, 120(a1)
     goto L_00D5BC;  // 00D77C  bra $d5bc
 L_00D780:
-    tick(22);
     // 00D780  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00D894;  // 00D784  bne $d894
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00D788  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x7);  // 00D78E  move.b #$7, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00D794  move.w #$8011, -2(a1)
     goto L_00D5BC;  // 00D79A  bra $d5bc
 L_00D79E:
-    tick(22);
     // 00D79E  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00D7BA;  // 00D7A2  bne $d7ba
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00D7A4  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x3);  // 00D7AA  move.b #$3, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00D7B0  move.w #$8011, 2(a1)
     goto L_00D5BC;  // 00D7B6  bra $d5bc
 L_00D7BA:
-    tick(22);
     // 00D7BA  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00D7D6;  // 00D7BE  bne $d7d6
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00D7C0  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x1);  // 00D7C6  move.b #$1, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00D7CC  move.w #$8011, -2(a1)
     goto L_00D5BC;  // 00D7D2  bra $d5bc
 L_00D7D6:
-    tick(22);
     // 00D7D6  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00D894;  // 00D7DA  bne $d894
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00D7DE  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x8);  // 00D7E4  move.b #$8, 6(a2)
     wr16(A1 - 0x78, 0x8022);  // 00D7EA  move.w #$8022, -120(a1)
     goto L_00D5BC;  // 00D7F0  bra $d5bc
 L_00D7F4:
-    tick(26);
     // 00D7F4  cmpi.b #$5, 6(a2)
     if (rd8(A2 + 0x6) == 0x5) goto L_00D814;  // 00D7FA  beq $d814
-    tick(26);
     // 00D7FC  cmpi.b #$6, 6(a2)
     if (rd8(A2 + 0x6) == 0x6) goto L_00D834;  // 00D802  beq $d834
-    tick(26);
     // 00D804  cmpi.b #$7, 6(a2)
     if (rd8(A2 + 0x6) == 0x7) goto L_00D854;  // 00D80A  beq $d854
-    tick(26);
     // 00D80C  cmpi.b #$8, 6(a2)
     if (rd8(A2 + 0x6) == 0x8) goto L_00D874;  // 00D812  beq $d874
 L_00D814:
-    tick(26);
     // 00D814  cmpi.b #$7, 7(a2)
     if (rd8(A2 + 0x7) == 0x7) goto L_00D82A;  // 00D81A  beq $d82a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D81C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D822  addq.b #$1, 7(a2)
     goto L_00D624;  // 00D826  bra $d624
 L_00D82A:
-    tick(26);
     wr8(A2 + 0x6, 0x3);  // 00D82A  move.b #$3, 6(a2)
     goto L_00D5C4;  // 00D830  bra $d5c4
 L_00D834:
-    tick(26);
     // 00D834  cmpi.b #$5, 7(a2)
     if (rd8(A2 + 0x7) == 0x5) goto L_00D84A;  // 00D83A  beq $d84a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D83C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D842  addq.b #$1, 7(a2)
     goto L_00D624;  // 00D846  bra $d624
 L_00D84A:
-    tick(26);
     wr8(A2 + 0x6, 0x4);  // 00D84A  move.b #$4, 6(a2)
     goto L_00D5C4;  // 00D850  bra $d5c4
 L_00D854:
-    tick(26);
     // 00D854  cmpi.b #$b, 7(a2)
     if (rd8(A2 + 0x7) == 0xB) goto L_00D86A;  // 00D85A  beq $d86a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D85C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D862  addq.b #$1, 7(a2)
     goto L_00D624;  // 00D866  bra $d624
 L_00D86A:
-    tick(26);
     wr8(A2 + 0x6, 0x1);  // 00D86A  move.b #$1, 6(a2)
     goto L_00D5C4;  // 00D870  bra $d5c4
 L_00D874:
-    tick(26);
     // 00D874  cmpi.b #$9, 7(a2)
     if (rd8(A2 + 0x7) == 0x9) goto L_00D88A;  // 00D87A  beq $d88a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D87C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D882  addq.b #$1, 7(a2)
     goto L_00D624;  // 00D886  bra $d624
 L_00D88A:
-    tick(26);
     wr8(A2 + 0x6, 0x2);  // 00D88A  move.b #$2, 6(a2)
     goto L_00D5C4;  // 00D890  bra $d5c4
 L_00D894:
-    tick(48);
     wr8(A2 + 0x6, 0xA);  // 00D894  move.b #$a, 6(a2)
     wr8(A2 + 0x7, 0x1);  // 00D89A  move.b #$1, 7(a2)
     wr8(A2 + 0x4, 0x1);  // 00D8A0  move.b #$1, 4(a2)
 L_00D8A6:
-    tick(26);
     // 00D8A6  cmpi.b #$6, 4(a2)
     if (int8_t(rd8(A2 + 0x4)) < 6) goto L_00D624;  // 00D8AC  blt $d624
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00D8B0  move.b #$1, 4(a2)
     // 00D8B6  cmpi.b #$3, 7(a2)
     if (rd8(A2 + 0x7) == 0x3) goto L_00D8F0;  // 00D8BC  beq $d8f0
-    tick(26);
     // 00D8BE  cmpi.b #$5, 7(a2)
     if (rd8(A2 + 0x7) == 0x5) goto L_00D914;  // 00D8C4  beq $d914
-    tick(26);
     // 00D8C6  cmpi.b #$7, 7(a2)
     if (rd8(A2 + 0x7) == 0x7) goto L_00D938;  // 00D8CC  beq $d938
-    tick(26);
     // 00D8CE  cmpi.b #$8, 7(a2)
     if (rd8(A2 + 0x7) == 0x8) goto L_00D95C;  // 00D8D4  beq $d95c
 L_00D8D8:
-    tick(42);
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00D8D8  addq.b #$1, 7(a2)
     // 00D8DC  cmpi.b #$9, 7(a2)
     if (rd8(A2 + 0x7) != 0x9) goto L_00D624;  // 00D8E2  bne $d624
-    tick(26);
     wr8(A2 + 0x7, 0x1);  // 00D8E6  move.b #$1, 7(a2)
     goto L_00D624;  // 00D8EC  bra $d624
 L_00D8F0:
-    tick(26);
     // 00D8F0  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) != 0x3) goto L_00D900;  // 00D8F6  bne $d900
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00D8F8  move.w #$1, $112da.l
 L_00D900:
-    tick(22);
     // 00D900  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00D8D8;  // 00D904  bne $d8d8
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00D906  clr.l 4(a2)
     wr8(A2 + 0x1, 0x2);  // 00D90A  move.b #$2, 1(a2)
     goto L_00CF96;  // 00D910  bra $cf96
 L_00D914:
-    tick(26);
     // 00D914  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) != 0x3) goto L_00D924;  // 00D91A  bne $d924
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00D91C  move.w #$1, $112da.l
 L_00D924:
-    tick(22);
     // 00D924  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00D8D8;  // 00D928  bne $d8d8
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00D92A  clr.l 4(a2)
     wr8(A2 + 0x1, 0x4);  // 00D92E  move.b #$4, 1(a2)
     goto L_00CF96;  // 00D934  bra $cf96
 L_00D938:
-    tick(26);
     // 00D938  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) != 0x3) goto L_00D948;  // 00D93E  bne $d948
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00D940  move.w #$1, $112da.l
 L_00D948:
-    tick(22);
     // 00D948  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00D8D8;  // 00D94C  bne $d8d8
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00D94E  clr.l 4(a2)
     wr8(A2 + 0x1, 0x3);  // 00D952  move.b #$3, 1(a2)
     goto L_00CF96;  // 00D958  bra $cf96
 L_00D95C:
-    tick(26);
     // 00D95C  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) != 0x3) goto L_00D96C;  // 00D962  bne $d96c
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00D964  move.w #$1, $112da.l
 L_00D96C:
-    tick(22);
     // 00D96C  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00D8D8;  // 00D970  bne $d8d8
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00D974  clr.l 4(a2)
     wr8(A2 + 0x1, 0x1);  // 00D978  move.b #$1, 1(a2)
     goto L_00CF96;  // 00D97E  bra $cf96
 }
 
 void blit_enemy_vertical() {
-    tick(164);
     D0 = 0x0;  // 00D2F2  moveq.l #$0, d0
     A1 = v_cell_screen_ptrs;  // 00D2F4  lea.l $191de.l, a1
     A0 = A6;  // 00D2FA  movea.l a6, a0
@@ -10039,10 +7590,8 @@ void blit_enemy_vertical() {
     setW(D1, (((D1 & 0xFFFF) << 1) & 0xFFFF));  // 00D31C  lsl.w #$1, d1
     A3 += D1;  // 00D31E  adda.l d1, a3
 L_00D320:
-    tick(26);
     // 00D320  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00D320;  // 00D326  bne $d320
-    tick(122);
     wr32(A5 + 0x50, A3);  // 00D328  move.l a3, 80(a5)
     wr32(A5 + 0x54, A1);  // 00D32C  move.l a1, 84(a5)
     wr16(A5 + 0x42, 0);  // 00D330  clr.w 66(a5)
@@ -10051,17 +7600,14 @@ L_00D320:
     wr16(A5 + 0x66, 0x76);  // 00D340  move.w #$76, 102(a5)
     // 00D346  tst.w $189ea.l
     if (rd16(0x189EA) != 0) goto L_00D356;  // 00D34C  bne $d356
-    tick(32);
     wr16(A5 + 0x58, 0x1201);  // 00D34E  move.w #$1201, 88(a5)
     return;  // 00D354  rts 
 L_00D356:
-    tick(32);
     wr16(A5 + 0x58, 0x1001);  // 00D356  move.w #$1001, 88(a5)
     return;  // 00D35C  rts 
 }
 
 void blit_enemy_vertical_down() {
-    tick(104);
     D0 = 0x0;  // 00D4EE  moveq.l #$0, d0
     A1 = v_cell_screen_ptrs;  // 00D4F0  lea.l $191de.l, a1
     A0 = A6;  // 00D4F6  movea.l a6, a0
@@ -10072,10 +7618,8 @@ void blit_enemy_vertical_down() {
     A1 = A1 - 0x780;  // 00D506  lea.l -1920(a1), a1
     // 00D50A  tst.w $189ec.l
     if (rd16(0x189EC) == 0) goto L_00D516;  // 00D510  beq $d516
-    tick(8);
     A1 = A1 + 0x3C0;  // 00D512  lea.l 960(a1), a1
 L_00D516:
-    tick(78);
     D0 = 0x0;  // 00D516  moveq.l #$0, d0
     setB(D0, rd8(A0));  // 00D518  move.b (a0), d0
     D1 = D0;  // 00D51A  move.l d0, d1
@@ -10084,10 +7628,8 @@ L_00D516:
     setW(D1, (((D1 & 0xFFFF) << 1) & 0xFFFF));  // 00D522  lsl.w #$1, d1
     A3 += D1;  // 00D524  adda.l d1, a3
 L_00D526:
-    tick(26);
     // 00D526  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00D526;  // 00D52C  bne $d526
-    tick(122);
     wr32(A5 + 0x50, A3);  // 00D52E  move.l a3, 80(a5)
     wr32(A5 + 0x54, A1);  // 00D532  move.l a1, 84(a5)
     wr16(A5 + 0x42, 0);  // 00D536  clr.w 66(a5)
@@ -10096,11 +7638,9 @@ L_00D526:
     wr16(A5 + 0x66, 0x76);  // 00D546  move.w #$76, 102(a5)
     // 00D54C  tst.w $189ec.l
     if (rd16(0x189EC) != 0) goto L_00D55C;  // 00D552  bne $d55c
-    tick(32);
     wr16(A5 + 0x58, 0x1201);  // 00D554  move.w #$1201, 88(a5)
     return;  // 00D55A  rts 
 L_00D55C:
-    tick(32);
     wr16(A5 + 0x58, 0x1001);  // 00D55C  move.w #$1001, 88(a5)
     return;  // 00D562  rts 
 }
@@ -10108,27 +7648,21 @@ L_00D55C:
 // Электроны (список $18604) — та же логика, что у сник-снаков, своя графика;
 // взрываются «в инфотроны».
 void update_electrons() {
-    tick(30);
     D0 = 0x0;  // 00D982  moveq.l #$0, d0
     A2 = 0x18602;  // 00D984  lea.l $18602.l, a2
     A6 = A2;  // 00D98A  movea.l a2, a6
     goto L_00D992;  // 00D98C  bra $d992
 L_00D98E:
-    tick(12);
     A6 += 0x8;  // 00D98E  addq.l #$8, a6
     A2 = A6;  // 00D990  movea.l a6, a2
 L_00D992:
-    tick(22);
     // 00D992  tst.l (a2)
     if (rd32(A2) == 0) goto L_00DA4C;  // 00D994  beq $da4c
-    tick(22);
     // 00D998  cmpi.w #$ffff, (a2)
     if (rd16(A2) == 0xFFFF) goto L_00D98E;  // 00D99C  beq $d98e
-    tick(22);
     // 00D99E  tst.b 4(a2)
     if (rd8(A2 + 0x4) != 0) goto L_00DF94;  // 00D9A2  bne $df94
 L_00D9A6:
-    tick(72);
     A0 = v_cell_screen_ptrs;  // 00D9A6  lea.l $191de.l, a0
     A1 = v_map;  // 00D9AC  lea.l $11928.l, a1
     setW(D0, rd16(A2 + 0x2));  // 00D9B2  move.w 2(a2), d0
@@ -10138,198 +7672,135 @@ L_00D9A6:
     if (rd16(A1) != 0x8888) goto L_00D9E4;  // 00D9BE  bne $d9e4
     { electron_destroyed(); return; }
 L_00D9E4:
-    tick(22);
     // 00D9E4  cmpi.w #$3, (a1)
     if (rd16(A1) != 0x3) goto L_00D9F4;  // 00D9E8  bne $d9f4
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D9EA  move.w #$1, $112da.l
     { electron_destroyed(); return; }  // 00D9F2  bra $d9c0
 L_00D9F4:
-    tick(22);
     // 00D9F4  tst.b 1(a2)
     if (rd8(A2 + 0x1) == 0) goto L_00DA4E;  // 00D9F8  beq $da4e
-    tick(26);
     // 00D9FA  cmpi.b #$5, 1(a2)
     if (rd8(A2 + 0x1) == 0x5) goto L_00DA4E;  // 00DA00  beq $da4e
-    tick(26);
     // 00DA02  cmpi.b #$6, 1(a2)
     if (rd8(A2 + 0x1) == 0x6) goto L_00DA9A;  // 00DA08  beq $da9a
-    tick(26);
     // 00DA0C  cmpi.b #$7, 1(a2)
     if (rd8(A2 + 0x1) == 0x7) goto L_00DAE6;  // 00DA12  beq $dae6
-    tick(26);
     // 00DA16  cmpi.b #$8, 1(a2)
     if (rd8(A2 + 0x1) == 0x8) goto L_00DB2E;  // 00DA1C  beq $db2e
-    tick(26);
     // 00DA20  cmpi.b #$1, 1(a2)
     if (rd8(A2 + 0x1) == 0x1) goto L_00DC7C;  // 00DA26  beq $dc7c
-    tick(26);
     // 00DA2A  cmpi.b #$2, 1(a2)
     if (rd8(A2 + 0x1) == 0x2) goto L_00DB82;  // 00DA30  beq $db82
-    tick(26);
     // 00DA34  cmpi.b #$3, 1(a2)
     if (rd8(A2 + 0x1) == 0x3) goto L_00DD8E;  // 00DA3A  beq $dd8e
-    tick(26);
     // 00DA3E  cmpi.b #$4, 1(a2)
     if (rd8(A2 + 0x1) == 0x4) goto L_00DE84;  // 00DA44  beq $de84
-    tick(10);
     goto L_00D98E;  // 00DA48  bra $d98e
 L_00DA4C:
-    tick(16);
     return;  // 00DA4C  rts 
 L_00DA4E:
-    tick(22);
     // 00DA4E  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00DB82;  // 00DA52  beq $db82
-    tick(26);
     // 00DA56  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00DB76;  // 00DA5C  beq $db76
-    tick(22);
     // 00DA60  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DC7C;  // 00DA64  beq $dc7c
-    tick(26);
     // 00DA68  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00DC70;  // 00DA6E  beq $dc70
-    tick(22);
     // 00DA72  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00DD8E;  // 00DA76  beq $dd8e
-    tick(26);
     // 00DA7A  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00DD82;  // 00DA80  beq $dd82
-    tick(22);
     // 00DA84  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DE84;  // 00DA88  beq $de84
-    tick(26);
     // 00DA8C  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00DE78;  // 00DA92  beq $de78
-    tick(10);
     goto L_00E2C4;  // 00DA96  bra $e2c4
 L_00DA9A:
-    tick(22);
     // 00DA9A  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DE84;  // 00DA9E  beq $de84
-    tick(26);
     // 00DAA2  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00DE78;  // 00DAA8  beq $de78
-    tick(22);
     // 00DAAC  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00DB82;  // 00DAB0  beq $db82
-    tick(26);
     // 00DAB4  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00DB76;  // 00DABA  beq $db76
-    tick(22);
     // 00DABE  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DC7C;  // 00DAC2  beq $dc7c
-    tick(26);
     // 00DAC6  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00DC70;  // 00DACC  beq $dc70
-    tick(22);
     // 00DAD0  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00DD8E;  // 00DAD4  beq $dd8e
-    tick(26);
     // 00DAD8  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00DD82;  // 00DADE  beq $dd82
-    tick(10);
     goto L_00E2C4;  // 00DAE2  bra $e2c4
 L_00DAE6:
-    tick(22);
     // 00DAE6  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00DD8E;  // 00DAEA  beq $dd8e
-    tick(26);
     // 00DAEE  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00DD82;  // 00DAF4  beq $dd82
-    tick(22);
     // 00DAF8  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DE84;  // 00DAFC  beq $de84
-    tick(26);
     // 00DB00  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00DE78;  // 00DB06  beq $de78
-    tick(22);
     // 00DB0A  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00DB82;  // 00DB0E  beq $db82
-    tick(26);
     // 00DB10  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00DB76;  // 00DB16  beq $db76
-    tick(22);
     // 00DB18  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DC7C;  // 00DB1C  beq $dc7c
-    tick(26);
     // 00DB20  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00DC70;  // 00DB26  beq $dc70
-    tick(10);
     goto L_00E2C4;  // 00DB2A  bra $e2c4
 L_00DB2E:
-    tick(22);
     // 00DB2E  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DC7C;  // 00DB32  beq $dc7c
-    tick(26);
     // 00DB36  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00DC70;  // 00DB3C  beq $dc70
-    tick(22);
     // 00DB40  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00DD8E;  // 00DB44  beq $dd8e
-    tick(26);
     // 00DB48  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00DD82;  // 00DB4E  beq $dd82
-    tick(22);
     // 00DB52  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DE84;  // 00DB56  beq $de84
-    tick(26);
     // 00DB5A  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00DE78;  // 00DB60  beq $de78
-    tick(22);
     // 00DB64  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00DB82;  // 00DB68  beq $db82
-    tick(26);
     // 00DB6A  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00DB76;  // 00DB70  beq $db76
-    tick(10);
     goto L_00E2C4;  // 00DB72  bra $e2c4
 L_00DB76:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00DB76  move.w #$1, $112da.l
     { electron_destroyed(); return; }  // 00DB7E  bra $d9c0
 L_00DB82:
-    tick(42);
     wr8(A2 + 0x1, 0x2);  // 00DB82  move.b #$2, 1(a2)
     // 00DB88  cmpi.b #$1, 5(a2)
     if (rd8(A2 + 0x5) == 0x1) goto L_00DBA0;  // 00DB8E  beq $dba0
-    tick(22);
     // 00DB90  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00DBA0;  // 00DB94  beq $dba0
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00DB96  move.b #$1, 4(a2)
     goto L_00D98E;  // 00DB9C  bra $d98e
 L_00DBA0:
-    tick(22);
     // 00DBA0  cmpi.w #$8888, (a1)
     if (rd16(A1) == 0x8888) goto L_00DBC2;  // 00DBA4  beq $dbc2
-    tick(26);
     // 00DBA6  cmpi.w #$8888, -2(a1)
     if (rd16(A1 - 0x2) != 0x8888) goto L_00DBD2;  // 00DBAC  bne $dbd2
-    tick(18);
     call(explosion_slot_free, 0xDBB2);  // 00DBAE  bsr $f8b8
-    tick(26);
     // 00DBB2  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DBD2;  // 00DBB8  bne $dbd2
-    tick(26);
     wr16(A1 - 0x2, 0);  // 00DBBA  clr.w -2(a1)
     { electron_destroyed(); return; }  // 00DBBE  bra $d9c0
 L_00DBC2:
-    tick(18);
     call(explosion_slot_free, 0xDBC6);  // 00DBC2  bsr $f8b8
-    tick(26);
     // 00DBC6  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DBD2;  // 00DBCC  bne $dbd2
-    tick(10);
     { electron_destroyed(); return; }  // 00DBCE  bra $d9c0
 L_00DBD2:
-    tick(62);
     wr32(A1 - 0x2, 0x80118011);  // 00DBD2  move.l #$80118011, -2(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00DBDA  addi.b #$1, (a2)
     // 00DBDE  cmpi.b #$8, (a2)
     if (rd8(A2) != 0x8) goto L_00DC18;  // 00DBE2  bne $dc18
-    tick(130);
     wr8(A2 + 0x5, 0x1);  // 00DBE4  move.b #$1, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00DBEA  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) - 0x4));  // 00DBF0  subi.w #$4, 2(a2)
@@ -10339,11 +7810,9 @@ L_00DBD2:
     wr8(A2 + 0x1, 0x6);  // 00DC02  move.b #$6, 1(a2)
     // 00DC08  tst.w 118(a1)
     if (rd16(A1 + 0x76) == 0) goto L_00D98E;  // 00DC0C  beq $d98e
-    tick(22);
     // 00DC10  tst.w -4(a1)
     if (rd16(A1 - 0x4) != 0) goto L_00D98E;  // 00DC14  bne $d98e
 L_00DC18:
-    tick(106);
     D0 = 0x0;  // 00DC18  moveq.l #$0, d0
     A0 = v_cell_screen_ptrs;  // 00DC1A  lea.l $191de.l, a0
     A1 = v_gfx_frame_ptrs;  // 00DC20  lea.l $1a85e.l, a1
@@ -10358,10 +7827,8 @@ L_00DC18:
     setW(D0, rd16(A3));  // 00DC3C  move.w (a3), d0
     A1 += D0;  // 00DC3E  adda.l d0, a1
 L_00DC40:
-    tick(26);
     // 00DC40  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00DC40;  // 00DC46  bne $dc40
-    tick(138);
     wr32(A5 + 0x50, rd32(A1));  // 00DC48  move.l (a1), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00DC4C  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00DC50  clr.w 66(a5)
@@ -10371,56 +7838,41 @@ L_00DC40:
     wr16(A5 + 0x58, 0x1002);  // 00DC66  move.w #$1002, 88(a5)
     goto L_00D98E;  // 00DC6C  bra $d98e
 L_00DC70:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00DC70  move.w #$1, $112da.l
     { electron_destroyed(); return; }  // 00DC78  bra $d9c0
 L_00DC7C:
-    tick(26);
     // 00DC7C  cmpi.b #$2, 5(a2)
     if (rd8(A2 + 0x5) == 0x2) goto L_00DC94;  // 00DC82  beq $dc94
-    tick(22);
     // 00DC84  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00DC94;  // 00DC88  beq $dc94
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00DC8A  move.b #$1, 4(a2)
     goto L_00D98E;  // 00DC90  bra $d98e
 L_00DC94:
-    tick(18);
     // 00DC94  tst.b (a2)
     if (rd8(A2) != 0) goto L_00DCB0;  // 00DC96  bne $dcb0
-    tick(22);
     // 00DC98  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DCB0;  // 00DC9C  beq $dcb0
-    tick(26);
     // 00DC9E  cmpi.w #$11, 120(a1)
     if (rd16(A1 + 0x78) == 0x11) goto L_00DCB0;  // 00DCA4  beq $dcb0
-    tick(30);
     wr16(0x189EA, 0x1);  // 00DCA6  move.w #$1, $189ea.l
     goto L_00DCB6;  // 00DCAE  bra $dcb6
 L_00DCB0:
-    tick(20);
     wr16(0x189EA, 0);  // 00DCB0  clr.w $189ea.l
 L_00DCB6:
-    tick(42);
     wr8(A2 + 0x1, 0x1);  // 00DCB6  move.b #$1, 1(a2)
     // 00DCBC  cmpi.w #$8888, -120(a1)
     if (rd16(A1 - 0x78) != 0x8888) goto L_00DCD8;  // 00DCC2  bne $dcd8
-    tick(18);
     call(explosion_slot_free, 0xDCC8);  // 00DCC4  bsr $f8b8
-    tick(26);
     // 00DCC8  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DCD8;  // 00DCCE  bne $dcd8
-    tick(26);
     wr16(A1 - 0x78, 0);  // 00DCD0  clr.w -120(a1)
     { electron_destroyed(); return; }  // 00DCD4  bra $d9c0
 L_00DCD8:
-    tick(66);
     wr16(A1, 0x8011);  // 00DCD8  move.w #$8011, (a1)
     wr16(A1 - 0x78, 0x8022);  // 00DCDC  move.w #$8022, -120(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00DCE2  addi.b #$1, (a2)
     // 00DCE6  cmpi.b #$9, (a2)
     if (rd8(A2) != 0x9) goto L_00DD10;  // 00DCEA  bne $dd10
-    tick(108);
     wr8(A2 + 0x5, 0x2);  // 00DCEC  move.b #$2, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00DCF2  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) - 0xF0));  // 00DCF8  subi.w #$f0, 2(a2)
@@ -10429,56 +7881,40 @@ L_00DCD8:
     wr8(A2, 0x1);  // 00DD06  move.b #$1, (a2)
     wr8(A2 + 0x1, 0x5);  // 00DD0A  move.b #$5, 1(a2)
 L_00DD10:
-    tick(18);
     call(blit_electron_vertical, 0xDD12);  // 00DD10  bsr $dd16
-    tick(10);
     goto L_00D98E;  // 00DD12  bra $d98e
 L_00DD82:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00DD82  move.w #$1, $112da.l
     { electron_destroyed(); return; }  // 00DD8A  bra $d9c0
 L_00DD8E:
-    tick(42);
     wr8(A2 + 0x1, 0x3);  // 00DD8E  move.b #$3, 1(a2)
     // 00DD94  cmpi.b #$3, 5(a2)
     if (rd8(A2 + 0x5) == 0x3) goto L_00DDAC;  // 00DD9A  beq $ddac
-    tick(22);
     // 00DD9C  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00DDAC;  // 00DDA0  beq $ddac
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00DDA2  move.b #$1, 4(a2)
     goto L_00D98E;  // 00DDA8  bra $d98e
 L_00DDAC:
-    tick(22);
     // 00DDAC  cmpi.w #$8888, (a1)
     if (rd16(A1) == 0x8888) goto L_00DDCE;  // 00DDB0  beq $ddce
-    tick(26);
     // 00DDB2  cmpi.w #$8888, 2(a1)
     if (rd16(A1 + 0x2) != 0x8888) goto L_00DDE0;  // 00DDB8  bne $dde0
-    tick(18);
     call(explosion_slot_free, 0xDDBE);  // 00DDBA  bsr $f8b8
-    tick(26);
     // 00DDBE  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DDE0;  // 00DDC4  bne $dde0
-    tick(26);
     wr16(A1 + 0x2, 0);  // 00DDC6  clr.w 2(a1)
     { electron_destroyed(); return; }  // 00DDCA  bra $d9c0
 L_00DDCE:
-    tick(18);
     call(explosion_slot_free, 0xDDD2);  // 00DDCE  bsr $f8b8
-    tick(26);
     // 00DDD2  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DDE0;  // 00DDD8  bne $dde0
-    tick(22);
     wr16(A1, 0);  // 00DDDA  clr.w (a1)
     { electron_destroyed(); return; }  // 00DDDC  bra $d9c0
 L_00DDE0:
-    tick(58);
     wr32(A1, 0x80118011);  // 00DDE0  move.l #$80118011, (a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00DDE6  addi.b #$1, (a2)
     // 00DDEA  cmpi.b #$8, (a2)
     if (rd8(A2) != 0x8) goto L_00DE22;  // 00DDEE  bne $de22
-    tick(130);
     wr8(A2 + 0x5, 0x3);  // 00DDF0  move.b #$3, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00DDF6  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) + 0x4));  // 00DDFC  addi.w #$4, 2(a2)
@@ -10488,11 +7924,9 @@ L_00DDE0:
     wr8(A2 + 0x1, 0x8);  // 00DE0C  move.b #$8, 1(a2)
     // 00DE12  tst.w -118(a1)
     if (rd16(A1 - 0x76) == 0) goto L_00D98E;  // 00DE16  beq $d98e
-    tick(22);
     // 00DE1A  tst.w 4(a1)
     if (rd16(A1 + 0x4) != 0) goto L_00D98E;  // 00DE1E  bne $d98e
 L_00DE22:
-    tick(98);
     D0 = 0x0;  // 00DE22  moveq.l #$0, d0
     A0 = v_cell_screen_ptrs;  // 00DE24  lea.l $191de.l, a0
     A1 = v_gfx_frame_ptrs;  // 00DE2A  lea.l $1a85e.l, a1
@@ -10506,10 +7940,8 @@ L_00DE22:
     setW(D0, rd16(A3));  // 00DE44  move.w (a3), d0
     A1 += D0;  // 00DE46  adda.l d0, a1
 L_00DE48:
-    tick(26);
     // 00DE48  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00DE48;  // 00DE4E  bne $de48
-    tick(138);
     wr32(A5 + 0x50, rd32(A1));  // 00DE50  move.l (a1), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00DE54  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00DE58  clr.w 66(a5)
@@ -10519,56 +7951,41 @@ L_00DE48:
     wr16(A5 + 0x58, 0x1002);  // 00DE6E  move.w #$1002, 88(a5)
     goto L_00D98E;  // 00DE74  bra $d98e
 L_00DE78:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00DE78  move.w #$1, $112da.l
     { electron_destroyed(); return; }  // 00DE80  bra $d9c0
 L_00DE84:
-    tick(26);
     // 00DE84  cmpi.b #$4, 5(a2)
     if (rd8(A2 + 0x5) == 0x4) goto L_00DE9C;  // 00DE8A  beq $de9c
-    tick(22);
     // 00DE8C  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00DE9C;  // 00DE90  beq $de9c
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00DE92  move.b #$1, 4(a2)
     goto L_00D98E;  // 00DE98  bra $d98e
 L_00DE9C:
-    tick(18);
     // 00DE9C  tst.b (a2)
     if (rd8(A2) != 0) goto L_00DEB8;  // 00DE9E  bne $deb8
-    tick(22);
     // 00DEA0  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DEB8;  // 00DEA4  beq $deb8
-    tick(26);
     // 00DEA6  cmpi.w #$11, -120(a1)
     if (rd16(A1 - 0x78) == 0x11) goto L_00DEB8;  // 00DEAC  beq $deb8
-    tick(30);
     wr16(0x189EC, 0x1);  // 00DEAE  move.w #$1, $189ec.l
     goto L_00DEBE;  // 00DEB6  bra $debe
 L_00DEB8:
-    tick(20);
     wr16(0x189EC, 0);  // 00DEB8  clr.w $189ec.l
 L_00DEBE:
-    tick(42);
     wr8(A2 + 0x1, 0x4);  // 00DEBE  move.b #$4, 1(a2)
     // 00DEC4  cmpi.w #$8888, 120(a1)
     if (rd16(A1 + 0x78) != 0x8888) goto L_00DEE0;  // 00DECA  bne $dee0
-    tick(18);
     call(explosion_slot_free, 0xDED0);  // 00DECC  bsr $f8b8
-    tick(26);
     // 00DED0  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DEE0;  // 00DED6  bne $dee0
-    tick(26);
     wr16(A1 + 0x78, 0);  // 00DED8  clr.w 120(a1)
     { electron_destroyed(); return; }  // 00DEDC  bra $d9c0
 L_00DEE0:
-    tick(66);
     wr16(A1, 0x8022);  // 00DEE0  move.w #$8022, (a1)
     wr16(A1 + 0x78, 0x8011);  // 00DEE4  move.w #$8011, 120(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00DEEA  addi.b #$1, (a2)
     // 00DEEE  cmpi.b #$9, (a2)
     if (rd8(A2) != 0x9) goto L_00DF18;  // 00DEF2  bne $df18
-    tick(108);
     wr8(A2 + 0x5, 0x4);  // 00DEF4  move.b #$4, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00DEFA  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) + 0xF0));  // 00DF00  addi.w #$f0, 2(a2)
@@ -10577,12 +7994,9 @@ L_00DEE0:
     wr8(A2, 0x1);  // 00DF0E  move.b #$1, (a2)
     wr8(A2 + 0x1, 0x7);  // 00DF12  move.b #$7, 1(a2)
 L_00DF18:
-    tick(18);
     call(blit_electron_vertical_down, 0xDF1A);  // 00DF18  bsr $df1e
-    tick(10);
     goto L_00D98E;  // 00DF1A  bra $d98e
 L_00DF94:
-    tick(64);
     D0 = 0x0;  // 00DF94  moveq.l #$0, d0
     A1 = v_map;  // 00DF96  lea.l $11928.l, a1
     setW(D0, rd16(A2 + 0x2));  // 00DF9C  move.w 2(a2), d0
@@ -10590,82 +8004,61 @@ L_00DF94:
     A1 += D0;  // 00DFA2  adda.l d0, a1
     // 00DFA4  cmpi.w #$ef01, (a1)
     if (rd16(A1) == 0xEF01) goto L_00DFB0;  // 00DFA8  beq $dfb0
-    tick(22);
     // 00DFAA  cmpi.w #$eb01, (a1)
     if (rd16(A1) != 0xEB01) goto L_00DFB6;  // 00DFAE  bne $dfb6
 L_00DFB0:
-    tick(30);
     wr16(A1, 0);  // 00DFB0  clr.w (a1)
     call(electron_destroyed, 0xDFB6);  // 00DFB2  bsr $d9c0
 L_00DFB6:
-    tick(22);
     // 00DFB6  cmpi.w #$8888, (a1)
     if (rd16(A1) != 0x8888) goto L_00DFDA;  // 00DFBA  bne $dfda
-    tick(38);
     wr16(A1, 0);  // 00DFBC  clr.w (a1)
     // 00DFBE  cmpi.w #$7777, 2(a1)
     if (rd16(A1 + 0x2) != 0x7777) goto L_00DFCA;  // 00DFC4  bne $dfca
-    tick(16);
     wr16(A1 + 0x2, 0);  // 00DFC6  clr.w 2(a1)
 L_00DFCA:
-    tick(26);
     // 00DFCA  cmpi.w #$7777, -2(a1)
     if (rd16(A1 - 0x2) != 0x7777) goto L_00DFD6;  // 00DFD0  bne $dfd6
-    tick(16);
     wr16(A1 - 0x2, 0);  // 00DFD2  clr.w -2(a1)
 L_00DFD6:
-    tick(18);
     call(electron_destroyed, 0xDFDA);  // 00DFD6  bsr $d9c0
 L_00DFDA:
-    tick(26);
     // 00DFDA  cmpi.b #$a, 6(a2)
     if (rd8(A2 + 0x6) == 0xA) goto L_00E2D6;  // 00DFE0  beq $e2d6
-    tick(22);
     // 00DFE4  tst.b 7(a2)
     if (rd8(A2 + 0x7) == 0) goto L_00E0A4;  // 00DFE8  beq $e0a4
 L_00DFEC:
-    tick(26);
     // 00DFEC  cmpi.b #$4, 4(a2)
     if (int8_t(rd8(A2 + 0x4)) < 4) goto L_00E054;  // 00DFF2  blt $e054
 L_00DFF4:
-    tick(26);
     // 00DFF4  cmpi.b #$5, 6(a2)
     if (int8_t(rd8(A2 + 0x6)) >= 5) goto L_00E224;  // 00DFFA  bge $e224
-    tick(26);
     // 00DFFE  cmpi.b #$1, 6(a2)
     if (rd8(A2 + 0x6) == 0x1) goto L_00E026;  // 00E004  beq $e026
-    tick(26);
     // 00E006  cmpi.b #$2, 6(a2)
     if (rd8(A2 + 0x6) == 0x2) goto L_00E032;  // 00E00C  beq $e032
-    tick(26);
     // 00E00E  cmpi.b #$3, 6(a2)
     if (rd8(A2 + 0x6) == 0x3) goto L_00E042;  // 00E014  beq $e042
-    tick(54);
     wr16(A1 + 0x78, 0);  // 00E016  clr.w 120(a1)
     wr8(A2 + 0x1, 0x4);  // 00E01A  move.b #$4, 1(a2)
     wr8(A2, 0x1);  // 00E020  move.b #$1, (a2)
     goto L_00E04C;  // 00E024  bra $e04c
 L_00E026:
-    tick(42);
     wr16(A1 - 0x2, 0);  // 00E026  clr.w -2(a1)
     wr8(A2 + 0x1, 0x2);  // 00E02A  move.b #$2, 1(a2)
     goto L_00E04C;  // 00E030  bra $e04c
 L_00E032:
-    tick(54);
     wr16(A1 - 0x78, 0);  // 00E032  clr.w -120(a1)
     wr8(A2 + 0x1, 0x1);  // 00E036  move.b #$1, 1(a2)
     wr8(A2, 0x1);  // 00E03C  move.b #$1, (a2)
     goto L_00E04C;  // 00E040  bra $e04c
 L_00E042:
-    tick(32);
     wr16(A1 + 0x2, 0);  // 00E042  clr.w 2(a1)
     wr8(A2 + 0x1, 0x3);  // 00E046  move.b #$3, 1(a2)
 L_00E04C:
-    tick(34);
     wr32(A2 + 0x4, 0);  // 00E04C  clr.l 4(a2)
     goto L_00D9A6;  // 00E050  bra $d9a6
 L_00E054:
-    tick(74);
     A4 = 0x1186E;  // 00E054  lea.l $1186e.l, a4
     D0 = 0x0;  // 00E05A  moveq.l #$0, d0
     setB(D0, rd8(A2 + 0x7));  // 00E05C  move.b 7(a2), d0
@@ -10675,10 +8068,8 @@ L_00E054:
     setW(D0, rd16(A2 + 0x2));  // 00E06A  move.w 2(a2), d0
     A0 += D0;  // 00E06E  adda.l d0, a0
 L_00E070:
-    tick(26);
     // 00E070  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00E070;  // 00E076  bne $e070
-    tick(154);
     wr32(A5 + 0x50, rd32(A4));  // 00E078  move.l (a4), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00E07C  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00E080  clr.w 66(a5)
@@ -10689,272 +8080,203 @@ L_00E070:
     wr8(A2 + 0x4, (rd8(A2 + 0x4) + 0x1));  // 00E09C  addq.b #$1, 4(a2)
     goto L_00D98E;  // 00E0A0  bra $d98e
 L_00E0A4:
-    tick(26);
     // 00E0A4  cmpi.b #$1, 5(a2)
     if (rd8(A2 + 0x5) == 0x1) goto L_00E0CC;  // 00E0AA  beq $e0cc
-    tick(26);
     // 00E0AC  cmpi.b #$2, 5(a2)
     if (rd8(A2 + 0x5) == 0x2) goto L_00E122;  // 00E0B2  beq $e122
-    tick(26);
     // 00E0B4  cmpi.b #$3, 5(a2)
     if (rd8(A2 + 0x5) == 0x3) goto L_00E178;  // 00E0BA  beq $e178
-    tick(26);
     // 00E0BE  cmpi.b #$4, 5(a2)
     if (rd8(A2 + 0x5) == 0x4) goto L_00E1CE;  // 00E0C4  beq $e1ce
-    tick(10);
     goto L_00D98E;  // 00E0C8  bra $d98e
 L_00E0CC:
-    tick(22);
     // 00E0CC  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00E0E8;  // 00E0D0  bne $e0e8
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00E0D2  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x4);  // 00E0D8  move.b #$4, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00E0DE  move.w #$8011, 120(a1)
     goto L_00DFEC;  // 00E0E4  bra $dfec
 L_00E0E8:
-    tick(22);
     // 00E0E8  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00E104;  // 00E0EC  bne $e104
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00E0EE  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x2);  // 00E0F4  move.b #$2, 6(a2)
     wr16(A1 - 0x78, 0x8011);  // 00E0FA  move.w #$8011, -120(a1)
     goto L_00DFEC;  // 00E100  bra $dfec
 L_00E104:
-    tick(22);
     // 00E104  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00E2C4;  // 00E108  bne $e2c4
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00E10C  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x5);  // 00E112  move.b #$5, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00E118  move.w #$8011, 2(a1)
     goto L_00DFEC;  // 00E11E  bra $dfec
 L_00E122:
-    tick(22);
     // 00E122  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00E13E;  // 00E126  bne $e13e
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00E128  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x1);  // 00E12E  move.b #$1, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00E134  move.w #$8011, -2(a1)
     goto L_00DFEC;  // 00E13A  bra $dfec
 L_00E13E:
-    tick(22);
     // 00E13E  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00E15A;  // 00E142  bne $e15a
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00E144  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x3);  // 00E14A  move.b #$3, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00E150  move.w #$8011, 2(a1)
     goto L_00DFEC;  // 00E156  bra $dfec
 L_00E15A:
-    tick(22);
     // 00E15A  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00E2C4;  // 00E15E  bne $e2c4
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00E162  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x6);  // 00E168  move.b #$6, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00E16E  move.w #$8011, 120(a1)
     goto L_00DFEC;  // 00E174  bra $dfec
 L_00E178:
-    tick(22);
     // 00E178  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00E194;  // 00E17C  bne $e194
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00E17E  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x2);  // 00E184  move.b #$2, 6(a2)
     wr16(A1 - 0x78, 0x8011);  // 00E18A  move.w #$8011, -120(a1)
     goto L_00DFEC;  // 00E190  bra $dfec
 L_00E194:
-    tick(22);
     // 00E194  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00E1B0;  // 00E198  bne $e1b0
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00E19A  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x4);  // 00E1A0  move.b #$4, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00E1A6  move.w #$8011, 120(a1)
     goto L_00DFEC;  // 00E1AC  bra $dfec
 L_00E1B0:
-    tick(22);
     // 00E1B0  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00E2C4;  // 00E1B4  bne $e2c4
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00E1B8  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x7);  // 00E1BE  move.b #$7, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00E1C4  move.w #$8011, -2(a1)
     goto L_00DFEC;  // 00E1CA  bra $dfec
 L_00E1CE:
-    tick(22);
     // 00E1CE  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00E1EA;  // 00E1D2  bne $e1ea
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00E1D4  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x3);  // 00E1DA  move.b #$3, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00E1E0  move.w #$8011, 2(a1)
     goto L_00DFEC;  // 00E1E6  bra $dfec
 L_00E1EA:
-    tick(22);
     // 00E1EA  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00E206;  // 00E1EE  bne $e206
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00E1F0  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x1);  // 00E1F6  move.b #$1, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00E1FC  move.w #$8011, -2(a1)
     goto L_00DFEC;  // 00E202  bra $dfec
 L_00E206:
-    tick(22);
     // 00E206  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00E2C4;  // 00E20A  bne $e2c4
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00E20E  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x8);  // 00E214  move.b #$8, 6(a2)
     wr16(A1 - 0x78, 0x8022);  // 00E21A  move.w #$8022, -120(a1)
     goto L_00DFEC;  // 00E220  bra $dfec
 L_00E224:
-    tick(26);
     // 00E224  cmpi.b #$5, 6(a2)
     if (rd8(A2 + 0x6) == 0x5) goto L_00E244;  // 00E22A  beq $e244
-    tick(26);
     // 00E22C  cmpi.b #$6, 6(a2)
     if (rd8(A2 + 0x6) == 0x6) goto L_00E264;  // 00E232  beq $e264
-    tick(26);
     // 00E234  cmpi.b #$7, 6(a2)
     if (rd8(A2 + 0x6) == 0x7) goto L_00E284;  // 00E23A  beq $e284
-    tick(26);
     // 00E23C  cmpi.b #$8, 6(a2)
     if (rd8(A2 + 0x6) == 0x8) goto L_00E2A4;  // 00E242  beq $e2a4
 L_00E244:
-    tick(26);
     // 00E244  cmpi.b #$7, 7(a2)
     if (rd8(A2 + 0x7) == 0x7) goto L_00E25A;  // 00E24A  beq $e25a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E24C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E252  addq.b #$1, 7(a2)
     goto L_00E054;  // 00E256  bra $e054
 L_00E25A:
-    tick(26);
     wr8(A2 + 0x6, 0x3);  // 00E25A  move.b #$3, 6(a2)
     goto L_00DFF4;  // 00E260  bra $dff4
 L_00E264:
-    tick(26);
     // 00E264  cmpi.b #$5, 7(a2)
     if (rd8(A2 + 0x7) == 0x5) goto L_00E27A;  // 00E26A  beq $e27a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E26C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E272  addq.b #$1, 7(a2)
     goto L_00E054;  // 00E276  bra $e054
 L_00E27A:
-    tick(26);
     wr8(A2 + 0x6, 0x4);  // 00E27A  move.b #$4, 6(a2)
     goto L_00DFF4;  // 00E280  bra $dff4
 L_00E284:
-    tick(26);
     // 00E284  cmpi.b #$b, 7(a2)
     if (rd8(A2 + 0x7) == 0xB) goto L_00E29A;  // 00E28A  beq $e29a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E28C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E292  addq.b #$1, 7(a2)
     goto L_00E054;  // 00E296  bra $e054
 L_00E29A:
-    tick(26);
     wr8(A2 + 0x6, 0x1);  // 00E29A  move.b #$1, 6(a2)
     goto L_00DFF4;  // 00E2A0  bra $dff4
 L_00E2A4:
-    tick(26);
     // 00E2A4  cmpi.b #$9, 7(a2)
     if (rd8(A2 + 0x7) == 0x9) goto L_00E2BA;  // 00E2AA  beq $e2ba
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E2AC  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E2B2  addq.b #$1, 7(a2)
     goto L_00E054;  // 00E2B6  bra $e054
 L_00E2BA:
-    tick(26);
     wr8(A2 + 0x6, 0x2);  // 00E2BA  move.b #$2, 6(a2)
     goto L_00DFF4;  // 00E2C0  bra $dff4
 L_00E2C4:
-    tick(48);
     wr8(A2 + 0x6, 0xA);  // 00E2C4  move.b #$a, 6(a2)
     wr8(A2 + 0x7, 0x1);  // 00E2CA  move.b #$1, 7(a2)
     wr8(A2 + 0x4, 0x1);  // 00E2D0  move.b #$1, 4(a2)
 L_00E2D6:
-    tick(26);
     // 00E2D6  cmpi.b #$6, 4(a2)
     if (int8_t(rd8(A2 + 0x4)) < 6) goto L_00E054;  // 00E2DC  blt $e054
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E2E0  move.b #$1, 4(a2)
     // 00E2E6  cmpi.b #$3, 7(a2)
     if (rd8(A2 + 0x7) == 0x3) goto L_00E320;  // 00E2EC  beq $e320
-    tick(26);
     // 00E2EE  cmpi.b #$5, 7(a2)
     if (rd8(A2 + 0x7) == 0x5) goto L_00E344;  // 00E2F4  beq $e344
-    tick(26);
     // 00E2F6  cmpi.b #$7, 7(a2)
     if (rd8(A2 + 0x7) == 0x7) goto L_00E368;  // 00E2FC  beq $e368
-    tick(26);
     // 00E2FE  cmpi.b #$8, 7(a2)
     if (rd8(A2 + 0x7) == 0x8) goto L_00E38C;  // 00E304  beq $e38c
 L_00E308:
-    tick(42);
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E308  addq.b #$1, 7(a2)
     // 00E30C  cmpi.b #$9, 7(a2)
     if (rd8(A2 + 0x7) != 0x9) goto L_00E054;  // 00E312  bne $e054
-    tick(26);
     wr8(A2 + 0x7, 0x1);  // 00E316  move.b #$1, 7(a2)
     goto L_00E054;  // 00E31C  bra $e054
 L_00E320:
-    tick(26);
     // 00E320  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) != 0x3) goto L_00E330;  // 00E326  bne $e330
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00E328  move.w #$1, $112da.l
 L_00E330:
-    tick(22);
     // 00E330  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00E308;  // 00E334  bne $e308
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00E336  clr.l 4(a2)
     wr8(A2 + 0x1, 0x2);  // 00E33A  move.b #$2, 1(a2)
     goto L_00D9A6;  // 00E340  bra $d9a6
 L_00E344:
-    tick(26);
     // 00E344  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) != 0x3) goto L_00E354;  // 00E34A  bne $e354
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00E34C  move.w #$1, $112da.l
 L_00E354:
-    tick(22);
     // 00E354  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00E308;  // 00E358  bne $e308
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00E35A  clr.l 4(a2)
     wr8(A2 + 0x1, 0x4);  // 00E35E  move.b #$4, 1(a2)
     goto L_00D9A6;  // 00E364  bra $d9a6
 L_00E368:
-    tick(26);
     // 00E368  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) != 0x3) goto L_00E378;  // 00E36E  bne $e378
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00E370  move.w #$1, $112da.l
 L_00E378:
-    tick(22);
     // 00E378  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00E308;  // 00E37C  bne $e308
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00E37E  clr.l 4(a2)
     wr8(A2 + 0x1, 0x3);  // 00E382  move.b #$3, 1(a2)
     goto L_00D9A6;  // 00E388  bra $d9a6
 L_00E38C:
-    tick(26);
     // 00E38C  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) != 0x3) goto L_00E39C;  // 00E392  bne $e39c
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00E394  move.w #$1, $112da.l
 L_00E39C:
-    tick(22);
     // 00E39C  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00E308;  // 00E3A0  bne $e308
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00E3A4  clr.l 4(a2)
     wr8(A2 + 0x1, 0x1);  // 00E3A8  move.b #$1, 1(a2)
     goto L_00D9A6;  // 00E3AE  bra $d9a6
@@ -10963,20 +8285,15 @@ L_00E39C:
 void electron_destroyed() {
     goto L_00D9C0;
 L_00D98E:
-    tick(12);
     A6 += 0x8;  // 00D98E  addq.l #$8, a6
     A2 = A6;  // 00D990  movea.l a6, a2
-    tick(22);
     // 00D992  tst.l (a2)
     if (rd32(A2) == 0) goto L_00DA4C;  // 00D994  beq $da4c
-    tick(22);
     // 00D998  cmpi.w #$ffff, (a2)
     if (rd16(A2) == 0xFFFF) goto L_00D98E;  // 00D99C  beq $d98e
-    tick(22);
     // 00D99E  tst.b 4(a2)
     if (rd8(A2 + 0x4) != 0) goto L_00DF94;  // 00D9A2  bne $df94
 L_00D9A6:
-    tick(72);
     A0 = v_cell_screen_ptrs;  // 00D9A6  lea.l $191de.l, a0
     A1 = v_map;  // 00D9AC  lea.l $11928.l, a1
     setW(D0, rd16(A2 + 0x2));  // 00D9B2  move.w 2(a2), d0
@@ -10985,7 +8302,6 @@ L_00D9A6:
     // 00D9BA  cmpi.w #$8888, (a1)
     if (rd16(A1) != 0x8888) goto L_00D9E4;  // 00D9BE  bne $d9e4
 L_00D9C0:
-    tick(100);
     wr16(A2, 0xFFFF);  // 00D9C0  move.w #$ffff, (a2)
     A0 = A1;  // 00D9C4  movea.l a1, a0
     D0 = 0x0;  // 00D9C6  moveq.l #$0, d0
@@ -10995,201 +8311,137 @@ L_00D9C0:
     A1 = rd32(A3);  // 00D9D4  movea.l (a3), a1
     wr16(0x112E8, 0x1);  // 00D9D6  move.w #$1, $112e8.l
     call(start_explosion, 0xD9E2);  // 00D9DE  bsr $f8e6
-    tick(10);
     goto L_00D98E;  // 00D9E2  bra $d98e
 L_00D9E4:
-    tick(22);
     // 00D9E4  cmpi.w #$3, (a1)
     if (rd16(A1) != 0x3) goto L_00D9F4;  // 00D9E8  bne $d9f4
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00D9EA  move.w #$1, $112da.l
     goto L_00D9C0;  // 00D9F2  bra $d9c0
 L_00D9F4:
-    tick(22);
     // 00D9F4  tst.b 1(a2)
     if (rd8(A2 + 0x1) == 0) goto L_00DA4E;  // 00D9F8  beq $da4e
-    tick(26);
     // 00D9FA  cmpi.b #$5, 1(a2)
     if (rd8(A2 + 0x1) == 0x5) goto L_00DA4E;  // 00DA00  beq $da4e
-    tick(26);
     // 00DA02  cmpi.b #$6, 1(a2)
     if (rd8(A2 + 0x1) == 0x6) goto L_00DA9A;  // 00DA08  beq $da9a
-    tick(26);
     // 00DA0C  cmpi.b #$7, 1(a2)
     if (rd8(A2 + 0x1) == 0x7) goto L_00DAE6;  // 00DA12  beq $dae6
-    tick(26);
     // 00DA16  cmpi.b #$8, 1(a2)
     if (rd8(A2 + 0x1) == 0x8) goto L_00DB2E;  // 00DA1C  beq $db2e
-    tick(26);
     // 00DA20  cmpi.b #$1, 1(a2)
     if (rd8(A2 + 0x1) == 0x1) goto L_00DC7C;  // 00DA26  beq $dc7c
-    tick(26);
     // 00DA2A  cmpi.b #$2, 1(a2)
     if (rd8(A2 + 0x1) == 0x2) goto L_00DB82;  // 00DA30  beq $db82
-    tick(26);
     // 00DA34  cmpi.b #$3, 1(a2)
     if (rd8(A2 + 0x1) == 0x3) goto L_00DD8E;  // 00DA3A  beq $dd8e
-    tick(26);
     // 00DA3E  cmpi.b #$4, 1(a2)
     if (rd8(A2 + 0x1) == 0x4) goto L_00DE84;  // 00DA44  beq $de84
-    tick(10);
     goto L_00D98E;  // 00DA48  bra $d98e
 L_00DA4C:
-    tick(16);
     return;  // 00DA4C  rts 
 L_00DA4E:
-    tick(22);
     // 00DA4E  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00DB82;  // 00DA52  beq $db82
-    tick(26);
     // 00DA56  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00DB76;  // 00DA5C  beq $db76
-    tick(22);
     // 00DA60  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DC7C;  // 00DA64  beq $dc7c
-    tick(26);
     // 00DA68  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00DC70;  // 00DA6E  beq $dc70
-    tick(22);
     // 00DA72  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00DD8E;  // 00DA76  beq $dd8e
-    tick(26);
     // 00DA7A  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00DD82;  // 00DA80  beq $dd82
-    tick(22);
     // 00DA84  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DE84;  // 00DA88  beq $de84
-    tick(26);
     // 00DA8C  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00DE78;  // 00DA92  beq $de78
-    tick(10);
     goto L_00E2C4;  // 00DA96  bra $e2c4
 L_00DA9A:
-    tick(22);
     // 00DA9A  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DE84;  // 00DA9E  beq $de84
-    tick(26);
     // 00DAA2  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00DE78;  // 00DAA8  beq $de78
-    tick(22);
     // 00DAAC  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00DB82;  // 00DAB0  beq $db82
-    tick(26);
     // 00DAB4  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00DB76;  // 00DABA  beq $db76
-    tick(22);
     // 00DABE  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DC7C;  // 00DAC2  beq $dc7c
-    tick(26);
     // 00DAC6  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00DC70;  // 00DACC  beq $dc70
-    tick(22);
     // 00DAD0  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00DD8E;  // 00DAD4  beq $dd8e
-    tick(26);
     // 00DAD8  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00DD82;  // 00DADE  beq $dd82
-    tick(10);
     goto L_00E2C4;  // 00DAE2  bra $e2c4
 L_00DAE6:
-    tick(22);
     // 00DAE6  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00DD8E;  // 00DAEA  beq $dd8e
-    tick(26);
     // 00DAEE  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00DD82;  // 00DAF4  beq $dd82
-    tick(22);
     // 00DAF8  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DE84;  // 00DAFC  beq $de84
-    tick(26);
     // 00DB00  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00DE78;  // 00DB06  beq $de78
-    tick(22);
     // 00DB0A  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00DB82;  // 00DB0E  beq $db82
-    tick(26);
     // 00DB10  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00DB76;  // 00DB16  beq $db76
-    tick(22);
     // 00DB18  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DC7C;  // 00DB1C  beq $dc7c
-    tick(26);
     // 00DB20  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00DC70;  // 00DB26  beq $dc70
-    tick(10);
     goto L_00E2C4;  // 00DB2A  bra $e2c4
 L_00DB2E:
-    tick(22);
     // 00DB2E  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DC7C;  // 00DB32  beq $dc7c
-    tick(26);
     // 00DB36  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) == 0x3) goto L_00DC70;  // 00DB3C  beq $dc70
-    tick(22);
     // 00DB40  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00DD8E;  // 00DB44  beq $dd8e
-    tick(26);
     // 00DB48  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) == 0x3) goto L_00DD82;  // 00DB4E  beq $dd82
-    tick(22);
     // 00DB52  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DE84;  // 00DB56  beq $de84
-    tick(26);
     // 00DB5A  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) == 0x3) goto L_00DE78;  // 00DB60  beq $de78
-    tick(22);
     // 00DB64  tst.w -2(a1)
     if (rd16(A1 - 0x2) == 0) goto L_00DB82;  // 00DB68  beq $db82
-    tick(26);
     // 00DB6A  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) == 0x3) goto L_00DB76;  // 00DB70  beq $db76
-    tick(10);
     goto L_00E2C4;  // 00DB72  bra $e2c4
 L_00DB76:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00DB76  move.w #$1, $112da.l
     goto L_00D9C0;  // 00DB7E  bra $d9c0
 L_00DB82:
-    tick(42);
     wr8(A2 + 0x1, 0x2);  // 00DB82  move.b #$2, 1(a2)
     // 00DB88  cmpi.b #$1, 5(a2)
     if (rd8(A2 + 0x5) == 0x1) goto L_00DBA0;  // 00DB8E  beq $dba0
-    tick(22);
     // 00DB90  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00DBA0;  // 00DB94  beq $dba0
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00DB96  move.b #$1, 4(a2)
     goto L_00D98E;  // 00DB9C  bra $d98e
 L_00DBA0:
-    tick(22);
     // 00DBA0  cmpi.w #$8888, (a1)
     if (rd16(A1) == 0x8888) goto L_00DBC2;  // 00DBA4  beq $dbc2
-    tick(26);
     // 00DBA6  cmpi.w #$8888, -2(a1)
     if (rd16(A1 - 0x2) != 0x8888) goto L_00DBD2;  // 00DBAC  bne $dbd2
-    tick(18);
     call(explosion_slot_free, 0xDBB2);  // 00DBAE  bsr $f8b8
-    tick(26);
     // 00DBB2  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DBD2;  // 00DBB8  bne $dbd2
-    tick(26);
     wr16(A1 - 0x2, 0);  // 00DBBA  clr.w -2(a1)
     goto L_00D9C0;  // 00DBBE  bra $d9c0
 L_00DBC2:
-    tick(18);
     call(explosion_slot_free, 0xDBC6);  // 00DBC2  bsr $f8b8
-    tick(26);
     // 00DBC6  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DBD2;  // 00DBCC  bne $dbd2
-    tick(10);
     goto L_00D9C0;  // 00DBCE  bra $d9c0
 L_00DBD2:
-    tick(62);
     wr32(A1 - 0x2, 0x80118011);  // 00DBD2  move.l #$80118011, -2(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00DBDA  addi.b #$1, (a2)
     // 00DBDE  cmpi.b #$8, (a2)
     if (rd8(A2) != 0x8) goto L_00DC18;  // 00DBE2  bne $dc18
-    tick(130);
     wr8(A2 + 0x5, 0x1);  // 00DBE4  move.b #$1, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00DBEA  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) - 0x4));  // 00DBF0  subi.w #$4, 2(a2)
@@ -11199,11 +8451,9 @@ L_00DBD2:
     wr8(A2 + 0x1, 0x6);  // 00DC02  move.b #$6, 1(a2)
     // 00DC08  tst.w 118(a1)
     if (rd16(A1 + 0x76) == 0) goto L_00D98E;  // 00DC0C  beq $d98e
-    tick(22);
     // 00DC10  tst.w -4(a1)
     if (rd16(A1 - 0x4) != 0) goto L_00D98E;  // 00DC14  bne $d98e
 L_00DC18:
-    tick(106);
     D0 = 0x0;  // 00DC18  moveq.l #$0, d0
     A0 = v_cell_screen_ptrs;  // 00DC1A  lea.l $191de.l, a0
     A1 = v_gfx_frame_ptrs;  // 00DC20  lea.l $1a85e.l, a1
@@ -11218,10 +8468,8 @@ L_00DC18:
     setW(D0, rd16(A3));  // 00DC3C  move.w (a3), d0
     A1 += D0;  // 00DC3E  adda.l d0, a1
 L_00DC40:
-    tick(26);
     // 00DC40  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00DC40;  // 00DC46  bne $dc40
-    tick(138);
     wr32(A5 + 0x50, rd32(A1));  // 00DC48  move.l (a1), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00DC4C  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00DC50  clr.w 66(a5)
@@ -11231,56 +8479,41 @@ L_00DC40:
     wr16(A5 + 0x58, 0x1002);  // 00DC66  move.w #$1002, 88(a5)
     goto L_00D98E;  // 00DC6C  bra $d98e
 L_00DC70:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00DC70  move.w #$1, $112da.l
     goto L_00D9C0;  // 00DC78  bra $d9c0
 L_00DC7C:
-    tick(26);
     // 00DC7C  cmpi.b #$2, 5(a2)
     if (rd8(A2 + 0x5) == 0x2) goto L_00DC94;  // 00DC82  beq $dc94
-    tick(22);
     // 00DC84  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00DC94;  // 00DC88  beq $dc94
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00DC8A  move.b #$1, 4(a2)
     goto L_00D98E;  // 00DC90  bra $d98e
 L_00DC94:
-    tick(18);
     // 00DC94  tst.b (a2)
     if (rd8(A2) != 0) goto L_00DCB0;  // 00DC96  bne $dcb0
-    tick(22);
     // 00DC98  tst.w 120(a1)
     if (rd16(A1 + 0x78) == 0) goto L_00DCB0;  // 00DC9C  beq $dcb0
-    tick(26);
     // 00DC9E  cmpi.w #$11, 120(a1)
     if (rd16(A1 + 0x78) == 0x11) goto L_00DCB0;  // 00DCA4  beq $dcb0
-    tick(30);
     wr16(0x189EA, 0x1);  // 00DCA6  move.w #$1, $189ea.l
     goto L_00DCB6;  // 00DCAE  bra $dcb6
 L_00DCB0:
-    tick(20);
     wr16(0x189EA, 0);  // 00DCB0  clr.w $189ea.l
 L_00DCB6:
-    tick(42);
     wr8(A2 + 0x1, 0x1);  // 00DCB6  move.b #$1, 1(a2)
     // 00DCBC  cmpi.w #$8888, -120(a1)
     if (rd16(A1 - 0x78) != 0x8888) goto L_00DCD8;  // 00DCC2  bne $dcd8
-    tick(18);
     call(explosion_slot_free, 0xDCC8);  // 00DCC4  bsr $f8b8
-    tick(26);
     // 00DCC8  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DCD8;  // 00DCCE  bne $dcd8
-    tick(26);
     wr16(A1 - 0x78, 0);  // 00DCD0  clr.w -120(a1)
     goto L_00D9C0;  // 00DCD4  bra $d9c0
 L_00DCD8:
-    tick(66);
     wr16(A1, 0x8011);  // 00DCD8  move.w #$8011, (a1)
     wr16(A1 - 0x78, 0x8022);  // 00DCDC  move.w #$8022, -120(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00DCE2  addi.b #$1, (a2)
     // 00DCE6  cmpi.b #$9, (a2)
     if (rd8(A2) != 0x9) goto L_00DD10;  // 00DCEA  bne $dd10
-    tick(108);
     wr8(A2 + 0x5, 0x2);  // 00DCEC  move.b #$2, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00DCF2  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) - 0xF0));  // 00DCF8  subi.w #$f0, 2(a2)
@@ -11289,56 +8522,40 @@ L_00DCD8:
     wr8(A2, 0x1);  // 00DD06  move.b #$1, (a2)
     wr8(A2 + 0x1, 0x5);  // 00DD0A  move.b #$5, 1(a2)
 L_00DD10:
-    tick(18);
     call(blit_electron_vertical, 0xDD12);  // 00DD10  bsr $dd16
-    tick(10);
     goto L_00D98E;  // 00DD12  bra $d98e
 L_00DD82:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00DD82  move.w #$1, $112da.l
     goto L_00D9C0;  // 00DD8A  bra $d9c0
 L_00DD8E:
-    tick(42);
     wr8(A2 + 0x1, 0x3);  // 00DD8E  move.b #$3, 1(a2)
     // 00DD94  cmpi.b #$3, 5(a2)
     if (rd8(A2 + 0x5) == 0x3) goto L_00DDAC;  // 00DD9A  beq $ddac
-    tick(22);
     // 00DD9C  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00DDAC;  // 00DDA0  beq $ddac
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00DDA2  move.b #$1, 4(a2)
     goto L_00D98E;  // 00DDA8  bra $d98e
 L_00DDAC:
-    tick(22);
     // 00DDAC  cmpi.w #$8888, (a1)
     if (rd16(A1) == 0x8888) goto L_00DDCE;  // 00DDB0  beq $ddce
-    tick(26);
     // 00DDB2  cmpi.w #$8888, 2(a1)
     if (rd16(A1 + 0x2) != 0x8888) goto L_00DDE0;  // 00DDB8  bne $dde0
-    tick(18);
     call(explosion_slot_free, 0xDDBE);  // 00DDBA  bsr $f8b8
-    tick(26);
     // 00DDBE  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DDE0;  // 00DDC4  bne $dde0
-    tick(26);
     wr16(A1 + 0x2, 0);  // 00DDC6  clr.w 2(a1)
     goto L_00D9C0;  // 00DDCA  bra $d9c0
 L_00DDCE:
-    tick(18);
     call(explosion_slot_free, 0xDDD2);  // 00DDCE  bsr $f8b8
-    tick(26);
     // 00DDD2  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DDE0;  // 00DDD8  bne $dde0
-    tick(22);
     wr16(A1, 0);  // 00DDDA  clr.w (a1)
     goto L_00D9C0;  // 00DDDC  bra $d9c0
 L_00DDE0:
-    tick(58);
     wr32(A1, 0x80118011);  // 00DDE0  move.l #$80118011, (a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00DDE6  addi.b #$1, (a2)
     // 00DDEA  cmpi.b #$8, (a2)
     if (rd8(A2) != 0x8) goto L_00DE22;  // 00DDEE  bne $de22
-    tick(130);
     wr8(A2 + 0x5, 0x3);  // 00DDF0  move.b #$3, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00DDF6  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) + 0x4));  // 00DDFC  addi.w #$4, 2(a2)
@@ -11348,11 +8565,9 @@ L_00DDE0:
     wr8(A2 + 0x1, 0x8);  // 00DE0C  move.b #$8, 1(a2)
     // 00DE12  tst.w -118(a1)
     if (rd16(A1 - 0x76) == 0) goto L_00D98E;  // 00DE16  beq $d98e
-    tick(22);
     // 00DE1A  tst.w 4(a1)
     if (rd16(A1 + 0x4) != 0) goto L_00D98E;  // 00DE1E  bne $d98e
 L_00DE22:
-    tick(98);
     D0 = 0x0;  // 00DE22  moveq.l #$0, d0
     A0 = v_cell_screen_ptrs;  // 00DE24  lea.l $191de.l, a0
     A1 = v_gfx_frame_ptrs;  // 00DE2A  lea.l $1a85e.l, a1
@@ -11366,10 +8581,8 @@ L_00DE22:
     setW(D0, rd16(A3));  // 00DE44  move.w (a3), d0
     A1 += D0;  // 00DE46  adda.l d0, a1
 L_00DE48:
-    tick(26);
     // 00DE48  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00DE48;  // 00DE4E  bne $de48
-    tick(138);
     wr32(A5 + 0x50, rd32(A1));  // 00DE50  move.l (a1), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00DE54  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00DE58  clr.w 66(a5)
@@ -11379,56 +8592,41 @@ L_00DE48:
     wr16(A5 + 0x58, 0x1002);  // 00DE6E  move.w #$1002, 88(a5)
     goto L_00D98E;  // 00DE74  bra $d98e
 L_00DE78:
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00DE78  move.w #$1, $112da.l
     goto L_00D9C0;  // 00DE80  bra $d9c0
 L_00DE84:
-    tick(26);
     // 00DE84  cmpi.b #$4, 5(a2)
     if (rd8(A2 + 0x5) == 0x4) goto L_00DE9C;  // 00DE8A  beq $de9c
-    tick(22);
     // 00DE8C  tst.b 6(a2)
     if (rd8(A2 + 0x6) == 0) goto L_00DE9C;  // 00DE90  beq $de9c
-    tick(26);
     wr8(A2 + 0x4, 0x1);  // 00DE92  move.b #$1, 4(a2)
     goto L_00D98E;  // 00DE98  bra $d98e
 L_00DE9C:
-    tick(18);
     // 00DE9C  tst.b (a2)
     if (rd8(A2) != 0) goto L_00DEB8;  // 00DE9E  bne $deb8
-    tick(22);
     // 00DEA0  tst.w -120(a1)
     if (rd16(A1 - 0x78) == 0) goto L_00DEB8;  // 00DEA4  beq $deb8
-    tick(26);
     // 00DEA6  cmpi.w #$11, -120(a1)
     if (rd16(A1 - 0x78) == 0x11) goto L_00DEB8;  // 00DEAC  beq $deb8
-    tick(30);
     wr16(0x189EC, 0x1);  // 00DEAE  move.w #$1, $189ec.l
     goto L_00DEBE;  // 00DEB6  bra $debe
 L_00DEB8:
-    tick(20);
     wr16(0x189EC, 0);  // 00DEB8  clr.w $189ec.l
 L_00DEBE:
-    tick(42);
     wr8(A2 + 0x1, 0x4);  // 00DEBE  move.b #$4, 1(a2)
     // 00DEC4  cmpi.w #$8888, 120(a1)
     if (rd16(A1 + 0x78) != 0x8888) goto L_00DEE0;  // 00DECA  bne $dee0
-    tick(18);
     call(explosion_slot_free, 0xDED0);  // 00DECC  bsr $f8b8
-    tick(26);
     // 00DED0  tst.w $113a6.l
     if (rd16(0x113A6) != 0) goto L_00DEE0;  // 00DED6  bne $dee0
-    tick(26);
     wr16(A1 + 0x78, 0);  // 00DED8  clr.w 120(a1)
     goto L_00D9C0;  // 00DEDC  bra $d9c0
 L_00DEE0:
-    tick(66);
     wr16(A1, 0x8022);  // 00DEE0  move.w #$8022, (a1)
     wr16(A1 + 0x78, 0x8011);  // 00DEE4  move.w #$8011, 120(a1)
     wr8(A2, (rd8(A2) + 0x1));  // 00DEEA  addi.b #$1, (a2)
     // 00DEEE  cmpi.b #$9, (a2)
     if (rd8(A2) != 0x9) goto L_00DF18;  // 00DEF2  bne $df18
-    tick(108);
     wr8(A2 + 0x5, 0x4);  // 00DEF4  move.b #$4, 5(a2)
     wr8(A2 + 0x6, 0x1);  // 00DEFA  move.b #$1, 6(a2)
     wr16(A2 + 0x2, (rd16(A2 + 0x2) + 0xF0));  // 00DF00  addi.w #$f0, 2(a2)
@@ -11437,12 +8635,9 @@ L_00DEE0:
     wr8(A2, 0x1);  // 00DF0E  move.b #$1, (a2)
     wr8(A2 + 0x1, 0x7);  // 00DF12  move.b #$7, 1(a2)
 L_00DF18:
-    tick(18);
     call(blit_electron_vertical_down, 0xDF1A);  // 00DF18  bsr $df1e
-    tick(10);
     goto L_00D98E;  // 00DF1A  bra $d98e
 L_00DF94:
-    tick(64);
     D0 = 0x0;  // 00DF94  moveq.l #$0, d0
     A1 = v_map;  // 00DF96  lea.l $11928.l, a1
     setW(D0, rd16(A2 + 0x2));  // 00DF9C  move.w 2(a2), d0
@@ -11450,82 +8645,61 @@ L_00DF94:
     A1 += D0;  // 00DFA2  adda.l d0, a1
     // 00DFA4  cmpi.w #$ef01, (a1)
     if (rd16(A1) == 0xEF01) goto L_00DFB0;  // 00DFA8  beq $dfb0
-    tick(22);
     // 00DFAA  cmpi.w #$eb01, (a1)
     if (rd16(A1) != 0xEB01) goto L_00DFB6;  // 00DFAE  bne $dfb6
 L_00DFB0:
-    tick(30);
     wr16(A1, 0);  // 00DFB0  clr.w (a1)
     call(electron_destroyed, 0xDFB6);  // 00DFB2  bsr $d9c0
 L_00DFB6:
-    tick(22);
     // 00DFB6  cmpi.w #$8888, (a1)
     if (rd16(A1) != 0x8888) goto L_00DFDA;  // 00DFBA  bne $dfda
-    tick(38);
     wr16(A1, 0);  // 00DFBC  clr.w (a1)
     // 00DFBE  cmpi.w #$7777, 2(a1)
     if (rd16(A1 + 0x2) != 0x7777) goto L_00DFCA;  // 00DFC4  bne $dfca
-    tick(16);
     wr16(A1 + 0x2, 0);  // 00DFC6  clr.w 2(a1)
 L_00DFCA:
-    tick(26);
     // 00DFCA  cmpi.w #$7777, -2(a1)
     if (rd16(A1 - 0x2) != 0x7777) goto L_00DFD6;  // 00DFD0  bne $dfd6
-    tick(16);
     wr16(A1 - 0x2, 0);  // 00DFD2  clr.w -2(a1)
 L_00DFD6:
-    tick(18);
     call(electron_destroyed, 0xDFDA);  // 00DFD6  bsr $d9c0
 L_00DFDA:
-    tick(26);
     // 00DFDA  cmpi.b #$a, 6(a2)
     if (rd8(A2 + 0x6) == 0xA) goto L_00E2D6;  // 00DFE0  beq $e2d6
-    tick(22);
     // 00DFE4  tst.b 7(a2)
     if (rd8(A2 + 0x7) == 0) goto L_00E0A4;  // 00DFE8  beq $e0a4
 L_00DFEC:
-    tick(26);
     // 00DFEC  cmpi.b #$4, 4(a2)
     if (int8_t(rd8(A2 + 0x4)) < 4) goto L_00E054;  // 00DFF2  blt $e054
 L_00DFF4:
-    tick(26);
     // 00DFF4  cmpi.b #$5, 6(a2)
     if (int8_t(rd8(A2 + 0x6)) >= 5) goto L_00E224;  // 00DFFA  bge $e224
-    tick(26);
     // 00DFFE  cmpi.b #$1, 6(a2)
     if (rd8(A2 + 0x6) == 0x1) goto L_00E026;  // 00E004  beq $e026
-    tick(26);
     // 00E006  cmpi.b #$2, 6(a2)
     if (rd8(A2 + 0x6) == 0x2) goto L_00E032;  // 00E00C  beq $e032
-    tick(26);
     // 00E00E  cmpi.b #$3, 6(a2)
     if (rd8(A2 + 0x6) == 0x3) goto L_00E042;  // 00E014  beq $e042
-    tick(54);
     wr16(A1 + 0x78, 0);  // 00E016  clr.w 120(a1)
     wr8(A2 + 0x1, 0x4);  // 00E01A  move.b #$4, 1(a2)
     wr8(A2, 0x1);  // 00E020  move.b #$1, (a2)
     goto L_00E04C;  // 00E024  bra $e04c
 L_00E026:
-    tick(42);
     wr16(A1 - 0x2, 0);  // 00E026  clr.w -2(a1)
     wr8(A2 + 0x1, 0x2);  // 00E02A  move.b #$2, 1(a2)
     goto L_00E04C;  // 00E030  bra $e04c
 L_00E032:
-    tick(54);
     wr16(A1 - 0x78, 0);  // 00E032  clr.w -120(a1)
     wr8(A2 + 0x1, 0x1);  // 00E036  move.b #$1, 1(a2)
     wr8(A2, 0x1);  // 00E03C  move.b #$1, (a2)
     goto L_00E04C;  // 00E040  bra $e04c
 L_00E042:
-    tick(32);
     wr16(A1 + 0x2, 0);  // 00E042  clr.w 2(a1)
     wr8(A2 + 0x1, 0x3);  // 00E046  move.b #$3, 1(a2)
 L_00E04C:
-    tick(34);
     wr32(A2 + 0x4, 0);  // 00E04C  clr.l 4(a2)
     goto L_00D9A6;  // 00E050  bra $d9a6
 L_00E054:
-    tick(74);
     A4 = 0x1186E;  // 00E054  lea.l $1186e.l, a4
     D0 = 0x0;  // 00E05A  moveq.l #$0, d0
     setB(D0, rd8(A2 + 0x7));  // 00E05C  move.b 7(a2), d0
@@ -11535,10 +8709,8 @@ L_00E054:
     setW(D0, rd16(A2 + 0x2));  // 00E06A  move.w 2(a2), d0
     A0 += D0;  // 00E06E  adda.l d0, a0
 L_00E070:
-    tick(26);
     // 00E070  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00E070;  // 00E076  bne $e070
-    tick(154);
     wr32(A5 + 0x50, rd32(A4));  // 00E078  move.l (a4), 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00E07C  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00E080  clr.w 66(a5)
@@ -11549,279 +8721,209 @@ L_00E070:
     wr8(A2 + 0x4, (rd8(A2 + 0x4) + 0x1));  // 00E09C  addq.b #$1, 4(a2)
     goto L_00D98E;  // 00E0A0  bra $d98e
 L_00E0A4:
-    tick(26);
     // 00E0A4  cmpi.b #$1, 5(a2)
     if (rd8(A2 + 0x5) == 0x1) goto L_00E0CC;  // 00E0AA  beq $e0cc
-    tick(26);
     // 00E0AC  cmpi.b #$2, 5(a2)
     if (rd8(A2 + 0x5) == 0x2) goto L_00E122;  // 00E0B2  beq $e122
-    tick(26);
     // 00E0B4  cmpi.b #$3, 5(a2)
     if (rd8(A2 + 0x5) == 0x3) goto L_00E178;  // 00E0BA  beq $e178
-    tick(26);
     // 00E0BE  cmpi.b #$4, 5(a2)
     if (rd8(A2 + 0x5) == 0x4) goto L_00E1CE;  // 00E0C4  beq $e1ce
-    tick(10);
     goto L_00D98E;  // 00E0C8  bra $d98e
 L_00E0CC:
-    tick(22);
     // 00E0CC  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00E0E8;  // 00E0D0  bne $e0e8
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00E0D2  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x4);  // 00E0D8  move.b #$4, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00E0DE  move.w #$8011, 120(a1)
     goto L_00DFEC;  // 00E0E4  bra $dfec
 L_00E0E8:
-    tick(22);
     // 00E0E8  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00E104;  // 00E0EC  bne $e104
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00E0EE  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x2);  // 00E0F4  move.b #$2, 6(a2)
     wr16(A1 - 0x78, 0x8011);  // 00E0FA  move.w #$8011, -120(a1)
     goto L_00DFEC;  // 00E100  bra $dfec
 L_00E104:
-    tick(22);
     // 00E104  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00E2C4;  // 00E108  bne $e2c4
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00E10C  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x5);  // 00E112  move.b #$5, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00E118  move.w #$8011, 2(a1)
     goto L_00DFEC;  // 00E11E  bra $dfec
 L_00E122:
-    tick(22);
     // 00E122  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00E13E;  // 00E126  bne $e13e
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00E128  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x1);  // 00E12E  move.b #$1, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00E134  move.w #$8011, -2(a1)
     goto L_00DFEC;  // 00E13A  bra $dfec
 L_00E13E:
-    tick(22);
     // 00E13E  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00E15A;  // 00E142  bne $e15a
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00E144  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x3);  // 00E14A  move.b #$3, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00E150  move.w #$8011, 2(a1)
     goto L_00DFEC;  // 00E156  bra $dfec
 L_00E15A:
-    tick(22);
     // 00E15A  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00E2C4;  // 00E15E  bne $e2c4
-    tick(58);
     wr8(A2 + 0x7, 0x2);  // 00E162  move.b #$2, 7(a2)
     wr8(A2 + 0x6, 0x6);  // 00E168  move.b #$6, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00E16E  move.w #$8011, 120(a1)
     goto L_00DFEC;  // 00E174  bra $dfec
 L_00E178:
-    tick(22);
     // 00E178  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00E194;  // 00E17C  bne $e194
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00E17E  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x2);  // 00E184  move.b #$2, 6(a2)
     wr16(A1 - 0x78, 0x8011);  // 00E18A  move.w #$8011, -120(a1)
     goto L_00DFEC;  // 00E190  bra $dfec
 L_00E194:
-    tick(22);
     // 00E194  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00E1B0;  // 00E198  bne $e1b0
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00E19A  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x4);  // 00E1A0  move.b #$4, 6(a2)
     wr16(A1 + 0x78, 0x8011);  // 00E1A6  move.w #$8011, 120(a1)
     goto L_00DFEC;  // 00E1AC  bra $dfec
 L_00E1B0:
-    tick(22);
     // 00E1B0  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00E2C4;  // 00E1B4  bne $e2c4
-    tick(58);
     wr8(A2 + 0x7, 0x8);  // 00E1B8  move.b #$8, 7(a2)
     wr8(A2 + 0x6, 0x7);  // 00E1BE  move.b #$7, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00E1C4  move.w #$8011, -2(a1)
     goto L_00DFEC;  // 00E1CA  bra $dfec
 L_00E1CE:
-    tick(22);
     // 00E1CE  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00E1EA;  // 00E1D2  bne $e1ea
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00E1D4  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x3);  // 00E1DA  move.b #$3, 6(a2)
     wr16(A1 + 0x2, 0x8011);  // 00E1E0  move.w #$8011, 2(a1)
     goto L_00DFEC;  // 00E1E6  bra $dfec
 L_00E1EA:
-    tick(22);
     // 00E1EA  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00E206;  // 00E1EE  bne $e206
-    tick(58);
     wr8(A2 + 0x7, 0x4);  // 00E1F0  move.b #$4, 7(a2)
     wr8(A2 + 0x6, 0x1);  // 00E1F6  move.b #$1, 6(a2)
     wr16(A1 - 0x2, 0x8011);  // 00E1FC  move.w #$8011, -2(a1)
     goto L_00DFEC;  // 00E202  bra $dfec
 L_00E206:
-    tick(22);
     // 00E206  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00E2C4;  // 00E20A  bne $e2c4
-    tick(58);
     wr8(A2 + 0x7, 0x6);  // 00E20E  move.b #$6, 7(a2)
     wr8(A2 + 0x6, 0x8);  // 00E214  move.b #$8, 6(a2)
     wr16(A1 - 0x78, 0x8022);  // 00E21A  move.w #$8022, -120(a1)
     goto L_00DFEC;  // 00E220  bra $dfec
 L_00E224:
-    tick(26);
     // 00E224  cmpi.b #$5, 6(a2)
     if (rd8(A2 + 0x6) == 0x5) goto L_00E244;  // 00E22A  beq $e244
-    tick(26);
     // 00E22C  cmpi.b #$6, 6(a2)
     if (rd8(A2 + 0x6) == 0x6) goto L_00E264;  // 00E232  beq $e264
-    tick(26);
     // 00E234  cmpi.b #$7, 6(a2)
     if (rd8(A2 + 0x6) == 0x7) goto L_00E284;  // 00E23A  beq $e284
-    tick(26);
     // 00E23C  cmpi.b #$8, 6(a2)
     if (rd8(A2 + 0x6) == 0x8) goto L_00E2A4;  // 00E242  beq $e2a4
 L_00E244:
-    tick(26);
     // 00E244  cmpi.b #$7, 7(a2)
     if (rd8(A2 + 0x7) == 0x7) goto L_00E25A;  // 00E24A  beq $e25a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E24C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E252  addq.b #$1, 7(a2)
     goto L_00E054;  // 00E256  bra $e054
 L_00E25A:
-    tick(26);
     wr8(A2 + 0x6, 0x3);  // 00E25A  move.b #$3, 6(a2)
     goto L_00DFF4;  // 00E260  bra $dff4
 L_00E264:
-    tick(26);
     // 00E264  cmpi.b #$5, 7(a2)
     if (rd8(A2 + 0x7) == 0x5) goto L_00E27A;  // 00E26A  beq $e27a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E26C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E272  addq.b #$1, 7(a2)
     goto L_00E054;  // 00E276  bra $e054
 L_00E27A:
-    tick(26);
     wr8(A2 + 0x6, 0x4);  // 00E27A  move.b #$4, 6(a2)
     goto L_00DFF4;  // 00E280  bra $dff4
 L_00E284:
-    tick(26);
     // 00E284  cmpi.b #$b, 7(a2)
     if (rd8(A2 + 0x7) == 0xB) goto L_00E29A;  // 00E28A  beq $e29a
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E28C  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E292  addq.b #$1, 7(a2)
     goto L_00E054;  // 00E296  bra $e054
 L_00E29A:
-    tick(26);
     wr8(A2 + 0x6, 0x1);  // 00E29A  move.b #$1, 6(a2)
     goto L_00DFF4;  // 00E2A0  bra $dff4
 L_00E2A4:
-    tick(26);
     // 00E2A4  cmpi.b #$9, 7(a2)
     if (rd8(A2 + 0x7) == 0x9) goto L_00E2BA;  // 00E2AA  beq $e2ba
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E2AC  move.b #$1, 4(a2)
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E2B2  addq.b #$1, 7(a2)
     goto L_00E054;  // 00E2B6  bra $e054
 L_00E2BA:
-    tick(26);
     wr8(A2 + 0x6, 0x2);  // 00E2BA  move.b #$2, 6(a2)
     goto L_00DFF4;  // 00E2C0  bra $dff4
 L_00E2C4:
-    tick(48);
     wr8(A2 + 0x6, 0xA);  // 00E2C4  move.b #$a, 6(a2)
     wr8(A2 + 0x7, 0x1);  // 00E2CA  move.b #$1, 7(a2)
     wr8(A2 + 0x4, 0x1);  // 00E2D0  move.b #$1, 4(a2)
 L_00E2D6:
-    tick(26);
     // 00E2D6  cmpi.b #$6, 4(a2)
     if (int8_t(rd8(A2 + 0x4)) < 6) goto L_00E054;  // 00E2DC  blt $e054
-    tick(42);
     wr8(A2 + 0x4, 0x1);  // 00E2E0  move.b #$1, 4(a2)
     // 00E2E6  cmpi.b #$3, 7(a2)
     if (rd8(A2 + 0x7) == 0x3) goto L_00E320;  // 00E2EC  beq $e320
-    tick(26);
     // 00E2EE  cmpi.b #$5, 7(a2)
     if (rd8(A2 + 0x7) == 0x5) goto L_00E344;  // 00E2F4  beq $e344
-    tick(26);
     // 00E2F6  cmpi.b #$7, 7(a2)
     if (rd8(A2 + 0x7) == 0x7) goto L_00E368;  // 00E2FC  beq $e368
-    tick(26);
     // 00E2FE  cmpi.b #$8, 7(a2)
     if (rd8(A2 + 0x7) == 0x8) goto L_00E38C;  // 00E304  beq $e38c
 L_00E308:
-    tick(42);
     wr8(A2 + 0x7, (rd8(A2 + 0x7) + 0x1));  // 00E308  addq.b #$1, 7(a2)
     // 00E30C  cmpi.b #$9, 7(a2)
     if (rd8(A2 + 0x7) != 0x9) goto L_00E054;  // 00E312  bne $e054
-    tick(26);
     wr8(A2 + 0x7, 0x1);  // 00E316  move.b #$1, 7(a2)
     goto L_00E054;  // 00E31C  bra $e054
 L_00E320:
-    tick(26);
     // 00E320  cmpi.w #$3, -2(a1)
     if (rd16(A1 - 0x2) != 0x3) goto L_00E330;  // 00E326  bne $e330
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00E328  move.w #$1, $112da.l
 L_00E330:
-    tick(22);
     // 00E330  tst.w -2(a1)
     if (rd16(A1 - 0x2) != 0) goto L_00E308;  // 00E334  bne $e308
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00E336  clr.l 4(a2)
     wr8(A2 + 0x1, 0x2);  // 00E33A  move.b #$2, 1(a2)
     goto L_00D9A6;  // 00E340  bra $d9a6
 L_00E344:
-    tick(26);
     // 00E344  cmpi.w #$3, 120(a1)
     if (rd16(A1 + 0x78) != 0x3) goto L_00E354;  // 00E34A  bne $e354
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00E34C  move.w #$1, $112da.l
 L_00E354:
-    tick(22);
     // 00E354  tst.w 120(a1)
     if (rd16(A1 + 0x78) != 0) goto L_00E308;  // 00E358  bne $e308
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00E35A  clr.l 4(a2)
     wr8(A2 + 0x1, 0x4);  // 00E35E  move.b #$4, 1(a2)
     goto L_00D9A6;  // 00E364  bra $d9a6
 L_00E368:
-    tick(26);
     // 00E368  cmpi.w #$3, 2(a1)
     if (rd16(A1 + 0x2) != 0x3) goto L_00E378;  // 00E36E  bne $e378
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00E370  move.w #$1, $112da.l
 L_00E378:
-    tick(22);
     // 00E378  tst.w 2(a1)
     if (rd16(A1 + 0x2) != 0) goto L_00E308;  // 00E37C  bne $e308
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00E37E  clr.l 4(a2)
     wr8(A2 + 0x1, 0x3);  // 00E382  move.b #$3, 1(a2)
     goto L_00D9A6;  // 00E388  bra $d9a6
 L_00E38C:
-    tick(26);
     // 00E38C  cmpi.w #$3, -120(a1)
     if (rd16(A1 - 0x78) != 0x3) goto L_00E39C;  // 00E392  bne $e39c
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00E394  move.w #$1, $112da.l
 L_00E39C:
-    tick(22);
     // 00E39C  tst.w -120(a1)
     if (rd16(A1 - 0x78) != 0) goto L_00E308;  // 00E3A0  bne $e308
-    tick(50);
     wr32(A2 + 0x4, 0);  // 00E3A4  clr.l 4(a2)
     wr8(A2 + 0x1, 0x1);  // 00E3A8  move.b #$1, 1(a2)
     goto L_00D9A6;  // 00E3AE  bra $d9a6
 }
 
 void blit_electron_vertical() {
-    tick(164);
     D0 = 0x0;  // 00DD16  moveq.l #$0, d0
     A1 = v_cell_screen_ptrs;  // 00DD18  lea.l $191de.l, a1
     A0 = A6;  // 00DD1E  movea.l a6, a0
@@ -11838,10 +8940,8 @@ void blit_electron_vertical() {
     setW(D1, (((D1 & 0xFFFF) << 1) & 0xFFFF));  // 00DD40  lsl.w #$1, d1
     A3 += D1;  // 00DD42  adda.l d1, a3
 L_00DD44:
-    tick(26);
     // 00DD44  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00DD44;  // 00DD4A  bne $dd44
-    tick(122);
     wr32(A5 + 0x50, A3);  // 00DD4C  move.l a3, 80(a5)
     wr32(A5 + 0x54, A1);  // 00DD50  move.l a1, 84(a5)
     wr16(A5 + 0x42, 0);  // 00DD54  clr.w 66(a5)
@@ -11850,17 +8950,14 @@ L_00DD44:
     wr16(A5 + 0x66, 0x76);  // 00DD64  move.w #$76, 102(a5)
     // 00DD6A  tst.w $189ea.l
     if (rd16(0x189EA) != 0) goto L_00DD7A;  // 00DD70  bne $dd7a
-    tick(32);
     wr16(A5 + 0x58, 0x1201);  // 00DD72  move.w #$1201, 88(a5)
     return;  // 00DD78  rts 
 L_00DD7A:
-    tick(32);
     wr16(A5 + 0x58, 0x1001);  // 00DD7A  move.w #$1001, 88(a5)
     return;  // 00DD80  rts 
 }
 
 void blit_electron_vertical_down() {
-    tick(104);
     D0 = 0x0;  // 00DF1E  moveq.l #$0, d0
     A1 = v_cell_screen_ptrs;  // 00DF20  lea.l $191de.l, a1
     A0 = A6;  // 00DF26  movea.l a6, a0
@@ -11871,10 +8968,8 @@ void blit_electron_vertical_down() {
     A1 = A1 - 0x780;  // 00DF36  lea.l -1920(a1), a1
     // 00DF3A  tst.w $189ec.l
     if (rd16(0x189EC) == 0) goto L_00DF46;  // 00DF40  beq $df46
-    tick(8);
     A1 = A1 + 0x3C0;  // 00DF42  lea.l 960(a1), a1
 L_00DF46:
-    tick(78);
     D0 = 0x0;  // 00DF46  moveq.l #$0, d0
     setB(D0, rd8(A0));  // 00DF48  move.b (a0), d0
     D1 = D0;  // 00DF4A  move.l d0, d1
@@ -11883,10 +8978,8 @@ L_00DF46:
     setW(D1, (((D1 & 0xFFFF) << 1) & 0xFFFF));  // 00DF52  lsl.w #$1, d1
     A3 += D1;  // 00DF54  adda.l d1, a3
 L_00DF56:
-    tick(26);
     // 00DF56  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00DF56;  // 00DF5C  bne $df56
-    tick(122);
     wr32(A5 + 0x50, A3);  // 00DF5E  move.l a3, 80(a5)
     wr32(A5 + 0x54, A1);  // 00DF62  move.l a1, 84(a5)
     wr16(A5 + 0x42, 0);  // 00DF66  clr.w 66(a5)
@@ -11895,11 +8988,9 @@ L_00DF56:
     wr16(A5 + 0x66, 0x76);  // 00DF76  move.w #$76, 102(a5)
     // 00DF7C  tst.w $189ec.l
     if (rd16(0x189EC) != 0) goto L_00DF8C;  // 00DF82  bne $df8c
-    tick(32);
     wr16(A5 + 0x58, 0x1201);  // 00DF84  move.w #$1201, 88(a5)
     return;  // 00DF8A  rts 
 L_00DF8C:
-    tick(32);
     wr16(A5 + 0x58, 0x1001);  // 00DF8C  move.w #$1001, 88(a5)
     return;  // 00DF92  rts 
 }
@@ -11907,16 +8998,12 @@ L_00DF8C:
 // Поиск новых падений/скатываний зонков (через кадр). $12A25 — заморозка:
 // 1 — упрощённая ветка, 2 — зонки не обрабатываются.
 void scan_zonks() {
-    tick(30);
     // 00E3B2  cmpi.b #$1, $12a25.l
     if (rd8(v_freeze_zonks) == 0x1) goto L_00E4AC;  // 00E3BA  beq $e4ac
-    tick(30);
     // 00E3BE  cmpi.b #$2, $12a25.l
     if (rd8(v_freeze_zonks) != 0x2) { scan_zonks_normal(); return; }  // 00E3C6  bne $e3ca
-    tick(16);
     return;  // 00E3C8  rts 
 L_00E4AC:
-    tick(60);
     D0 = 0x0;  // 00E4AC  moveq.l #$0, d0
     setW(D1, 0x0);  // 00E4AE  move.w #$0, d1
     A1 = 0x14D5E;  // 00E4B2  lea.l $14d5e.l, a1
@@ -11927,7 +9014,6 @@ L_00E4AC:
 }
 
 void scan_zonks_normal() {
-    tick(48);
     D0 = 0x0;  // 00E3CA  moveq.l #$0, d0
     setW(D1, 0x0);  // 00E3CC  move.w #$0, d1
     A1 = 0x14D5E;  // 00E3D0  lea.l $14d5e.l, a1
@@ -11938,103 +9024,73 @@ void scan_zonks_normal() {
 
 void scan_zonks_loop() {
 L_00E3E2:
-    tick(34);
     A0 = v_map;  // 00E3E2  lea.l $11928.l, a0
     // 00E3E8  tst.l (a1)
     if (rd32(A1) == 0) goto L_00E5DC;  // 00E3EA  beq $e5dc
-    tick(22);
     // 00E3EE  cmpi.b #$ff, (a1)
     if (rd8(A1) == 0xFF) goto L_00E5D6;  // 00E3F2  beq $e5d6
-    tick(50);
     setW(D0, rd16(A1 + 0x2));  // 00E3F6  move.w 2(a1), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E3FA  lsr.w #$1, d0
     A0 += sxw((D0 & 0xFFFF));  // 00E3FC  adda.w d0, a0
     // 00E3FE  cmpi.w #$8888, (a0)
     if (rd16(A0) != 0x8888) goto L_00E40C;  // 00E402  bne $e40c
-    tick(22);
     wr8(A1, 0xFF);  // 00E404  move.b #$ff, (a1)
     goto L_00E5D6;  // 00E408  bra $e5d6
 L_00E40C:
-    tick(22);
     // 00E40C  cmpi.w #$3, (a0)
     if (rd16(A0) != 0x3) goto L_00E438;  // 00E410  bne $e438
-    tick(26);
     // 00E412  tst.b $11307.l
     if (rd8(0x11307) != 0) goto L_00E428;  // 00E418  bne $e428
-    tick(26);
     // 00E41A  tst.b $112e3.l
     if (rd8(0x112E3) != 0) goto L_00E438;  // 00E420  bne $e438
-    tick(18);
     call(murphy_die, 0xE426);  // 00E422  bsr $f21a
-    tick(10);
     goto L_00E438;  // 00E426  bra $e438
 L_00E428:
-    tick(26);
     // 00E428  tst.b $112e3.l
     if (rd8(0x112E3) != 0) goto L_00E438;  // 00E42E  bne $e438
-    tick(20);
     wr16(0x112E2, 0x1);  // 00E430  move.w #$1, $112e2.l
 L_00E438:
-    tick(22);
     // 00E438  cmpi.w #$8011, (a0)
     if (rd16(A0) != 0x8011) goto L_00E444;  // 00E43C  bne $e444
-    tick(16);
     wr16(A0 - 0x78, 0x8888);  // 00E43E  move.w #$8888, -120(a0)
 L_00E444:
-    tick(22);
     // 00E444  tst.w 120(a0)
     if (rd16(A0 + 0x78) == 0) goto L_00E526;  // 00E448  beq $e526
-    tick(26);
     // 00E44C  cmpi.w #$8022, 120(a0)
     if (rd16(A0 + 0x78) == 0x8022) goto L_00E526;  // 00E452  beq $e526
-    tick(26);
     // 00E456  cmpi.w #$ef01, 120(a0)
     if (rd16(A0 + 0x78) == 0xEF01) goto L_00E53E;  // 00E45C  beq $e53e
-    tick(26);
     // 00E460  cmpi.w #$5, 120(a0)
     if (rd16(A0 + 0x78) == 0x5) goto L_00E56C;  // 00E466  beq $e56c
-    tick(26);
     // 00E46A  cmpi.w #$4, 120(a0)
     if (rd16(A0 + 0x78) == 0x4) goto L_00E56C;  // 00E470  beq $e56c
-    tick(26);
     // 00E474  cmpi.w #$11, 120(a0)
     if (rd16(A0 + 0x78) == 0x11) goto L_00E486;  // 00E47A  beq $e486
-    tick(26);
     // 00E47C  cmpi.w #$8011, 120(a0)
     if (rd16(A0 + 0x78) != 0x8011) goto L_00E55E;  // 00E482  bne $e55e
 L_00E486:
-    tick(42);
     wr16(A0 + 0x78, 0x8888);  // 00E486  move.w #$8888, 120(a0)
     // 00E48C  cmpi.w #$8011, 122(a0)
     if (rd16(A0 + 0x7A) != 0x8011) goto L_00E49A;  // 00E492  bne $e49a
-    tick(16);
     wr16(A0 + 0x7A, 0x7777);  // 00E494  move.w #$7777, 122(a0)
 L_00E49A:
-    tick(26);
     // 00E49A  cmpi.w #$8011, 118(a0)
     if (rd16(A0 + 0x76) != 0x8011) goto L_00E4A8;  // 00E4A0  bne $e4a8
-    tick(16);
     wr16(A0 + 0x76, 0x7777);  // 00E4A2  move.w #$7777, 118(a0)
 L_00E4A8:
-    tick(10);
     goto L_00E5D6;  // 00E4A8  bra $e5d6
 L_00E526:
-    tick(22);
     // 00E526  cmpi.b #$ff, (a1)
     if (rd8(A1) != 0xFF) goto L_00E532;  // 00E52A  bne $e532
-    tick(20);
     setW(D1, ((D1 & 0xFFFF) + 0x4));  // 00E52C  addq.w #$4, d1
     A1 += 0x4;  // 00E52E  addq.l #$4, a1
     switch (A6) { case 0xE3E2: goto L_00E3E2; default: callAddress(A6); return; }  // 00E530  jmp (a6)
 L_00E532:
-    tick(22);
     // 00E532  cmpi.b #$2, (a1)
     if (rd8(A1) == 0x2) goto L_00E590;  // 00E536  beq $e590
-    tick(22);
     // 00E538  cmpi.b #$3, (a1)
     if (rd8(A1) == 0x3) goto L_00E5BC;  // 00E53C  beq $e5bc
 L_00E53E:
-    tick(100);
     wr8(A0, 0xEB);  // 00E53E  move.b #$eb, (a0)
     wr16(A0 + 0x78, 0xEF01);  // 00E542  move.w #$ef01, 120(a0)
     wr8(A1, 0x1);  // 00E548  move.b #$1, (a1)
@@ -12045,30 +9101,22 @@ L_00E53E:
     A1 += 0x4;  // 00E55A  addq.l #$4, a1
     switch (A6) { case 0xE3E2: goto L_00E3E2; default: callAddress(A6); return; }  // 00E55C  jmp (a6)
 L_00E55E:
-    tick(26);
     // 00E55E  cmpi.b #$1, 121(a0)
     if (rd8(A0 + 0x79) != 0x1) goto L_00E5D6;  // 00E564  bne $e5d6
-    tick(22);
     // 00E566  tst.b 120(a0)
     if (rd8(A0 + 0x78) != 0) goto L_00E5D6;  // 00E56A  bne $e5d6
 L_00E56C:
-    tick(26);
     // 00E56C  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00E5D6;  // 00E572  bne $e5d6
-    tick(26);
     // 00E574  cmpi.w #$ee01, -2(a0)
     if (rd16(A0 - 0x2) == 0xEE01) goto L_00E590;  // 00E57A  beq $e590
-    tick(26);
     // 00E57C  cmpi.w #$ed01, 2(a0)
     if (rd16(A0 + 0x2) == 0xED01) goto L_00E5BC;  // 00E582  beq $e5bc
-    tick(22);
     // 00E584  tst.w -2(a0)
     if (rd16(A0 - 0x2) != 0) goto L_00E5B0;  // 00E588  bne $e5b0
-    tick(22);
     // 00E58A  tst.w 118(a0)
     if (rd16(A0 + 0x76) != 0) goto L_00E5B0;  // 00E58E  bne $e5b0
 L_00E590:
-    tick(100);
     wr16(A3 + 0x2, (D1 & 0xFFFF));  // 00E590  move.w d1, 2(a3)
     wr16(A3 + 0x6, rd16(A1 + 0x2));  // 00E594  move.w 2(a1), 6(a3)
     A3 += 0x8;  // 00E59A  addq.l #$8, a3
@@ -12079,14 +9127,11 @@ L_00E590:
     A1 += 0x4;  // 00E5AC  addq.l #$4, a1
     switch (A6) { case 0xE3E2: goto L_00E3E2; default: callAddress(A6); return; }  // 00E5AE  jmp (a6)
 L_00E5B0:
-    tick(22);
     // 00E5B0  tst.w 2(a0)
     if (rd16(A0 + 0x2) != 0) goto L_00E5D6;  // 00E5B4  bne $e5d6
-    tick(22);
     // 00E5B6  tst.w 122(a0)
     if (rd16(A0 + 0x7A) != 0) goto L_00E5D6;  // 00E5BA  bne $e5d6
 L_00E5BC:
-    tick(80);
     wr16(A3 + 0x2, (D1 & 0xFFFF));  // 00E5BC  move.w d1, 2(a3)
     wr16(A3 + 0x6, rd16(A1 + 0x2));  // 00E5C0  move.w 2(a1), 6(a3)
     A3 += 0x8;  // 00E5C6  addq.l #$8, a3
@@ -12094,73 +9139,54 @@ L_00E5BC:
     wr16(A0 + 0x2, 0xED01);  // 00E5CC  move.w #$ed01, 2(a0)
     wr8(A0, 0xEB);  // 00E5D2  move.b #$eb, (a0)
 L_00E5D6:
-    tick(20);
     setW(D1, ((D1 & 0xFFFF) + 0x4));  // 00E5D6  addq.w #$4, d1
     A1 += 0x4;  // 00E5D8  addq.l #$4, a1
     switch (A6) { case 0xE3E2: goto L_00E3E2; default: callAddress(A6); return; }  // 00E5DA  jmp (a6)
 L_00E5DC:
-    tick(32);
     wr16(A3 + 0x2, 0xFFFF);  // 00E5DC  move.w #$ffff, 2(a3)
     return;  // 00E5E2  rts 
 }
 
 void scan_zonks_frozen_loop() {
 L_00E4CA:
-    tick(26);
     A0 = A4;  // 00E4CA  movea.l a4, a0
     // 00E4CC  tst.w 2(a1)
     if (rd16(A1 + 0x2) == 0) goto L_00E5DC;  // 00E4D0  beq $e5dc
-    tick(50);
     setW(D0, rd16(A1 + 0x2));  // 00E4D4  move.w 2(a1), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E4D8  lsr.w #$1, d0
     A0 += sxw((D0 & 0xFFFF));  // 00E4DA  adda.w d0, a0
     // 00E4DC  cmpi.w #$3, (a0)
     if (rd16(A0) != 0x3) goto L_00E508;  // 00E4E0  bne $e508
-    tick(26);
     // 00E4E2  tst.b $11307.l
     if (rd8(0x11307) != 0) goto L_00E4F8;  // 00E4E8  bne $e4f8
-    tick(26);
     // 00E4EA  tst.b $112e3.l
     if (rd8(0x112E3) != 0) goto L_00E508;  // 00E4F0  bne $e508
-    tick(18);
     call(murphy_die, 0xE4F6);  // 00E4F2  bsr $f21a
-    tick(10);
     goto L_00E508;  // 00E4F6  bra $e508
 L_00E4F8:
-    tick(26);
     // 00E4F8  tst.b $112e3.l
     if (rd8(0x112E3) != 0) goto L_00E508;  // 00E4FE  bne $e508
-    tick(20);
     wr16(0x112E2, 0x1);  // 00E500  move.w #$1, $112e2.l
 L_00E508:
-    tick(22);
     // 00E508  tst.w 120(a0)
     if (rd16(A0 + 0x78) == 0) goto L_00E526;  // 00E50C  beq $e526
-    tick(26);
     // 00E50E  cmpi.w #$5, 120(a0)
     if (rd16(A0 + 0x78) == 0x5) goto L_00E56C;  // 00E514  beq $e56c
-    tick(26);
     // 00E516  cmpi.w #$4, 120(a0)
     if (rd16(A0 + 0x78) == 0x4) goto L_00E56C;  // 00E51C  beq $e56c
-    tick(26);
     // 00E51E  cmpi.w #$ef01, 120(a0)
     if (rd16(A0 + 0x78) != 0xEF01) goto L_00E55E;  // 00E524  bne $e55e
 L_00E526:
-    tick(22);
     // 00E526  cmpi.b #$ff, (a1)
     if (rd8(A1) != 0xFF) goto L_00E532;  // 00E52A  bne $e532
-    tick(20);
     setW(D1, ((D1 & 0xFFFF) + 0x4));  // 00E52C  addq.w #$4, d1
     A1 += 0x4;  // 00E52E  addq.l #$4, a1
     switch (A6) { case 0xE4CA: goto L_00E4CA; default: callAddress(A6); return; }  // 00E530  jmp (a6)
 L_00E532:
-    tick(22);
     // 00E532  cmpi.b #$2, (a1)
     if (rd8(A1) == 0x2) goto L_00E590;  // 00E536  beq $e590
-    tick(22);
     // 00E538  cmpi.b #$3, (a1)
     if (rd8(A1) == 0x3) goto L_00E5BC;  // 00E53C  beq $e5bc
-    tick(100);
     wr8(A0, 0xEB);  // 00E53E  move.b #$eb, (a0)
     wr16(A0 + 0x78, 0xEF01);  // 00E542  move.w #$ef01, 120(a0)
     wr8(A1, 0x1);  // 00E548  move.b #$1, (a1)
@@ -12171,30 +9197,22 @@ L_00E532:
     A1 += 0x4;  // 00E55A  addq.l #$4, a1
     switch (A6) { case 0xE4CA: goto L_00E4CA; default: callAddress(A6); return; }  // 00E55C  jmp (a6)
 L_00E55E:
-    tick(26);
     // 00E55E  cmpi.b #$1, 121(a0)
     if (rd8(A0 + 0x79) != 0x1) goto L_00E5D6;  // 00E564  bne $e5d6
-    tick(22);
     // 00E566  tst.b 120(a0)
     if (rd8(A0 + 0x78) != 0) goto L_00E5D6;  // 00E56A  bne $e5d6
 L_00E56C:
-    tick(26);
     // 00E56C  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00E5D6;  // 00E572  bne $e5d6
-    tick(26);
     // 00E574  cmpi.w #$ee01, -2(a0)
     if (rd16(A0 - 0x2) == 0xEE01) goto L_00E590;  // 00E57A  beq $e590
-    tick(26);
     // 00E57C  cmpi.w #$ed01, 2(a0)
     if (rd16(A0 + 0x2) == 0xED01) goto L_00E5BC;  // 00E582  beq $e5bc
-    tick(22);
     // 00E584  tst.w -2(a0)
     if (rd16(A0 - 0x2) != 0) goto L_00E5B0;  // 00E588  bne $e5b0
-    tick(22);
     // 00E58A  tst.w 118(a0)
     if (rd16(A0 + 0x76) != 0) goto L_00E5B0;  // 00E58E  bne $e5b0
 L_00E590:
-    tick(100);
     wr16(A3 + 0x2, (D1 & 0xFFFF));  // 00E590  move.w d1, 2(a3)
     wr16(A3 + 0x6, rd16(A1 + 0x2));  // 00E594  move.w 2(a1), 6(a3)
     A3 += 0x8;  // 00E59A  addq.l #$8, a3
@@ -12205,14 +9223,11 @@ L_00E590:
     A1 += 0x4;  // 00E5AC  addq.l #$4, a1
     switch (A6) { case 0xE4CA: goto L_00E4CA; default: callAddress(A6); return; }  // 00E5AE  jmp (a6)
 L_00E5B0:
-    tick(22);
     // 00E5B0  tst.w 2(a0)
     if (rd16(A0 + 0x2) != 0) goto L_00E5D6;  // 00E5B4  bne $e5d6
-    tick(22);
     // 00E5B6  tst.w 122(a0)
     if (rd16(A0 + 0x7A) != 0) goto L_00E5D6;  // 00E5BA  bne $e5d6
 L_00E5BC:
-    tick(80);
     wr16(A3 + 0x2, (D1 & 0xFFFF));  // 00E5BC  move.w d1, 2(a3)
     wr16(A3 + 0x6, rd16(A1 + 0x2));  // 00E5C0  move.w 2(a1), 6(a3)
     A3 += 0x8;  // 00E5C6  addq.l #$8, a3
@@ -12220,12 +9235,10 @@ L_00E5BC:
     wr16(A0 + 0x2, 0xED01);  // 00E5CC  move.w #$ed01, 2(a0)
     wr8(A0, 0xEB);  // 00E5D2  move.b #$eb, (a0)
 L_00E5D6:
-    tick(20);
     setW(D1, ((D1 & 0xFFFF) + 0x4));  // 00E5D6  addq.w #$4, d1
     A1 += 0x4;  // 00E5D8  addq.l #$4, a1
     switch (A6) { case 0xE4CA: goto L_00E4CA; default: callAddress(A6); return; }  // 00E5DA  jmp (a6)
 L_00E5DC:
-    tick(32);
     wr16(A3 + 0x2, 0xFFFF);  // 00E5DC  move.w #$ffff, 2(a3)
     return;  // 00E5E2  rts 
 }
@@ -12233,16 +9246,12 @@ L_00E5DC:
 // Анимация движущихся зонков (список $163D4): падение 8 фаз по 2 пикселя
 // (обработчики по таблице $11210), скатывание влево/вправо.
 void animate_zonks() {
-    tick(30);
     // 00E5E4  cmpi.b #$2, $12a25.l
     if (rd8(v_freeze_zonks) == 0x2) goto L_00F49A;  // 00E5EC  beq $f49a
-    tick(12);
     A1 = v_moving_zonks;  // 00E5F0  lea.l $163d4.l, a1
 L_00E5F6:
-    tick(26);
     // 00E5F6  cmpi.w #$ffff, 2(a1)
     if (rd16(A1 + 0x2) == 0xFFFF) goto L_00F49A;  // 00E5FC  beq $f49a
-    tick(94);
     A0 = v_cell_screen_ptrs;  // 00E600  lea.l $191de.l, a0
     A3 = 0x14D5E;  // 00E606  lea.l $14d5e.l, a3
     A3 += sxw(rd16(A1 + 0x2));  // 00E60C  adda.w 2(a1), a3
@@ -12251,10 +9260,8 @@ L_00E5F6:
     D0 = 0x0;  // 00E616  moveq.l #$0, d0
     // 00E618  cmpi.b #$2, (a3)
     if (rd8(A3) == 0x2) goto L_00E6C2;  // 00E61C  beq $e6c2
-    tick(22);
     // 00E620  cmpi.b #$3, (a3)
     if (rd8(A3) == 0x3) goto L_00E734;  // 00E624  beq $e734
-    tick(58);
     A6 = 0x11210;  // 00E628  lea.l $11210.l, a6
     setB(D0, rd8(A3 + 0x1));  // 00E62E  move.b 1(a3), d0
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 00E632  lsl.w #$1, d0
@@ -12262,14 +9269,12 @@ L_00E5F6:
     A4 = rd32(A6);  // 00E636  movea.l (a6), a4
     callAddress(A4); return;  // 00E638  jmp (a4)
 L_00E6C2:
-    tick(64);
     A0 -= 0x2;  // 00E6C2  subq.l #$2, a0
     A4 = rd32(0x1129E);  // 00E6C4  movea.l $1129e.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00E6CA  move.b 1(a3), d0
     A4 += D0;  // 00E6CE  adda.l d0, a4
     // 00E6D0  cmpi.w #$1c, d0
     if (int16_t((D0 & 0xFFFF)) < 28) goto L_00E6FE;  // 00E6D4  blt $e6fe
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00E6D6  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E6DA  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00E6DC  andi.l #$ffff, d0
@@ -12281,13 +9286,10 @@ L_00E6C2:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) - 0x4));  // 00E6F8  subq.w #$4, 2(a3)
     goto L_00E702;  // 00E6FC  bra $e702
 L_00E6FE:
-    tick(16);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00E6FE  addq.b #$4, 1(a3)
 L_00E702:
-    tick(26);
     // 00E702  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00E702;  // 00E708  bne $e702
-    tick(130);
     wr32(A5 + 0x50, A4);  // 00E70A  move.l a4, 80(a5)
     wr32(A5 + 0x54, A0);  // 00E70E  move.l a0, 84(a5)
     wr16(A5 + 0x64, 0x24);  // 00E712  move.w #$24, 100(a5)
@@ -12298,17 +9300,14 @@ L_00E702:
     A1 += 0x8;  // 00E72E  addq.l #$8, a1
     goto L_00E5F6;  // 00E730  bra $e5f6
 L_00E734:
-    tick(56);
     A4 = rd32(0x112A2);  // 00E734  movea.l $112a2.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00E73A  move.b 1(a3), d0
     A4 += D0;  // 00E73E  adda.l d0, a4
     // 00E740  cmpi.w #$1c, d0
     if ((D0 & 0xFFFF) == 0x1C) goto L_00E74C;  // 00E744  beq $e74c
-    tick(26);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00E746  addq.b #$4, 1(a3)
     goto L_00E702;  // 00E74A  bra $e702
 L_00E74C:
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00E74C  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E750  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00E752  andi.l #$ffff, d0
@@ -12320,17 +9319,14 @@ L_00E74C:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) + 0x4));  // 00E76E  addq.w #$4, 2(a3)
     goto L_00E702;  // 00E772  bra $e702
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void zonk_fall_step() {
     goto L_00E63A;
 L_00E5F6:
-    tick(26);
     // 00E5F6  cmpi.w #$ffff, 2(a1)
     if (rd16(A1 + 0x2) == 0xFFFF) goto L_00F49A;  // 00E5FC  beq $f49a
-    tick(94);
     A0 = v_cell_screen_ptrs;  // 00E600  lea.l $191de.l, a0
     A3 = 0x14D5E;  // 00E606  lea.l $14d5e.l, a3
     A3 += sxw(rd16(A1 + 0x2));  // 00E60C  adda.w 2(a1), a3
@@ -12339,10 +9335,8 @@ L_00E5F6:
     D0 = 0x0;  // 00E616  moveq.l #$0, d0
     // 00E618  cmpi.b #$2, (a3)
     if (rd8(A3) == 0x2) goto L_00E6C2;  // 00E61C  beq $e6c2
-    tick(22);
     // 00E620  cmpi.b #$3, (a3)
     if (rd8(A3) == 0x3) goto L_00E734;  // 00E624  beq $e734
-    tick(58);
     A6 = 0x11210;  // 00E628  lea.l $11210.l, a6
     setB(D0, rd8(A3 + 0x1));  // 00E62E  move.b 1(a3), d0
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 00E632  lsl.w #$1, d0
@@ -12350,14 +9344,11 @@ L_00E5F6:
     A4 = rd32(A6);  // 00E636  movea.l (a6), a4
     switch (A4) { case 0xE63A: goto L_00E63A; default: callAddress(A4); return; }  // 00E638  jmp (a4)
 L_00E63A:
-    tick(26);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00E63A  addq.b #$4, 1(a3)
     goto L_00E688;  // 00E63E  bra $e688
 L_00E688:
-    tick(26);
     // 00E688  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00E688;  // 00E68E  bne $e688
-    tick(164);
     A0 += rd32(A6 + 0x4);  // 00E690  adda.l 4(a6), a0
     wr32(A5 + 0x50, rd32(0x1129A));  // 00E694  move.l $1129a.l, 80(a5)
     wr32(A5 + 0x54, A0);  // 00E69C  move.l a0, 84(a5)
@@ -12369,14 +9360,12 @@ L_00E688:
     A1 += 0x8;  // 00E6BC  addq.l #$8, a1
     goto L_00E5F6;  // 00E6BE  bra $e5f6
 L_00E6C2:
-    tick(64);
     A0 -= 0x2;  // 00E6C2  subq.l #$2, a0
     A4 = rd32(0x1129E);  // 00E6C4  movea.l $1129e.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00E6CA  move.b 1(a3), d0
     A4 += D0;  // 00E6CE  adda.l d0, a4
     // 00E6D0  cmpi.w #$1c, d0
     if (int16_t((D0 & 0xFFFF)) < 28) goto L_00E6FE;  // 00E6D4  blt $e6fe
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00E6D6  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E6DA  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00E6DC  andi.l #$ffff, d0
@@ -12388,13 +9377,10 @@ L_00E6C2:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) - 0x4));  // 00E6F8  subq.w #$4, 2(a3)
     goto L_00E702;  // 00E6FC  bra $e702
 L_00E6FE:
-    tick(16);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00E6FE  addq.b #$4, 1(a3)
 L_00E702:
-    tick(26);
     // 00E702  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00E702;  // 00E708  bne $e702
-    tick(130);
     wr32(A5 + 0x50, A4);  // 00E70A  move.l a4, 80(a5)
     wr32(A5 + 0x54, A0);  // 00E70E  move.l a0, 84(a5)
     wr16(A5 + 0x64, 0x24);  // 00E712  move.w #$24, 100(a5)
@@ -12405,17 +9391,14 @@ L_00E702:
     A1 += 0x8;  // 00E72E  addq.l #$8, a1
     goto L_00E5F6;  // 00E730  bra $e5f6
 L_00E734:
-    tick(56);
     A4 = rd32(0x112A2);  // 00E734  movea.l $112a2.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00E73A  move.b 1(a3), d0
     A4 += D0;  // 00E73E  adda.l d0, a4
     // 00E740  cmpi.w #$1c, d0
     if ((D0 & 0xFFFF) == 0x1C) goto L_00E74C;  // 00E744  beq $e74c
-    tick(26);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00E746  addq.b #$4, 1(a3)
     goto L_00E702;  // 00E74A  bra $e702
 L_00E74C:
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00E74C  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E750  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00E752  andi.l #$ffff, d0
@@ -12427,17 +9410,14 @@ L_00E74C:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) + 0x4));  // 00E76E  addq.w #$4, 2(a3)
     goto L_00E702;  // 00E772  bra $e702
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void zonk_fall_land() {
     goto L_00E640;
 L_00E5F6:
-    tick(26);
     // 00E5F6  cmpi.w #$ffff, 2(a1)
     if (rd16(A1 + 0x2) == 0xFFFF) goto L_00F49A;  // 00E5FC  beq $f49a
-    tick(94);
     A0 = v_cell_screen_ptrs;  // 00E600  lea.l $191de.l, a0
     A3 = 0x14D5E;  // 00E606  lea.l $14d5e.l, a3
     A3 += sxw(rd16(A1 + 0x2));  // 00E60C  adda.w 2(a1), a3
@@ -12446,10 +9426,8 @@ L_00E5F6:
     D0 = 0x0;  // 00E616  moveq.l #$0, d0
     // 00E618  cmpi.b #$2, (a3)
     if (rd8(A3) == 0x2) goto L_00E6C2;  // 00E61C  beq $e6c2
-    tick(22);
     // 00E620  cmpi.b #$3, (a3)
     if (rd8(A3) == 0x3) goto L_00E734;  // 00E624  beq $e734
-    tick(58);
     A6 = 0x11210;  // 00E628  lea.l $11210.l, a6
     setB(D0, rd8(A3 + 0x1));  // 00E62E  move.b 1(a3), d0
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 00E632  lsl.w #$1, d0
@@ -12457,7 +9435,6 @@ L_00E5F6:
     A4 = rd32(A6);  // 00E636  movea.l (a6), a4
     switch (A4) { case 0xE640: goto L_00E640; default: callAddress(A4); return; }  // 00E638  jmp (a4)
 L_00E640:
-    tick(90);
     D4 = 0x0;  // 00E640  moveq.l #$0, d4
     A2 = v_map;  // 00E642  lea.l $11928.l, a2
     setW(D4, rd16(A3 + 0x2));  // 00E648  move.w 2(a3), d4
@@ -12466,26 +9443,20 @@ L_00E640:
     wr16(A2, rd16(c_tile_empty));  // 00E650  move.w $113b8.l, (a2)
     // 00E656  cmpi.w #$3, 240(a2)
     if (rd16(A2 + 0xF0) == 0x3) goto L_00E680;  // 00E65C  beq $e680
-    tick(26);
     // 00E65E  cmpi.w #$8, 240(a2)
     if (rd16(A2 + 0xF0) != 0x8) goto L_00E66E;  // 00E664  bne $e66e
-    tick(16);
     wr16(A2 + 0xF0, 0x8888);  // 00E668  move.w #$8888, 240(a2)
 L_00E66E:
-    tick(66);
     wr16(A2 + 0x78, rd16(c_tile_zonk));  // 00E66E  move.w $113ba.l, 120(a2)
     wr16(A3, 0);  // 00E676  clr.w (a3)
     wr16(A3 + 0x2, (rd16(A3 + 0x2) + 0xF0));  // 00E678  addi.w #$f0, 2(a3)
     goto L_00E688;  // 00E67E  bra $e688
 L_00E680:
-    tick(30);
     wr32(v_murphy_crushed_cell, A2);  // 00E680  move.l a2, $11436.l
     goto L_00E66E;  // 00E686  bra $e66e
 L_00E688:
-    tick(26);
     // 00E688  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00E688;  // 00E68E  bne $e688
-    tick(164);
     A0 += rd32(A6 + 0x4);  // 00E690  adda.l 4(a6), a0
     wr32(A5 + 0x50, rd32(0x1129A));  // 00E694  move.l $1129a.l, 80(a5)
     wr32(A5 + 0x54, A0);  // 00E69C  move.l a0, 84(a5)
@@ -12497,14 +9468,12 @@ L_00E688:
     A1 += 0x8;  // 00E6BC  addq.l #$8, a1
     goto L_00E5F6;  // 00E6BE  bra $e5f6
 L_00E6C2:
-    tick(64);
     A0 -= 0x2;  // 00E6C2  subq.l #$2, a0
     A4 = rd32(0x1129E);  // 00E6C4  movea.l $1129e.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00E6CA  move.b 1(a3), d0
     A4 += D0;  // 00E6CE  adda.l d0, a4
     // 00E6D0  cmpi.w #$1c, d0
     if (int16_t((D0 & 0xFFFF)) < 28) goto L_00E6FE;  // 00E6D4  blt $e6fe
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00E6D6  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E6DA  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00E6DC  andi.l #$ffff, d0
@@ -12516,13 +9485,10 @@ L_00E6C2:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) - 0x4));  // 00E6F8  subq.w #$4, 2(a3)
     goto L_00E702;  // 00E6FC  bra $e702
 L_00E6FE:
-    tick(16);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00E6FE  addq.b #$4, 1(a3)
 L_00E702:
-    tick(26);
     // 00E702  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00E702;  // 00E708  bne $e702
-    tick(130);
     wr32(A5 + 0x50, A4);  // 00E70A  move.l a4, 80(a5)
     wr32(A5 + 0x54, A0);  // 00E70E  move.l a0, 84(a5)
     wr16(A5 + 0x64, 0x24);  // 00E712  move.w #$24, 100(a5)
@@ -12533,17 +9499,14 @@ L_00E702:
     A1 += 0x8;  // 00E72E  addq.l #$8, a1
     goto L_00E5F6;  // 00E730  bra $e5f6
 L_00E734:
-    tick(56);
     A4 = rd32(0x112A2);  // 00E734  movea.l $112a2.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00E73A  move.b 1(a3), d0
     A4 += D0;  // 00E73E  adda.l d0, a4
     // 00E740  cmpi.w #$1c, d0
     if ((D0 & 0xFFFF) == 0x1C) goto L_00E74C;  // 00E744  beq $e74c
-    tick(26);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00E746  addq.b #$4, 1(a3)
     goto L_00E702;  // 00E74A  bra $e702
 L_00E74C:
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00E74C  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E750  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00E752  andi.l #$ffff, d0
@@ -12555,19 +9518,15 @@ L_00E74C:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) + 0x4));  // 00E76E  addq.w #$4, 2(a3)
     goto L_00E702;  // 00E772  bra $e702
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 // Поиск новых падений/скатываний инфотронов (в кадры без зонков).
 void scan_infotrons() {
-    tick(30);
     // 00E786  cmpi.b #$1, $12a25.l
     if (rd8(v_freeze_zonks) == 0x1) goto L_00E87A;  // 00E78E  beq $e87a
-    tick(30);
     // 00E792  cmpi.b #$2, $12a25.l
     if (rd8(v_freeze_zonks) == 0x2) goto L_00E87A;  // 00E79A  beq $e87a
-    tick(48);
     D0 = 0x0;  // 00E79E  moveq.l #$0, d0
     setW(D1, 0x0);  // 00E7A0  move.w #$0, d1
     A1 = 0x167BC;  // 00E7A4  lea.l $167bc.l, a1
@@ -12575,7 +9534,6 @@ void scan_infotrons() {
     A6 = 0xE7B6;  // 00E7B0  movea.l #$e7b6, a6
     { scan_infotrons_loop(); return; }
 L_00E87A:
-    tick(48);
     D0 = 0x0;  // 00E87A  moveq.l #$0, d0
     setW(D1, 0x0);  // 00E87C  move.w #$0, d1
     A1 = 0x167BC;  // 00E880  lea.l $167bc.l, a1
@@ -12586,97 +9544,70 @@ L_00E87A:
 
 void scan_infotrons_loop() {
 L_00E7B6:
-    tick(34);
     A0 = v_map;  // 00E7B6  lea.l $11928.l, a0
     // 00E7BC  tst.l (a1)
     if (rd32(A1) == 0) goto L_00E986;  // 00E7BE  beq $e986
-    tick(22);
     // 00E7C2  cmpi.b #$ff, (a1)
     if (rd8(A1) == 0xFF) goto L_00E980;  // 00E7C6  beq $e980
-    tick(48);
     setW(D0, rd16(A1 + 0x2));  // 00E7CA  move.w 2(a1), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E7CE  lsr.w #$1, d0
     A0 += D0;  // 00E7D0  adda.l d0, a0
     // 00E7D2  cmpi.w #$8888, (a0)
     if (rd16(A0) != 0x8888) goto L_00E7E0;  // 00E7D6  bne $e7e0
-    tick(22);
     wr8(A1, 0xFF);  // 00E7D8  move.b #$ff, (a1)
     goto L_00E980;  // 00E7DC  bra $e980
 L_00E7E0:
-    tick(22);
     // 00E7E0  cmpi.w #$8011, (a0)
     if (rd16(A0) == 0x8011) goto L_00E7F4;  // 00E7E4  beq $e7f4
-    tick(22);
     // 00E7E6  cmpi.w #$8022, (a0)
     if (rd16(A0) == 0x8022) goto L_00E80C;  // 00E7EA  beq $e80c
-    tick(22);
     // 00E7EC  cmpi.w #$11, (a0)
     if (rd16(A0) == 0x11) goto L_00E80C;  // 00E7F0  beq $e80c
-    tick(10);
     goto L_00E7FC;  // 00E7F2  bra $e7fc
 L_00E7F4:
-    tick(26);
     wr16(A0 - 0x78, 0x8888);  // 00E7F4  move.w #$8888, -120(a0)
     goto L_00E812;  // 00E7FA  bra $e812
 L_00E7FC:
-    tick(26);
     // 00E7FC  cmpi.b #$4, 1(a0)
     if (rd8(A0 + 0x1) == 0x4) goto L_00E80C;  // 00E802  beq $e80c
 L_00E804:
-    tick(22);
     wr8(A1, 0xEE);  // 00E804  move.b #$ee, (a1)
     goto L_00E980;  // 00E808  bra $e980
 L_00E80C:
-    tick(22);
     // 00E80C  cmpi.w #$fc04, (a0)
     if (rd16(A0) == 0xFC04) goto L_00E804;  // 00E810  beq $e804
 L_00E812:
-    tick(22);
     // 00E812  tst.w 120(a0)
     if (rd16(A0 + 0x78) == 0) goto L_00E8E2;  // 00E816  beq $e8e2
-    tick(26);
     // 00E81A  cmpi.w #$8022, 120(a0)
     if (rd16(A0 + 0x78) == 0x8022) goto L_00E8E2;  // 00E820  beq $e8e2
-    tick(26);
     // 00E824  cmpi.w #$5, 120(a0)
     if (rd16(A0 + 0x78) == 0x5) goto L_00E91C;  // 00E82A  beq $e91c
-    tick(26);
     // 00E82E  cmpi.w #$1, 120(a0)
     if (rd16(A0 + 0x78) == 0x1) goto L_00E91C;  // 00E834  beq $e91c
-    tick(26);
     // 00E838  cmpi.w #$ff04, 120(a0)
     if (rd16(A0 + 0x78) == 0xFF04) goto L_00E8EE;  // 00E83E  beq $e8ee
-    tick(26);
     // 00E842  cmpi.w #$11, 120(a0)
     if (rd16(A0 + 0x78) == 0x11) goto L_00E854;  // 00E848  beq $e854
-    tick(26);
     // 00E84A  cmpi.w #$8011, 120(a0)
     if (rd16(A0 + 0x78) != 0x8011) goto L_00E90E;  // 00E850  bne $e90e
 L_00E854:
-    tick(42);
     wr16(A0 + 0x78, 0x8888);  // 00E854  move.w #$8888, 120(a0)
     // 00E85A  cmpi.w #$8011, 122(a0)
     if (rd16(A0 + 0x7A) != 0x8011) goto L_00E868;  // 00E860  bne $e868
-    tick(16);
     wr16(A0 + 0x7A, 0x7777);  // 00E862  move.w #$7777, 122(a0)
 L_00E868:
-    tick(26);
     // 00E868  cmpi.w #$8011, 118(a0)
     if (rd16(A0 + 0x76) != 0x8011) goto L_00E876;  // 00E86E  bne $e876
-    tick(16);
     wr16(A0 + 0x76, 0x7777);  // 00E870  move.w #$7777, 118(a0)
 L_00E876:
-    tick(10);
     goto L_00E980;  // 00E876  bra $e980
 L_00E8E2:
-    tick(22);
     // 00E8E2  cmpi.b #$2, (a1)
     if (rd8(A1) == 0x2) goto L_00E938;  // 00E8E6  beq $e938
-    tick(22);
     // 00E8E8  cmpi.b #$3, (a1)
     if (rd8(A1) == 0x3) goto L_00E966;  // 00E8EC  beq $e966
 L_00E8EE:
-    tick(100);
     wr8(A0, 0xFB);  // 00E8EE  move.b #$fb, (a0)
     wr16(A0 + 0x78, 0xFF04);  // 00E8F2  move.w #$ff04, 120(a0)
     wr8(A1, 0x1);  // 00E8F8  move.b #$1, (a1)
@@ -12687,27 +9618,20 @@ L_00E8EE:
     A1 += 0x4;  // 00E90A  addq.l #$4, a1
     switch (A6) { case 0xE7B6: goto L_00E7B6; default: callAddress(A6); return; }  // 00E90C  jmp (a6)
 L_00E90E:
-    tick(26);
     // 00E90E  cmpi.b #$4, 121(a0)
     if (rd8(A0 + 0x79) != 0x4) goto L_00E980;  // 00E914  bne $e980
-    tick(22);
     // 00E916  tst.b 120(a0)
     if (rd8(A0 + 0x78) != 0) goto L_00E980;  // 00E91A  bne $e980
 L_00E91C:
-    tick(26);
     // 00E91C  cmpi.w #$fe04, -2(a0)
     if (rd16(A0 - 0x2) == 0xFE04) goto L_00E938;  // 00E922  beq $e938
-    tick(26);
     // 00E924  cmpi.w #$fd04, 2(a0)
     if (rd16(A0 + 0x2) == 0xFD04) goto L_00E966;  // 00E92A  beq $e966
-    tick(22);
     // 00E92C  tst.w -2(a0)
     if (rd16(A0 - 0x2) != 0) goto L_00E958;  // 00E930  bne $e958
-    tick(22);
     // 00E932  tst.w 118(a0)
     if (rd16(A0 + 0x76) != 0) goto L_00E958;  // 00E936  bne $e958
 L_00E938:
-    tick(100);
     wr16(A3 + 0x2, (D1 & 0xFFFF));  // 00E938  move.w d1, 2(a3)
     wr16(A3 + 0x6, rd16(A1 + 0x2));  // 00E93C  move.w 2(a1), 6(a3)
     A3 += 0x8;  // 00E942  addq.l #$8, a3
@@ -12718,14 +9642,11 @@ L_00E938:
     A1 += 0x4;  // 00E954  addq.l #$4, a1
     switch (A6) { case 0xE7B6: goto L_00E7B6; default: callAddress(A6); return; }  // 00E956  jmp (a6)
 L_00E958:
-    tick(22);
     // 00E958  tst.w 2(a0)
     if (rd16(A0 + 0x2) != 0) goto L_00E980;  // 00E95C  bne $e980
-    tick(22);
     // 00E960  tst.w 122(a0)
     if (rd16(A0 + 0x7A) != 0) goto L_00E980;  // 00E964  bne $e980
 L_00E966:
-    tick(80);
     wr16(A3 + 0x2, (D1 & 0xFFFF));  // 00E966  move.w d1, 2(a3)
     wr16(A3 + 0x6, rd16(A1 + 0x2));  // 00E96A  move.w 2(a1), 6(a3)
     A3 += 0x8;  // 00E970  addq.l #$8, a3
@@ -12733,59 +9654,45 @@ L_00E966:
     wr16(A0 + 0x2, 0xFD04);  // 00E976  move.w #$fd04, 2(a0)
     wr8(A0, 0xFB);  // 00E97C  move.b #$fb, (a0)
 L_00E980:
-    tick(20);
     setW(D1, ((D1 & 0xFFFF) + 0x4));  // 00E980  addq.w #$4, d1
     A1 += 0x4;  // 00E982  addq.l #$4, a1
     switch (A6) { case 0xE7B6: goto L_00E7B6; default: callAddress(A6); return; }  // 00E984  jmp (a6)
 L_00E986:
-    tick(32);
     wr16(A3 + 0x2, 0xFFFF);  // 00E986  move.w #$ffff, 2(a3)
     return;  // 00E98C  rts 
 }
 
 void scan_infotrons_frozen_loop() {
 L_00E892:
-    tick(34);
     A0 = v_map;  // 00E892  lea.l $11928.l, a0
     // 00E898  tst.l (a1)
     if (rd32(A1) == 0) goto L_00E986;  // 00E89A  beq $e986
-    tick(22);
     // 00E89E  cmpi.b #$ff, (a1)
     if (rd8(A1) == 0xFF) goto L_00E980;  // 00E8A2  beq $e980
-    tick(52);
     setW(D0, rd16(A1 + 0x2));  // 00E8A6  move.w 2(a1), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00E8AA  lsr.w #$1, d0
     A0 += D0;  // 00E8AC  adda.l d0, a0
     // 00E8AE  cmpi.b #$4, 1(a0)
     if (rd8(A0 + 0x1) == 0x4) goto L_00E8BE;  // 00E8B4  beq $e8be
 L_00E8B6:
-    tick(22);
     wr8(A1, 0xEE);  // 00E8B6  move.b #$ee, (a1)
     goto L_00E980;  // 00E8BA  bra $e980
 L_00E8BE:
-    tick(22);
     // 00E8BE  cmpi.w #$fc04, (a0)
     if (rd16(A0) == 0xFC04) goto L_00E8B6;  // 00E8C2  beq $e8b6
-    tick(22);
     // 00E8C4  tst.w 120(a0)
     if (rd16(A0 + 0x78) == 0) goto L_00E8E2;  // 00E8C8  beq $e8e2
-    tick(26);
     // 00E8CA  cmpi.w #$5, 120(a0)
     if (rd16(A0 + 0x78) == 0x5) goto L_00E91C;  // 00E8D0  beq $e91c
-    tick(26);
     // 00E8D2  cmpi.w #$1, 120(a0)
     if (rd16(A0 + 0x78) == 0x1) goto L_00E91C;  // 00E8D8  beq $e91c
-    tick(26);
     // 00E8DA  cmpi.w #$ff04, 120(a0)
     if (rd16(A0 + 0x78) != 0xFF04) goto L_00E90E;  // 00E8E0  bne $e90e
 L_00E8E2:
-    tick(22);
     // 00E8E2  cmpi.b #$2, (a1)
     if (rd8(A1) == 0x2) goto L_00E938;  // 00E8E6  beq $e938
-    tick(22);
     // 00E8E8  cmpi.b #$3, (a1)
     if (rd8(A1) == 0x3) goto L_00E966;  // 00E8EC  beq $e966
-    tick(100);
     wr8(A0, 0xFB);  // 00E8EE  move.b #$fb, (a0)
     wr16(A0 + 0x78, 0xFF04);  // 00E8F2  move.w #$ff04, 120(a0)
     wr8(A1, 0x1);  // 00E8F8  move.b #$1, (a1)
@@ -12796,27 +9703,20 @@ L_00E8E2:
     A1 += 0x4;  // 00E90A  addq.l #$4, a1
     switch (A6) { case 0xE892: goto L_00E892; default: callAddress(A6); return; }  // 00E90C  jmp (a6)
 L_00E90E:
-    tick(26);
     // 00E90E  cmpi.b #$4, 121(a0)
     if (rd8(A0 + 0x79) != 0x4) goto L_00E980;  // 00E914  bne $e980
-    tick(22);
     // 00E916  tst.b 120(a0)
     if (rd8(A0 + 0x78) != 0) goto L_00E980;  // 00E91A  bne $e980
 L_00E91C:
-    tick(26);
     // 00E91C  cmpi.w #$fe04, -2(a0)
     if (rd16(A0 - 0x2) == 0xFE04) goto L_00E938;  // 00E922  beq $e938
-    tick(26);
     // 00E924  cmpi.w #$fd04, 2(a0)
     if (rd16(A0 + 0x2) == 0xFD04) goto L_00E966;  // 00E92A  beq $e966
-    tick(22);
     // 00E92C  tst.w -2(a0)
     if (rd16(A0 - 0x2) != 0) goto L_00E958;  // 00E930  bne $e958
-    tick(22);
     // 00E932  tst.w 118(a0)
     if (rd16(A0 + 0x76) != 0) goto L_00E958;  // 00E936  bne $e958
 L_00E938:
-    tick(100);
     wr16(A3 + 0x2, (D1 & 0xFFFF));  // 00E938  move.w d1, 2(a3)
     wr16(A3 + 0x6, rd16(A1 + 0x2));  // 00E93C  move.w 2(a1), 6(a3)
     A3 += 0x8;  // 00E942  addq.l #$8, a3
@@ -12827,14 +9727,11 @@ L_00E938:
     A1 += 0x4;  // 00E954  addq.l #$4, a1
     switch (A6) { case 0xE892: goto L_00E892; default: callAddress(A6); return; }  // 00E956  jmp (a6)
 L_00E958:
-    tick(22);
     // 00E958  tst.w 2(a0)
     if (rd16(A0 + 0x2) != 0) goto L_00E980;  // 00E95C  bne $e980
-    tick(22);
     // 00E960  tst.w 122(a0)
     if (rd16(A0 + 0x7A) != 0) goto L_00E980;  // 00E964  bne $e980
 L_00E966:
-    tick(80);
     wr16(A3 + 0x2, (D1 & 0xFFFF));  // 00E966  move.w d1, 2(a3)
     wr16(A3 + 0x6, rd16(A1 + 0x2));  // 00E96A  move.w 2(a1), 6(a3)
     A3 += 0x8;  // 00E970  addq.l #$8, a3
@@ -12842,25 +9739,20 @@ L_00E966:
     wr16(A0 + 0x2, 0xFD04);  // 00E976  move.w #$fd04, 2(a0)
     wr8(A0, 0xFB);  // 00E97C  move.b #$fb, (a0)
 L_00E980:
-    tick(20);
     setW(D1, ((D1 & 0xFFFF) + 0x4));  // 00E980  addq.w #$4, d1
     A1 += 0x4;  // 00E982  addq.l #$4, a1
     switch (A6) { case 0xE892: goto L_00E892; default: callAddress(A6); return; }  // 00E984  jmp (a6)
 L_00E986:
-    tick(32);
     wr16(A3 + 0x2, 0xFFFF);  // 00E986  move.w #$ffff, 2(a3)
     return;  // 00E98C  rts 
 }
 
 // Анимация движущихся инфотронов (список $17E32), таблица $11250.
 void animate_infotrons() {
-    tick(12);
     A1 = v_moving_infotrons;  // 00E98E  lea.l $17e32.l, a1
 L_00E994:
-    tick(26);
     // 00E994  cmpi.w #$ffff, 2(a1)
     if (rd16(A1 + 0x2) == 0xFFFF) goto L_00F49A;  // 00E99A  beq $f49a
-    tick(94);
     A0 = v_cell_screen_ptrs;  // 00E99E  lea.l $191de.l, a0
     A3 = 0x167BC;  // 00E9A4  lea.l $167bc.l, a3
     A3 += sxw(rd16(A1 + 0x2));  // 00E9AA  adda.w 2(a1), a3
@@ -12869,10 +9761,8 @@ L_00E994:
     D0 = 0x0;  // 00E9B4  moveq.l #$0, d0
     // 00E9B6  cmpi.b #$2, (a3)
     if (rd8(A3) == 0x2) goto L_00EA7E;  // 00E9BA  beq $ea7e
-    tick(22);
     // 00E9BE  cmpi.b #$3, (a3)
     if (rd8(A3) == 0x3) goto L_00EAF0;  // 00E9C2  beq $eaf0
-    tick(58);
     A6 = 0x11250;  // 00E9C6  lea.l $11250.l, a6
     setB(D0, rd8(A3 + 0x1));  // 00E9CC  move.b 1(a3), d0
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 00E9D0  lsl.w #$1, d0
@@ -12880,14 +9770,12 @@ L_00E994:
     A4 = rd32(A6);  // 00E9D4  movea.l (a6), a4
     callAddress(A4); return;  // 00E9D6  jmp (a4)
 L_00EA7E:
-    tick(64);
     A0 -= 0x2;  // 00EA7E  subq.l #$2, a0
     A4 = rd32(0x112AA);  // 00EA80  movea.l $112aa.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00EA86  move.b 1(a3), d0
     A4 += D0;  // 00EA8A  adda.l d0, a4
     // 00EA8C  cmpi.w #$1c, d0
     if (int16_t((D0 & 0xFFFF)) < 28) goto L_00EABA;  // 00EA90  blt $eaba
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00EA92  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00EA96  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00EA98  andi.l #$ffff, d0
@@ -12899,13 +9787,10 @@ L_00EA7E:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) - 0x4));  // 00EAB4  subq.w #$4, 2(a3)
     goto L_00EABE;  // 00EAB8  bra $eabe
 L_00EABA:
-    tick(16);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00EABA  addq.b #$4, 1(a3)
 L_00EABE:
-    tick(26);
     // 00EABE  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00EABE;  // 00EAC4  bne $eabe
-    tick(130);
     wr32(A5 + 0x50, A4);  // 00EAC6  move.l a4, 80(a5)
     wr32(A5 + 0x54, A0);  // 00EACA  move.l a0, 84(a5)
     wr16(A5 + 0x64, 0x24);  // 00EACE  move.w #$24, 100(a5)
@@ -12916,17 +9801,14 @@ L_00EABE:
     A1 += 0x8;  // 00EAEA  addq.l #$8, a1
     goto L_00E994;  // 00EAEC  bra $e994
 L_00EAF0:
-    tick(56);
     A4 = rd32(0x112AE);  // 00EAF0  movea.l $112ae.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00EAF6  move.b 1(a3), d0
     A4 += D0;  // 00EAFA  adda.l d0, a4
     // 00EAFC  cmpi.w #$1c, d0
     if ((D0 & 0xFFFF) == 0x1C) goto L_00EB08;  // 00EB00  beq $eb08
-    tick(26);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00EB02  addq.b #$4, 1(a3)
     goto L_00EABE;  // 00EB06  bra $eabe
 L_00EB08:
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00EB08  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00EB0C  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00EB0E  andi.l #$ffff, d0
@@ -12938,17 +9820,14 @@ L_00EB08:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) + 0x4));  // 00EB2A  addq.w #$4, 2(a3)
     goto L_00EABE;  // 00EB2E  bra $eabe
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void infotron_fall_step() {
     goto L_00E9D8;
 L_00E994:
-    tick(26);
     // 00E994  cmpi.w #$ffff, 2(a1)
     if (rd16(A1 + 0x2) == 0xFFFF) goto L_00F49A;  // 00E99A  beq $f49a
-    tick(94);
     A0 = v_cell_screen_ptrs;  // 00E99E  lea.l $191de.l, a0
     A3 = 0x167BC;  // 00E9A4  lea.l $167bc.l, a3
     A3 += sxw(rd16(A1 + 0x2));  // 00E9AA  adda.w 2(a1), a3
@@ -12957,10 +9836,8 @@ L_00E994:
     D0 = 0x0;  // 00E9B4  moveq.l #$0, d0
     // 00E9B6  cmpi.b #$2, (a3)
     if (rd8(A3) == 0x2) goto L_00EA7E;  // 00E9BA  beq $ea7e
-    tick(22);
     // 00E9BE  cmpi.b #$3, (a3)
     if (rd8(A3) == 0x3) goto L_00EAF0;  // 00E9C2  beq $eaf0
-    tick(58);
     A6 = 0x11250;  // 00E9C6  lea.l $11250.l, a6
     setB(D0, rd8(A3 + 0x1));  // 00E9CC  move.b 1(a3), d0
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 00E9D0  lsl.w #$1, d0
@@ -12968,14 +9845,11 @@ L_00E994:
     A4 = rd32(A6);  // 00E9D4  movea.l (a6), a4
     switch (A4) { case 0xE9D8: goto L_00E9D8; default: callAddress(A4); return; }  // 00E9D6  jmp (a4)
 L_00E9D8:
-    tick(26);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00E9D8  addq.b #$4, 1(a3)
     goto L_00EA44;  // 00E9DC  bra $ea44
 L_00EA44:
-    tick(26);
     // 00EA44  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00EA44;  // 00EA4A  bne $ea44
-    tick(164);
     A0 += rd32(A6 + 0x4);  // 00EA4C  adda.l 4(a6), a0
     wr32(A5 + 0x50, rd32(0x112A6));  // 00EA50  move.l $112a6.l, 80(a5)
     wr32(A5 + 0x54, A0);  // 00EA58  move.l a0, 84(a5)
@@ -12987,14 +9861,12 @@ L_00EA44:
     A1 += 0x8;  // 00EA78  addq.l #$8, a1
     goto L_00E994;  // 00EA7A  bra $e994
 L_00EA7E:
-    tick(64);
     A0 -= 0x2;  // 00EA7E  subq.l #$2, a0
     A4 = rd32(0x112AA);  // 00EA80  movea.l $112aa.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00EA86  move.b 1(a3), d0
     A4 += D0;  // 00EA8A  adda.l d0, a4
     // 00EA8C  cmpi.w #$1c, d0
     if (int16_t((D0 & 0xFFFF)) < 28) goto L_00EABA;  // 00EA90  blt $eaba
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00EA92  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00EA96  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00EA98  andi.l #$ffff, d0
@@ -13006,13 +9878,10 @@ L_00EA7E:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) - 0x4));  // 00EAB4  subq.w #$4, 2(a3)
     goto L_00EABE;  // 00EAB8  bra $eabe
 L_00EABA:
-    tick(16);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00EABA  addq.b #$4, 1(a3)
 L_00EABE:
-    tick(26);
     // 00EABE  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00EABE;  // 00EAC4  bne $eabe
-    tick(130);
     wr32(A5 + 0x50, A4);  // 00EAC6  move.l a4, 80(a5)
     wr32(A5 + 0x54, A0);  // 00EACA  move.l a0, 84(a5)
     wr16(A5 + 0x64, 0x24);  // 00EACE  move.w #$24, 100(a5)
@@ -13023,17 +9892,14 @@ L_00EABE:
     A1 += 0x8;  // 00EAEA  addq.l #$8, a1
     goto L_00E994;  // 00EAEC  bra $e994
 L_00EAF0:
-    tick(56);
     A4 = rd32(0x112AE);  // 00EAF0  movea.l $112ae.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00EAF6  move.b 1(a3), d0
     A4 += D0;  // 00EAFA  adda.l d0, a4
     // 00EAFC  cmpi.w #$1c, d0
     if ((D0 & 0xFFFF) == 0x1C) goto L_00EB08;  // 00EB00  beq $eb08
-    tick(26);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00EB02  addq.b #$4, 1(a3)
     goto L_00EABE;  // 00EB06  bra $eabe
 L_00EB08:
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00EB08  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00EB0C  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00EB0E  andi.l #$ffff, d0
@@ -13045,17 +9911,14 @@ L_00EB08:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) + 0x4));  // 00EB2A  addq.w #$4, 2(a3)
     goto L_00EABE;  // 00EB2E  bra $eabe
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void infotron_fall_land() {
     goto L_00E9DE;
 L_00E994:
-    tick(26);
     // 00E994  cmpi.w #$ffff, 2(a1)
     if (rd16(A1 + 0x2) == 0xFFFF) goto L_00F49A;  // 00E99A  beq $f49a
-    tick(94);
     A0 = v_cell_screen_ptrs;  // 00E99E  lea.l $191de.l, a0
     A3 = 0x167BC;  // 00E9A4  lea.l $167bc.l, a3
     A3 += sxw(rd16(A1 + 0x2));  // 00E9AA  adda.w 2(a1), a3
@@ -13064,10 +9927,8 @@ L_00E994:
     D0 = 0x0;  // 00E9B4  moveq.l #$0, d0
     // 00E9B6  cmpi.b #$2, (a3)
     if (rd8(A3) == 0x2) goto L_00EA7E;  // 00E9BA  beq $ea7e
-    tick(22);
     // 00E9BE  cmpi.b #$3, (a3)
     if (rd8(A3) == 0x3) goto L_00EAF0;  // 00E9C2  beq $eaf0
-    tick(58);
     A6 = 0x11250;  // 00E9C6  lea.l $11250.l, a6
     setB(D0, rd8(A3 + 0x1));  // 00E9CC  move.b 1(a3), d0
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 00E9D0  lsl.w #$1, d0
@@ -13075,7 +9936,6 @@ L_00E994:
     A4 = rd32(A6);  // 00E9D4  movea.l (a6), a4
     switch (A4) { case 0xE9DE: goto L_00E9DE; default: callAddress(A4); return; }  // 00E9D6  jmp (a4)
 L_00E9DE:
-    tick(90);
     D4 = 0x0;  // 00E9DE  moveq.l #$0, d4
     A2 = v_map;  // 00E9E0  lea.l $11928.l, a2
     setW(D4, rd16(A3 + 0x2));  // 00E9E6  move.w 2(a3), d4
@@ -13084,37 +9944,28 @@ L_00E9DE:
     wr16(A2, rd16(c_tile_empty));  // 00E9EE  move.w $113b8.l, (a2)
     // 00E9F4  cmpi.w #$8, 240(a2)
     if (rd16(A2 + 0xF0) != 0x8) goto L_00EA0A;  // 00E9FA  bne $ea0a
-    tick(38);
     wr16(A2 + 0xF0, 0x8888);  // 00E9FC  move.w #$8888, 240(a2)
     wr8(A3, 0xFF);  // 00EA02  move.b #$ff, (a3)
     goto L_00EA44;  // 00EA06  bra $ea44
 L_00EA0A:
-    tick(26);
     // 00EA0A  cmpi.w #$3, 240(a2)
     if (rd16(A2 + 0xF0) != 0x3) goto L_00EA2A;  // 00EA10  bne $ea2a
-    tick(30);
     // 00EA12  cmpi.w #$2, $11924.l
     if (rd16(0x11924) == 0x2) goto L_00EA3C;  // 00EA1A  beq $ea3c
-    tick(30);
     // 00EA1C  cmpi.w #$4, $11924.l
     if (rd16(0x11924) == 0x4) goto L_00EA3C;  // 00EA24  beq $ea3c
-    tick(18);
     call(murphy_die, 0xEA2A);  // 00EA26  bsr $f21a
 L_00EA2A:
-    tick(66);
     wr16(A2 + 0x78, rd16(c_tile_infotron));  // 00EA2A  move.w $113c0.l, 120(a2)
     wr16(A3, 0);  // 00EA32  clr.w (a3)
     wr16(A3 + 0x2, (rd16(A3 + 0x2) + 0xF0));  // 00EA34  addi.w #$f0, 2(a3)
     goto L_00EA44;  // 00EA3A  bra $ea44
 L_00EA3C:
-    tick(30);
     wr32(v_murphy_crushed_cell, A2);  // 00EA3C  move.l a2, $11436.l
     goto L_00EA2A;  // 00EA42  bra $ea2a
 L_00EA44:
-    tick(26);
     // 00EA44  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00EA44;  // 00EA4A  bne $ea44
-    tick(164);
     A0 += rd32(A6 + 0x4);  // 00EA4C  adda.l 4(a6), a0
     wr32(A5 + 0x50, rd32(0x112A6));  // 00EA50  move.l $112a6.l, 80(a5)
     wr32(A5 + 0x54, A0);  // 00EA58  move.l a0, 84(a5)
@@ -13126,14 +9977,12 @@ L_00EA44:
     A1 += 0x8;  // 00EA78  addq.l #$8, a1
     goto L_00E994;  // 00EA7A  bra $e994
 L_00EA7E:
-    tick(64);
     A0 -= 0x2;  // 00EA7E  subq.l #$2, a0
     A4 = rd32(0x112AA);  // 00EA80  movea.l $112aa.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00EA86  move.b 1(a3), d0
     A4 += D0;  // 00EA8A  adda.l d0, a4
     // 00EA8C  cmpi.w #$1c, d0
     if (int16_t((D0 & 0xFFFF)) < 28) goto L_00EABA;  // 00EA90  blt $eaba
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00EA92  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00EA96  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00EA98  andi.l #$ffff, d0
@@ -13145,13 +9994,10 @@ L_00EA7E:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) - 0x4));  // 00EAB4  subq.w #$4, 2(a3)
     goto L_00EABE;  // 00EAB8  bra $eabe
 L_00EABA:
-    tick(16);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00EABA  addq.b #$4, 1(a3)
 L_00EABE:
-    tick(26);
     // 00EABE  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00EABE;  // 00EAC4  bne $eabe
-    tick(130);
     wr32(A5 + 0x50, A4);  // 00EAC6  move.l a4, 80(a5)
     wr32(A5 + 0x54, A0);  // 00EACA  move.l a0, 84(a5)
     wr16(A5 + 0x64, 0x24);  // 00EACE  move.w #$24, 100(a5)
@@ -13162,17 +10008,14 @@ L_00EABE:
     A1 += 0x8;  // 00EAEA  addq.l #$8, a1
     goto L_00E994;  // 00EAEC  bra $e994
 L_00EAF0:
-    tick(56);
     A4 = rd32(0x112AE);  // 00EAF0  movea.l $112ae.l, a4
     setB(D0, rd8(A3 + 0x1));  // 00EAF6  move.b 1(a3), d0
     A4 += D0;  // 00EAFA  adda.l d0, a4
     // 00EAFC  cmpi.w #$1c, d0
     if ((D0 & 0xFFFF) == 0x1C) goto L_00EB08;  // 00EB00  beq $eb08
-    tick(26);
     wr8(A3 + 0x1, (rd8(A3 + 0x1) + 0x4));  // 00EB02  addq.b #$4, 1(a3)
     goto L_00EABE;  // 00EB06  bra $eabe
 L_00EB08:
-    tick(126);
     setW(D0, rd16(A3 + 0x2));  // 00EB08  move.w 2(a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00EB0C  lsr.w #$1, d0
     D0 = (D0 & 0xFFFF);  // 00EB0E  andi.l #$ffff, d0
@@ -13184,22 +10027,17 @@ L_00EB08:
     wr16(A3 + 0x2, (rd16(A3 + 0x2) + 0x4));  // 00EB2A  addq.w #$4, 2(a3)
     goto L_00EABE;  // 00EB2E  bra $eabe
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 // Заложенный красный диск: через 35 кадров взрыв в его клетке.
 void update_red_disk() {
-    tick(26);
     // 00EB32  tst.w $1138e.l
     if (rd16(v_red_disk_planted) != 0) goto L_00EB3C;  // 00EB38  bne $eb3c
-    tick(16);
     return;  // 00EB3A  rts 
 L_00EB3C:
-    tick(26);
     // 00EB3C  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00EB3C;  // 00EB42  bne $eb3c
-    tick(206);
     wr32(A5 + 0x50, rd32(0x112B2));  // 00EB44  move.l $112b2.l, 80(a5)
     wr32(A5 + 0x54, rd32(0x1138A));  // 00EB4C  move.l $1138a.l, 84(a5)
     wr16(A5 + 0x42, 0);  // 00EB54  clr.w 66(a5)
@@ -13211,15 +10049,12 @@ L_00EB3C:
     wr16(A0, 0x2);  // 00EB76  move.w #$2, (a0)
     // 00EB7A  cmpi.w #$23, $1138e.l
     if (rd16(v_red_disk_planted) == 0x23) goto L_00EB8C;  // 00EB82  beq $eb8c
-    tick(36);
     wr16(v_red_disk_planted, (rd16(v_red_disk_planted) + 0x1));  // 00EB84  addq.w #$1, $1138e.l
     return;  // 00EB8A  rts 
 L_00EB8C:
-    tick(58);
     A1 = rd32(0x1138A);  // 00EB8C  movea.l $1138a.l, a1
     A0 = rd32(v_fire_hold_cell);  // 00EB92  movea.l $11394.l, a0
     call(start_explosion, 0xEB9C);  // 00EB98  bsr $f8e6
-    tick(112);
     wr16(v_red_disk_planted, 0);  // 00EB9C  clr.w $1138e.l
     wr16(v_fire_hold_frames, 0);  // 00EBA2  clr.w $11392.l
     wr32(v_fire_hold_cell, 0);  // 00EBA8  clr.l $11394.l
@@ -13230,82 +10065,61 @@ L_00EB8C:
 // Оранжевые диски (список $189EE, 6 байт): падение, взрыв при приземлении,
 // взрыв через 10 кадров после попадания во взрыв.
 void update_orange_disks() {
-    tick(12);
     A2 = v_orange_disks;  // 00EBB6  lea.l $189ee.l, a2
 L_00EBBC:
-    tick(46);
     A0 = v_map;  // 00EBBC  lea.l $11928.l, a0
     A1 = v_cell_screen_ptrs;  // 00EBC2  lea.l $191de.l, a1
     // 00EBC8  tst.l (a2)
     if (rd32(A2) != 0) goto L_00EBCE;  // 00EBCA  bne $ebce
-    tick(16);
     return;  // 00EBCC  rts 
 L_00EBCE:
-    tick(22);
     // 00EBCE  cmpi.w #$ffff, (a2)
     if (rd16(A2) == 0xFFFF) goto L_00EC5E;  // 00EBD2  beq $ec5e
-    tick(52);
     D0 = 0x0;  // 00EBD6  moveq.l #$0, d0
     setW(D0, rd16(A2 + 0x2));  // 00EBD8  move.w 2(a2), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00EBDC  lsr.w #$1, d0
     A0 += D0;  // 00EBDE  adda.l d0, a0
     // 00EBE0  cmpi.w #$8888, (a0)
     if (rd16(A0) == 0x8888) goto L_00EC2A;  // 00EBE4  beq $ec2a
-    tick(22);
     // 00EBE6  cmpi.w #$3, (a0)
     if (rd16(A0) != 0x3) goto L_00EC02;  // 00EBEA  bne $ec02
-    tick(30);
     // 00EBEC  cmpi.w #$1, $118fe.l
     if (rd16(v_input_dir) != 0x1) goto L_00EC02;  // 00EBF4  bne $ec02
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00EBF6  move.w #$1, $112da.l
     goto L_00EC2A;  // 00EBFE  bra $ec2a
 L_00EC02:
-    tick(26);
     // 00EC02  cmpi.b #$1, 5(a2)
     if (rd8(A2 + 0x5) == 0x1) goto L_00EC2A;  // 00EC08  beq $ec2a
-    tick(26);
     // 00EC0A  cmpi.b #$2, 5(a2)
     if (rd8(A2 + 0x5) == 0x2) goto L_00ED16;  // 00EC10  beq $ed16
-    tick(18);
     // 00EC14  tst.w (a2)
     if (rd16(A2) != 0) goto L_00EC64;  // 00EC16  bne $ec64
-    tick(22);
     // 00EC18  tst.w 120(a0)
     if (rd16(A0 + 0x78) == 0) goto L_00EC64;  // 00EC1C  beq $ec64
-    tick(26);
     // 00EC1E  cmpi.b #$11, 121(a0)
     if (rd8(A0 + 0x79) == 0x11) goto L_00EC2A;  // 00EC24  beq $ec2a
-    tick(10);
     goto L_00EC5E;  // 00EC26  bra $ec5e
 L_00EC2A:
-    tick(26);
     // 00EC2A  cmpi.b #$a, 4(a2)
     if (rd8(A2 + 0x4) == 0xA) goto L_00EC42;  // 00EC30  beq $ec42
-    tick(50);
     wr8(A2 + 0x4, (rd8(A2 + 0x4) + 0x1));  // 00EC32  addq.b #$1, 4(a2)
     wr8(A2 + 0x5, 0x1);  // 00EC36  move.b #$1, 5(a2)
     A2 += 0x6;  // 00EC3C  addq.l #$6, a2
     goto L_00EBBC;  // 00EC3E  bra $ebbc
 L_00EC42:
-    tick(68);
     wr16(A2, 0xFFFF);  // 00EC42  move.w #$ffff, (a2)
     setW(D0, rd16(A2 + 0x2));  // 00EC46  move.w 2(a2), d0
     A1 += D0;  // 00EC4A  adda.l d0, a1
     A1 = rd32(A1);  // 00EC4C  movea.l (a1), a1
     // 00EC4E  cmpi.w #$8888, 120(a0)
     if (rd16(A0 + 0x78) != 0x8888) goto L_00EC5A;  // 00EC54  bne $ec5a
-    tick(16);
     wr16(A0 + 0x78, 0);  // 00EC56  clr.w 120(a0)
 L_00EC5A:
-    tick(18);
     call(start_explosion, 0xEC5E);  // 00EC5A  bsr $f8e6
 L_00EC5E:
-    tick(18);
     A2 += 0x6;  // 00EC5E  addq.l #$6, a2
     goto L_00EBBC;  // 00EC60  bra $ebbc
 L_00EC64:
-    tick(76);
     D0 = 0x0;  // 00EC64  moveq.l #$0, d0
     wr16(A0, 0xEB08);  // 00EC66  move.w #$eb08, (a0)
     wr16(A0 + 0x78, 0xEB08);  // 00EC6A  move.w #$eb08, 120(a0)
@@ -13315,10 +10129,8 @@ L_00EC64:
     setW(D0, rd16(A2));  // 00EC78  move.w (a2), d0
     A1 += D0;  // 00EC7A  adda.l d0, a1
 L_00EC7C:
-    tick(26);
     // 00EC7C  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00EC7C;  // 00EC82  bne $ec7c
-    tick(166);
     wr32(A5 + 0x50, rd32(0x112B6));  // 00EC84  move.l $112b6.l, 80(a5)
     wr32(A5 + 0x54, A1);  // 00EC8C  move.l a1, 84(a5)
     wr16(A5 + 0x42, 0);  // 00EC90  clr.w 66(a5)
@@ -13329,31 +10141,23 @@ L_00EC7C:
     wr16(A2, (rd16(A2) + 0x3C0));  // 00ECAC  addi.w #$3c0, (a2)
     // 00ECB0  cmpi.w #$1e00, (a2)
     if (rd16(A2) == 0x1E00) goto L_00ECBC;  // 00ECB4  beq $ecbc
-    tick(18);
     A2 += 0x6;  // 00ECB6  addq.l #$6, a2
     goto L_00EBBC;  // 00ECB8  bra $ebbc
 L_00ECBC:
-    tick(26);
     // 00ECBC  cmpi.w #$eb08, 240(a0)
     if (rd16(A0 + 0xF0) == 0xEB08) goto L_00ECF4;  // 00ECC2  beq $ecf4
-    tick(26);
     // 00ECC6  cmpi.w #$fb04, 240(a0)
     if (rd16(A0 + 0xF0) == 0xFB04) goto L_00ECF4;  // 00ECCC  beq $ecf4
-    tick(26);
     // 00ECD0  cmpi.w #$eb01, 240(a0)
     if (rd16(A0 + 0xF0) == 0xEB01) goto L_00ECF4;  // 00ECD6  beq $ecf4
-    tick(26);
     // 00ECDA  cmpi.w #$3, 240(a0)
     if (rd16(A0 + 0xF0) != 0x3) goto L_00ECEE;  // 00ECE0  bne $ecee
-    tick(30);
     wr32(v_murphy_crushed_cell, A0);  // 00ECE4  move.l a0, $11436.l
     goto L_00ECF4;  // 00ECEA  bra $ecf4
 L_00ECEE:
-    tick(22);
     // 00ECEE  tst.w 240(a0)
     if (rd16(A0 + 0xF0) != 0) goto L_00ED0A;  // 00ECF2  bne $ed0a
 L_00ECF4:
-    tick(78);
     wr16(A0, 0);  // 00ECF4  clr.w (a0)
     wr16(A0 + 0x78, 0xEB08);  // 00ECF6  move.w #$eb08, 120(a0)
     wr16(A2, 0);  // 00ECFC  clr.w (a2)
@@ -13361,20 +10165,16 @@ L_00ECF4:
     A2 += 0x6;  // 00ED04  addq.l #$6, a2
     goto L_00EBBC;  // 00ED06  bra $ebbc
 L_00ED0A:
-    tick(34);
     wr8(A2 + 0x5, 0x2);  // 00ED0A  move.b #$2, 5(a2)
     A2 += 0x6;  // 00ED10  addq.l #$6, a2
     goto L_00EBBC;  // 00ED12  bra $ebbc
 L_00ED16:
-    tick(26);
     // 00ED16  cmpi.b #$1, 4(a2)
     if (rd8(A2 + 0x4) == 0x1) goto L_00ED28;  // 00ED1C  beq $ed28
-    tick(34);
     wr8(A2 + 0x4, (rd8(A2 + 0x4) + 0x1));  // 00ED1E  addq.b #$1, 4(a2)
     A2 += 0x6;  // 00ED22  addq.l #$6, a2
     goto L_00EBBC;  // 00ED24  bra $ebbc
 L_00ED28:
-    tick(82);
     setW(D0, rd16(A2 + 0x2));  // 00ED28  move.w 2(a2), d0
     A1 += D0;  // 00ED2C  adda.l d0, a1
     A1 = rd32(A1);  // 00ED2E  movea.l (a1), a1
@@ -13383,389 +10183,277 @@ L_00ED28:
     A0 = A0 + 0x78;  // 00ED34  lea.l 120(a0), a0
     wr16(A2, 0xFFFF);  // 00ED38  move.w #$ffff, (a2)
     call(start_explosion, 0xED40);  // 00ED3C  bsr $f8e6
-    tick(18);
     A2 += 0x6;  // 00ED40  addq.l #$6, a2
     goto L_00EBBC;  // 00ED42  bra $ebbc
 }
 
 // Проход Murphy через порт (перемещение на две клетки).
 void murphy_port_passage() {
-    tick(26);
     // 00ED46  tst.w $113e8.l
     if (rd16(v_port_passage_dir) == 0) goto L_00F49A;  // 00ED4C  beq $f49a
-    tick(30);
     // 00ED50  cmpi.w #$1, $113e8.l
     if (rd16(v_port_passage_dir) == 0x1) goto L_00ED80;  // 00ED58  beq $ed80
-    tick(30);
     // 00ED5A  cmpi.w #$2, $113e8.l
     if (rd16(v_port_passage_dir) == 0x2) goto L_00EE8A;  // 00ED62  beq $ee8a
-    tick(30);
     // 00ED66  cmpi.w #$3, $113e8.l
     if (rd16(v_port_passage_dir) == 0x3) goto L_00F094;  // 00ED6E  beq $f094
-    tick(30);
     // 00ED72  cmpi.w #$4, $113e8.l
     if (rd16(v_port_passage_dir) == 0x4) goto L_00EF88;  // 00ED7A  beq $ef88
-    tick(16);
     return;  // 00ED7E  rts 
 L_00ED80:
-    tick(26);
     // 00ED80  tst.w $113ea.l
     if (rd16(0x113EA) != 0) goto L_00EDB4;  // 00ED86  bne $edb4
-    tick(18);
     call(blit_murphy_standing, 0xED8C);  // 00ED88  bsr $caec
-    tick(144);
     wr32(0x113EC, rd32(v_murphy_screen));  // 00ED8C  move.l $11398.l, $113ec.l
     wr32(0x113F0, rd32(0x113EC));  // 00ED96  move.l $113ec.l, $113f0.l
     wr32(0x113F0, (rd32(0x113F0) - 0x3C00));  // 00EDA0  subi.l #$3c00, $113f0.l
     wr32(0x11334, (rd32(0x11334) - 0x3C00));  // 00EDAA  subi.l #$3c00, $11334.l
 L_00EDB4:
-    tick(18);
     call(blit_port_passage_frame, 0xEDB8);  // 00EDB4  bsr $f1a4
-    tick(30);
     // 00EDB8  cmpi.w #$b0, $11346.l
     if (rd16(v_scroll_y) != 0xB0) goto L_00EDDA;  // 00EDC0  bne $edda
-    tick(30);
     // 00EDC2  cmpi.w #$7, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x7) goto L_00EDF0;  // 00EDCA  beq $edf0
-    tick(30);
     // 00EDCC  cmpi.w #$8, $1133e.l
     if (int16_t(rd16(v_murphy_screen_y)) >= 8) goto L_00EDF4;  // 00EDD4  bge $edf4
-    tick(10);
     goto L_00EDEC;  // 00EDD8  bra $edec
 L_00EDDA:
-    tick(26);
     // 00EDDA  tst.w $11346.l
     if (rd16(v_scroll_y) == 0) goto L_00EDF4;  // 00EDE0  beq $edf4
-    tick(30);
     // 00EDE2  cmpi.w #$10, $11346.l
     if (rd16(v_scroll_y) == 0x10) goto L_00EDF0;  // 00EDEA  beq $edf0
 L_00EDEC:
-    tick(18);
     call(bplptr_up_one_line_block, 0xEDF0);  // 00EDEC  bsr $ce62
 L_00EDF0:
-    tick(18);
     call(bplptr_up_one_line_block, 0xEDF4);  // 00EDF0  bsr $ce62
 L_00EDF4:
-    tick(30);
     // 00EDF4  cmpi.w #$10, $113ea.l
     if (rd16(0x113EA) == 0x10) goto L_00EE00;  // 00EDFC  beq $ee00
-    tick(16);
     return;  // 00EDFE  rts 
 L_00EE00:
-    tick(62);
     A0 = rd32(v_murphy_cell);  // 00EE00  movea.l $1131e.l, a0
     wr16(A0, 0);  // 00EE06  clr.w (a0)
     // 00EE08  cmpi.w #$b0, $11346.l
     if (rd16(v_scroll_y) != 0xB0) goto L_00EE44;  // 00EE10  bne $ee44
-    tick(30);
     // 00EE12  cmpi.w #$7, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x7) goto L_00EE32;  // 00EE1A  beq $ee32
-    tick(30);
     // 00EE1C  cmpi.w #$8, $1133e.l
     if (int16_t(rd16(v_murphy_screen_y)) >= 8) goto L_00EE6C;  // 00EE24  bge $ee6c
-    tick(34);
     wr16(v_scroll_y, (rd16(v_scroll_y) - 0x20));  // 00EE28  subi.w #$20, $11346.l
     goto L_00EE72;  // 00EE30  bra $ee72
 L_00EE32:
-    tick(58);
     wr16(v_scroll_y, (rd16(v_scroll_y) - 0x10));  // 00EE32  subi.w #$10, $11346.l
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) - 0x1));  // 00EE3A  subi.w #$1, $1133e.l
     goto L_00EE72;  // 00EE42  bra $ee72
 L_00EE44:
-    tick(26);
     // 00EE44  tst.w $11346.l
     if (rd16(v_scroll_y) == 0) goto L_00EE6C;  // 00EE4A  beq $ee6c
-    tick(30);
     // 00EE4C  cmpi.w #$10, $11346.l
     if (rd16(v_scroll_y) == 0x10) goto L_00EE60;  // 00EE54  beq $ee60
-    tick(34);
     wr16(v_scroll_y, (rd16(v_scroll_y) - 0x20));  // 00EE56  subi.w #$20, $11346.l
     goto L_00EE72;  // 00EE5E  bra $ee72
 L_00EE60:
-    tick(40);
     wr16(v_scroll_y, 0);  // 00EE60  clr.w $11346.l
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) + 0x1));  // 00EE66  addq.w #$1, $1133e.l
 L_00EE6C:
-    tick(20);
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) - 0x2));  // 00EE6C  subq.w #$2, $1133e.l
 L_00EE72:
-    tick(82);
     wr32(v_murphy_cell, (rd32(v_murphy_cell) - 0xF0));  // 00EE72  subi.l #$f0, $1131e.l
     wr32(v_murphy_screen, (rd32(v_murphy_screen) - 0x3C00));  // 00EE7C  subi.l #$3c00, $11398.l
     goto L_00F18E;  // 00EE86  bra $f18e
 L_00EE8A:
-    tick(26);
     // 00EE8A  tst.w $113ea.l
     if (rd16(0x113EA) != 0) goto L_00EEB6;  // 00EE90  bne $eeb6
-    tick(18);
     call(blit_murphy_standing, 0xEE96);  // 00EE92  bsr $caec
-    tick(128);
     wr32(0x113EC, rd32(v_murphy_screen));  // 00EE96  move.l $11398.l, $113ec.l
     wr32(0x113F0, rd32(0x113EC));  // 00EEA0  move.l $113ec.l, $113f0.l
     wr32(0x113F0, (rd32(0x113F0) - 0x4));  // 00EEAA  subq.l #$4, $113f0.l
     wr32(0x11334, (rd32(0x11334) - 0x4));  // 00EEB0  subq.l #$4, $11334.l
 L_00EEB6:
-    tick(18);
     call(blit_port_passage_frame, 0xEEBA);  // 00EEB6  bsr $f1a4
-    tick(30);
     // 00EEBA  cmpi.w #$277, $11344.l
     if (rd16(v_scroll_x) != 0x277) goto L_00EEDC;  // 00EEC2  bne $eedc
-    tick(30);
     // 00EEC4  cmpi.w #$b, $1133c.l
     if (rd16(v_murphy_screen_x) == 0xB) goto L_00EEF4;  // 00EECC  beq $eef4
-    tick(30);
     // 00EECE  cmpi.w #$c, $1133c.l
     if (int16_t(rd16(v_murphy_screen_x)) >= 12) goto L_00EEF8;  // 00EED6  bge $eef8
-    tick(10);
     goto L_00EEF0;  // 00EEDA  bra $eef0
 L_00EEDC:
-    tick(30);
     // 00EEDC  cmpi.w #$7, $11344.l
     if (rd16(v_scroll_x) == 0x7) goto L_00EEF8;  // 00EEE4  beq $eef8
-    tick(30);
     // 00EEE6  cmpi.w #$17, $11344.l
     if (rd16(v_scroll_x) == 0x17) goto L_00EEF4;  // 00EEEE  beq $eef4
 L_00EEF0:
-    tick(18);
     call(fine_scroll_left, 0xEEF4);  // 00EEF0  bsr $cebe
 L_00EEF4:
-    tick(18);
     call(fine_scroll_left, 0xEEF8);  // 00EEF4  bsr $cebe
 L_00EEF8:
-    tick(30);
     // 00EEF8  cmpi.w #$10, $113ea.l
     if (rd16(0x113EA) == 0x10) goto L_00EF04;  // 00EF00  beq $ef04
-    tick(16);
     return;  // 00EF02  rts 
 L_00EF04:
-    tick(62);
     A0 = rd32(v_murphy_cell);  // 00EF04  movea.l $1131e.l, a0
     wr16(A0, 0);  // 00EF0A  clr.w (a0)
     // 00EF0C  cmpi.w #$277, $11344.l
     if (rd16(v_scroll_x) != 0x277) goto L_00EF46;  // 00EF14  bne $ef46
-    tick(30);
     // 00EF16  cmpi.w #$b, $1133c.l
     if (rd16(v_murphy_screen_x) == 0xB) goto L_00EF36;  // 00EF1E  beq $ef36
-    tick(30);
     // 00EF20  cmpi.w #$c, $1133c.l
     if (int16_t(rd16(v_murphy_screen_x)) >= 12) goto L_00EF72;  // 00EF28  bge $ef72
-    tick(34);
     wr16(v_scroll_x, (rd16(v_scroll_x) - 0x20));  // 00EF2C  subi.w #$20, $11344.l
     goto L_00EF78;  // 00EF34  bra $ef78
 L_00EF36:
-    tick(54);
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) - 0x1));  // 00EF36  subq.w #$1, $1133c.l
     wr16(v_scroll_x, (rd16(v_scroll_x) - 0x10));  // 00EF3C  subi.w #$10, $11344.l
     goto L_00EF78;  // 00EF44  bra $ef78
 L_00EF46:
-    tick(30);
     // 00EF46  cmpi.w #$7, $11344.l
     if (rd16(v_scroll_x) == 0x7) goto L_00EF72;  // 00EF4E  beq $ef72
-    tick(30);
     // 00EF50  cmpi.w #$17, $11344.l
     if (rd16(v_scroll_x) == 0x17) goto L_00EF64;  // 00EF58  beq $ef64
-    tick(34);
     wr16(v_scroll_x, (rd16(v_scroll_x) - 0x20));  // 00EF5A  subi.w #$20, $11344.l
     goto L_00EF78;  // 00EF62  bra $ef78
 L_00EF64:
-    tick(40);
     wr16(v_scroll_x, 0x7);  // 00EF64  move.w #$7, $11344.l
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) + 0x1));  // 00EF6C  addq.w #$1, $1133c.l
 L_00EF72:
-    tick(20);
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) - 0x2));  // 00EF72  subq.w #$2, $1133c.l
 L_00EF78:
-    tick(66);
     wr32(v_murphy_cell, (rd32(v_murphy_cell) - 0x4));  // 00EF78  subq.l #$4, $1131e.l
     wr32(v_murphy_screen, (rd32(v_murphy_screen) - 0x4));  // 00EF7E  subq.l #$4, $11398.l
     goto L_00F18E;  // 00EF84  bra $f18e
 L_00EF88:
-    tick(26);
     // 00EF88  tst.w $113ea.l
     if (rd16(0x113EA) != 0) goto L_00EFBC;  // 00EF8E  bne $efbc
-    tick(18);
     call(blit_murphy_standing, 0xEF94);  // 00EF90  bsr $caec
-    tick(144);
     wr32(0x113EC, rd32(v_murphy_screen));  // 00EF94  move.l $11398.l, $113ec.l
     wr32(0x113F0, rd32(0x113EC));  // 00EF9E  move.l $113ec.l, $113f0.l
     wr32(0x113F0, (rd32(0x113F0) + 0x3C00));  // 00EFA8  addi.l #$3c00, $113f0.l
     wr32(0x11334, (rd32(0x11334) + 0x3C00));  // 00EFB2  addi.l #$3c00, $11334.l
 L_00EFBC:
-    tick(18);
     call(blit_port_passage_frame, 0xEFC0);  // 00EFBC  bsr $f1a4
-    tick(26);
     // 00EFC0  tst.w $11346.l
     if (rd16(v_scroll_y) != 0) goto L_00EFE0;  // 00EFC6  bne $efe0
-    tick(30);
     // 00EFC8  cmpi.w #$5, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x5) goto L_00EFF8;  // 00EFD0  beq $eff8
-    tick(30);
     // 00EFD2  cmpi.w #$4, $1133e.l
     if (int16_t(rd16(v_murphy_screen_y)) <= 4) goto L_00EFFC;  // 00EFDA  ble $effc
-    tick(10);
     goto L_00EFF4;  // 00EFDE  bra $eff4
 L_00EFE0:
-    tick(30);
     // 00EFE0  cmpi.w #$b0, $11346.l
     if (rd16(v_scroll_y) == 0xB0) goto L_00EFFC;  // 00EFE8  beq $effc
-    tick(30);
     // 00EFEA  cmpi.w #$a0, $11346.l
     if (rd16(v_scroll_y) == 0xA0) goto L_00EFF8;  // 00EFF2  beq $eff8
 L_00EFF4:
-    tick(18);
     call(bplptr_down_one_line_block, 0xEFF8);  // 00EFF4  bsr $ce90
 L_00EFF8:
-    tick(18);
     call(bplptr_down_one_line_block, 0xEFFC);  // 00EFF8  bsr $ce90
 L_00EFFC:
-    tick(30);
     // 00EFFC  cmpi.w #$10, $113ea.l
     if (rd16(0x113EA) == 0x10) goto L_00F008;  // 00F004  beq $f008
-    tick(16);
     return;  // 00F006  rts 
 L_00F008:
-    tick(58);
     A0 = rd32(v_murphy_cell);  // 00F008  movea.l $1131e.l, a0
     wr16(A0, 0);  // 00F00E  clr.w (a0)
     // 00F010  tst.w $11346.l
     if (rd16(v_scroll_y) != 0) goto L_00F04A;  // 00F016  bne $f04a
-    tick(30);
     // 00F018  cmpi.w #$5, $1133e.l
     if (rd16(v_murphy_screen_y) == 0x5) goto L_00F038;  // 00F020  beq $f038
-    tick(30);
     // 00F022  cmpi.w #$4, $1133e.l
     if (int16_t(rd16(v_murphy_screen_y)) <= 4) goto L_00F076;  // 00F02A  ble $f076
-    tick(34);
     wr16(v_scroll_y, (rd16(v_scroll_y) + 0x20));  // 00F02E  addi.w #$20, $11346.l
     goto L_00F07C;  // 00F036  bra $f07c
 L_00F038:
-    tick(58);
     wr16(v_scroll_y, (rd16(v_scroll_y) + 0x10));  // 00F038  addi.w #$10, $11346.l
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) + 0x1));  // 00F040  addi.w #$1, $1133e.l
     goto L_00F07C;  // 00F048  bra $f07c
 L_00F04A:
-    tick(30);
     // 00F04A  cmpi.w #$b0, $11346.l
     if (rd16(v_scroll_y) == 0xB0) goto L_00F076;  // 00F052  beq $f076
-    tick(30);
     // 00F054  cmpi.w #$a0, $11346.l
     if (rd16(v_scroll_y) == 0xA0) goto L_00F068;  // 00F05C  beq $f068
-    tick(34);
     wr16(v_scroll_y, (rd16(v_scroll_y) + 0x20));  // 00F05E  addi.w #$20, $11346.l
     goto L_00F07C;  // 00F066  bra $f07c
 L_00F068:
-    tick(40);
     wr16(v_scroll_y, 0xB0);  // 00F068  move.w #$b0, $11346.l
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) - 0x1));  // 00F070  subq.w #$1, $1133e.l
 L_00F076:
-    tick(20);
     wr16(v_murphy_screen_y, (rd16(v_murphy_screen_y) + 0x2));  // 00F076  addq.w #$2, $1133e.l
 L_00F07C:
-    tick(82);
     wr32(v_murphy_cell, (rd32(v_murphy_cell) + 0xF0));  // 00F07C  addi.l #$f0, $1131e.l
     wr32(v_murphy_screen, (rd32(v_murphy_screen) + 0x3C00));  // 00F086  addi.l #$3c00, $11398.l
     goto L_00F18E;  // 00F090  bra $f18e
 L_00F094:
-    tick(26);
     // 00F094  tst.w $113ea.l
     if (rd16(0x113EA) != 0) goto L_00F0C0;  // 00F09A  bne $f0c0
-    tick(18);
     call(blit_murphy_standing, 0xF0A0);  // 00F09C  bsr $caec
-    tick(128);
     wr32(0x113EC, rd32(v_murphy_screen));  // 00F0A0  move.l $11398.l, $113ec.l
     wr32(0x113F0, rd32(0x113EC));  // 00F0AA  move.l $113ec.l, $113f0.l
     wr32(0x113F0, (rd32(0x113F0) + 0x4));  // 00F0B4  addq.l #$4, $113f0.l
     wr32(0x11334, (rd32(0x11334) + 0x4));  // 00F0BA  addq.l #$4, $11334.l
 L_00F0C0:
-    tick(18);
     call(blit_port_passage_frame, 0xF0C4);  // 00F0C0  bsr $f1a4
-    tick(30);
     // 00F0C4  cmpi.w #$7, $11344.l
     if (rd16(v_scroll_x) != 0x7) goto L_00F0E6;  // 00F0CC  bne $f0e6
-    tick(30);
     // 00F0CE  cmpi.w #$9, $1133c.l
     if (rd16(v_murphy_screen_x) == 0x9) goto L_00F0FE;  // 00F0D6  beq $f0fe
-    tick(30);
     // 00F0D8  cmpi.w #$8, $1133c.l
     if (int16_t(rd16(v_murphy_screen_x)) <= 8) goto L_00F102;  // 00F0E0  ble $f102
-    tick(10);
     goto L_00F0FA;  // 00F0E4  bra $f0fa
 L_00F0E6:
-    tick(30);
     // 00F0E6  cmpi.w #$277, $11344.l
     if (rd16(v_scroll_x) == 0x277) goto L_00F102;  // 00F0EE  beq $f102
-    tick(30);
     // 00F0F0  cmpi.w #$267, $11344.l
     if (rd16(v_scroll_x) == 0x267) goto L_00F0FE;  // 00F0F8  beq $f0fe
 L_00F0FA:
-    tick(18);
     call(fine_scroll_right, 0xF0FE);  // 00F0FA  bsr $cef2
 L_00F0FE:
-    tick(18);
     call(fine_scroll_right, 0xF102);  // 00F0FE  bsr $cef2
 L_00F102:
-    tick(30);
     // 00F102  cmpi.w #$10, $113ea.l
     if (rd16(0x113EA) == 0x10) goto L_00F10E;  // 00F10A  beq $f10e
-    tick(16);
     return;  // 00F10C  rts 
 L_00F10E:
-    tick(62);
     A0 = rd32(v_murphy_cell);  // 00F10E  movea.l $1131e.l, a0
     wr16(A0, 0);  // 00F114  clr.w (a0)
     // 00F116  cmpi.w #$7, $11344.l
     if (rd16(v_scroll_x) != 0x7) goto L_00F150;  // 00F11E  bne $f150
-    tick(30);
     // 00F120  cmpi.w #$9, $1133c.l
     if (rd16(v_murphy_screen_x) == 0x9) goto L_00F140;  // 00F128  beq $f140
-    tick(30);
     // 00F12A  cmpi.w #$8, $1133c.l
     if (int16_t(rd16(v_murphy_screen_x)) <= 8) goto L_00F17C;  // 00F132  ble $f17c
-    tick(34);
     wr16(v_scroll_x, (rd16(v_scroll_x) + 0x20));  // 00F136  addi.w #$20, $11344.l
     goto L_00F182;  // 00F13E  bra $f182
 L_00F140:
-    tick(54);
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) + 0x1));  // 00F140  addq.w #$1, $1133c.l
     wr16(v_scroll_x, (rd16(v_scroll_x) + 0x10));  // 00F146  addi.w #$10, $11344.l
     goto L_00F182;  // 00F14E  bra $f182
 L_00F150:
-    tick(30);
     // 00F150  cmpi.w #$277, $11344.l
     if (rd16(v_scroll_x) == 0x277) goto L_00F17C;  // 00F158  beq $f17c
-    tick(30);
     // 00F15A  cmpi.w #$267, $11344.l
     if (rd16(v_scroll_x) == 0x267) goto L_00F16E;  // 00F162  beq $f16e
-    tick(34);
     wr16(v_scroll_x, (rd16(v_scroll_x) + 0x20));  // 00F164  addi.w #$20, $11344.l
     goto L_00F182;  // 00F16C  bra $f182
 L_00F16E:
-    tick(40);
     wr16(v_scroll_x, 0x277);  // 00F16E  move.w #$277, $11344.l
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) - 0x1));  // 00F176  subq.w #$1, $1133c.l
 L_00F17C:
-    tick(20);
     wr16(v_murphy_screen_x, (rd16(v_murphy_screen_x) + 0x2));  // 00F17C  addq.w #$2, $1133c.l
 L_00F182:
-    tick(56);
     wr32(v_murphy_cell, (rd32(v_murphy_cell) + 0x4));  // 00F182  addq.l #$4, $1131e.l
     wr32(v_murphy_screen, (rd32(v_murphy_screen) + 0x4));  // 00F188  addq.l #$4, $11398.l
 L_00F18E:
-    tick(58);
     wr16(v_port_passage_dir, 0);  // 00F18E  clr.w $113e8.l
     wr16(0x113EA, 0);  // 00F194  clr.w $113ea.l
     call(murphy_move_done, 0xF19E);  // 00F19A  bsr $cf28
-    tick(18);
     call(blit_murphy_standing, 0xF1A2);  // 00F19E  bsr $caec
-    tick(16);
     return;  // 00F1A2  rts 
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void blit_port_passage_frame() {
-    tick(178);
     A0 = 0x117E8;  // 00F1A4  lea.l $117e8.l, a0
     A1 = 0x117FA;  // 00F1AA  lea.l $117fa.l, a1
     A0 += sxw(rd16(0x113EA));  // 00F1B0  adda.w $113ea.l, a0
@@ -13779,21 +10467,17 @@ void blit_port_passage_frame() {
     A0 = A3;  // 00F1D0  movea.l a3, a0
     A6 = rd32(0x113EC);  // 00F1D2  movea.l $113ec.l, a6
     call(blit_16x16, 0xF1DA);  // 00F1D8  bsr $f1ec
-    tick(42);
     A0 = A4;  // 00F1DA  movea.l a4, a0
     A6 = rd32(0x113F0);  // 00F1DC  movea.l $113f0.l, a6
     call(blit_16x16, 0xF1E4);  // 00F1E2  bsr $f1ec
-    tick(36);
     wr16(0x113EA, (rd16(0x113EA) + 0x2));  // 00F1E4  addq.w #$2, $113ea.l
     return;  // 00F1EA  rts 
 }
 
 void blit_16x16() {
 L_00F1EC:
-    tick(26);
     // 00F1EC  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00F1EC;  // 00F1F2  bne $f1ec
-    tick(128);
     wr32(A5 + 0x50, A0);  // 00F1F4  move.l a0, 80(a5)
     wr32(A5 + 0x54, A6);  // 00F1F8  move.l a6, 84(a5)
     wr16(A5 + 0x42, 0);  // 00F1FC  clr.w 66(a5)
@@ -13807,223 +10491,168 @@ L_00F1EC:
 // Гибель Murphy: звук, клетки 3x3 вокруг (кроме «железа») -> $8888,
 // анимация взрыва; счётчик $112D4 до $12 — конец уровня.
 void murphy_die() {
-    tick(26);
     // 00F21A  tst.w $11382.l
     if (rd16(0x11382) != 0) goto L_00F254;  // 00F220  bne $f254
-    tick(26);
     // 00F222  tst.w $11384.l
     if (rd16(0x11384) != 0) goto L_00F254;  // 00F228  bne $f254
-    tick(58);
     { A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 00F22A  movem.l regs(c000), -(a7)
     D0 = 0x2;  // 00F22E  moveq.l #$2, d0
     D1 = 0xA;  // 00F230  move.l #$a, d1
     call(sound_effect_lock, 0xF23A);  // 00F236  bsr $10b56
-    tick(84);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; A7 = ea; }  // 00F23A  movem.l (a7)+, regs(0003)
     wr16(0x11382, 0x1);  // 00F23E  move.w #$1, $11382.l
     wr16(0x11384, 0x1);  // 00F246  move.w #$1, $11384.l
     wr16(A5 + 0x96, 0x2);  // 00F24E  move.w #$2, 150(a5)
 L_00F254:
-    tick(26);
     // 00F254  tst.w $112d4.l
     if (rd16(v_death_anim) == 0) goto L_00F2E8;  // 00F25A  beq $f2e8
-    tick(26);
     // 00F25E  tst.w $113e8.l
     if (rd16(v_port_passage_dir) == 0) goto L_00F2BA;  // 00F264  beq $f2ba
-    tick(198);
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 00F266  movem.l regs(fffe), -(a7)
     A0 = rd32(v_murphy_cell);  // 00F26A  movea.l $1131e.l, a0
     A1 = rd32(v_murphy_screen);  // 00F270  movea.l $11398.l, a1
     // 00F276  cmpi.w #$1, $113e8.l
     if (rd16(v_port_passage_dir) == 0x1) goto L_00F29E;  // 00F27E  beq $f29e
-    tick(30);
     // 00F280  cmpi.w #$2, $113e8.l
     if (rd16(v_port_passage_dir) == 0x2) goto L_00F2A8;  // 00F288  beq $f2a8
-    tick(30);
     // 00F28A  cmpi.w #$3, $113e8.l
     if (rd16(v_port_passage_dir) == 0x3) goto L_00F2AE;  // 00F292  beq $f2ae
-    tick(26);
     A0 = A0 + 0x78;  // 00F294  lea.l 120(a0), a0
     A1 = A1 + 0x1E00;  // 00F298  lea.l 7680(a1), a1
     goto L_00F2B2;  // 00F29C  bra $f2b2
 L_00F29E:
-    tick(26);
     A0 = A0 - 0x78;  // 00F29E  lea.l -120(a0), a0
     A1 = A1 - 0x1E00;  // 00F2A2  lea.l -7680(a1), a1
     goto L_00F2B2;  // 00F2A6  bra $f2b2
 L_00F2A8:
-    tick(26);
     A0 -= 0x2;  // 00F2A8  subq.l #$2, a0
     A1 -= 0x2;  // 00F2AA  subq.l #$2, a1
     goto L_00F2B2;  // 00F2AC  bra $f2b2
 L_00F2AE:
-    tick(16);
     A0 += 0x2;  // 00F2AE  addq.l #$2, a0
     A1 += 0x2;  // 00F2B0  addq.l #$2, a1
 L_00F2B2:
-    tick(18);
     call(start_explosion, 0xF2B6);  // 00F2B2  bsr $f8e6
-    tick(132);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 00F2B6  movem.l (a7)+, regs(7fff)
 L_00F2BA:
-    tick(26);
     // 00F2BA  tst.w $112e0.l
     if (rd16(0x112E0) != 0) goto L_00F49A;  // 00F2C0  bne $f49a
-    tick(50);
     wr16(0x112E0, 0x1);  // 00F2C4  move.w #$1, $112e0.l
     // 00F2CC  cmpi.w #$3, $112d6.l
     if (rd16(0x112D6) == 0x3) goto L_00F2DE;  // 00F2D4  beq $f2de
-    tick(36);
     wr16(0x112D6, (rd16(0x112D6) + 0x1));  // 00F2D6  addq.w #$1, $112d6.l
     return;  // 00F2DC  rts 
 L_00F2DE:
-    tick(30);
     wr16(0x112D6, 0);  // 00F2DE  clr.w $112d6.l
     goto L_00F430;  // 00F2E4  bra $f430
 L_00F2E8:
-    tick(118);
     { A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D0); }  // 00F2E8  movem.l regs(80e0), -(a7)
     A1 = 0x1B1BE;  // 00F2EC  lea.l $1b1be.l, a1
     A0 = rd32(v_murphy_cell);  // 00F2F2  movea.l $1131e.l, a0
     D0 = rd32(v_murphy_screen);  // 00F2F8  move.l $11398.l, d0
     // 00F2FE  cmpi.w #$6, -122(a0)
     if (rd16(A0 - 0x7A) == 0x6) goto L_00F31C;  // 00F304  beq $f31c
-    tick(26);
     // 00F306  cmpi.w #$8888, -122(a0)
     if (rd16(A0 - 0x7A) == 0x8888) goto L_00F31C;  // 00F30C  beq $f31c
-    tick(44);
     D0 = (D0 - 0x1E02);  // 00F30E  subi.l #$1e02, d0
     wr32(A1, D0);  // 00F314  move.l d0, (a1)
     wr16(A0 - 0x7A, 0x8888);  // 00F316  move.w #$8888, -122(a0)
 L_00F31C:
-    tick(54);
     A1 += 0x4;  // 00F31C  addq.l #$4, a1
     D0 = rd32(v_murphy_screen);  // 00F31E  move.l $11398.l, d0
     // 00F324  cmpi.w #$6, -120(a0)
     if (rd16(A0 - 0x78) == 0x6) goto L_00F342;  // 00F32A  beq $f342
-    tick(26);
     // 00F32C  cmpi.w #$8888, -120(a0)
     if (rd16(A0 - 0x78) == 0x8888) goto L_00F342;  // 00F332  beq $f342
-    tick(44);
     D0 = (D0 - 0x1E00);  // 00F334  subi.l #$1e00, d0
     wr32(A1, D0);  // 00F33A  move.l d0, (a1)
     wr16(A0 - 0x78, 0x8888);  // 00F33C  move.w #$8888, -120(a0)
 L_00F342:
-    tick(54);
     A1 += 0x4;  // 00F342  addq.l #$4, a1
     D0 = rd32(v_murphy_screen);  // 00F344  move.l $11398.l, d0
     // 00F34A  cmpi.w #$6, -118(a0)
     if (rd16(A0 - 0x76) == 0x6) goto L_00F368;  // 00F350  beq $f368
-    tick(26);
     // 00F352  cmpi.w #$8888, -118(a0)
     if (rd16(A0 - 0x76) == 0x8888) goto L_00F368;  // 00F358  beq $f368
-    tick(44);
     D0 = (D0 - 0x1DFE);  // 00F35A  subi.l #$1dfe, d0
     wr32(A1, D0);  // 00F360  move.l d0, (a1)
     wr16(A0 - 0x76, 0x8888);  // 00F362  move.w #$8888, -118(a0)
 L_00F368:
-    tick(54);
     A1 += 0x4;  // 00F368  addq.l #$4, a1
     D0 = rd32(v_murphy_screen);  // 00F36A  move.l $11398.l, d0
     // 00F370  cmpi.w #$6, -2(a0)
     if (rd16(A0 - 0x2) == 0x6) goto L_00F38A;  // 00F376  beq $f38a
-    tick(26);
     // 00F378  cmpi.w #$8888, -2(a0)
     if (rd16(A0 - 0x2) == 0x8888) goto L_00F38A;  // 00F37E  beq $f38a
-    tick(36);
     D0 = (D0 - 0x2);  // 00F380  subq.l #$2, d0
     wr32(A1, D0);  // 00F382  move.l d0, (a1)
     wr16(A0 - 0x2, 0x8888);  // 00F384  move.w #$8888, -2(a0)
 L_00F38A:
-    tick(22);
     // 00F38A  cmpi.w #$8888, (a0)
     if (rd16(A0) == 0x8888) goto L_00F3A2;  // 00F38E  beq $f3a2
-    tick(68);
     A1 += 0x4;  // 00F390  addq.l #$4, a1
     wr16(A0, 0x8888);  // 00F392  move.w #$8888, (a0)
     D0 = rd32(v_murphy_screen);  // 00F396  move.l $11398.l, d0
     {  wr32(A1, rd32(v_murphy_screen)); A1 += 4; }  // 00F39C  move.l $11398.l, (a1)+
 L_00F3A2:
-    tick(26);
     // 00F3A2  cmpi.w #$6, 2(a0)
     if (rd16(A0 + 0x2) == 0x6) goto L_00F3BC;  // 00F3A8  beq $f3bc
-    tick(26);
     // 00F3AA  cmpi.w #$8888, 2(a0)
     if (rd16(A0 + 0x2) == 0x8888) goto L_00F3BC;  // 00F3B0  beq $f3bc
-    tick(36);
     D0 = (D0 + 0x2);  // 00F3B2  addq.l #$2, d0
     wr32(A1, D0);  // 00F3B4  move.l d0, (a1)
     wr16(A0 + 0x2, 0x8888);  // 00F3B6  move.w #$8888, 2(a0)
 L_00F3BC:
-    tick(54);
     A1 += 0x4;  // 00F3BC  addq.l #$4, a1
     D0 = rd32(v_murphy_screen);  // 00F3BE  move.l $11398.l, d0
     // 00F3C4  cmpi.w #$6, 118(a0)
     if (rd16(A0 + 0x76) == 0x6) goto L_00F3E2;  // 00F3CA  beq $f3e2
-    tick(26);
     // 00F3CC  cmpi.w #$8888, 118(a0)
     if (rd16(A0 + 0x76) == 0x8888) goto L_00F3E2;  // 00F3D2  beq $f3e2
-    tick(44);
     D0 = (D0 + 0x1DFE);  // 00F3D4  addi.l #$1dfe, d0
     wr32(A1, D0);  // 00F3DA  move.l d0, (a1)
     wr16(A0 + 0x76, 0x8888);  // 00F3DC  move.w #$8888, 118(a0)
 L_00F3E2:
-    tick(54);
     A1 += 0x4;  // 00F3E2  addq.l #$4, a1
     D0 = rd32(v_murphy_screen);  // 00F3E4  move.l $11398.l, d0
     // 00F3EA  cmpi.w #$6, 120(a0)
     if (rd16(A0 + 0x78) == 0x6) goto L_00F408;  // 00F3F0  beq $f408
-    tick(26);
     // 00F3F2  cmpi.w #$8888, 120(a0)
     if (rd16(A0 + 0x78) == 0x8888) goto L_00F408;  // 00F3F8  beq $f408
-    tick(44);
     D0 = (D0 + 0x1E00);  // 00F3FA  addi.l #$1e00, d0
     wr32(A1, D0);  // 00F400  move.l d0, (a1)
     wr16(A0 + 0x78, 0x8888);  // 00F402  move.w #$8888, 120(a0)
 L_00F408:
-    tick(54);
     A1 += 0x4;  // 00F408  addq.l #$4, a1
     D0 = rd32(v_murphy_screen);  // 00F40A  move.l $11398.l, d0
     // 00F410  cmpi.w #$6, 122(a0)
     if (rd16(A0 + 0x7A) == 0x6) goto L_00F42E;  // 00F416  beq $f42e
-    tick(26);
     // 00F418  cmpi.w #$8888, 122(a0)
     if (rd16(A0 + 0x7A) == 0x8888) goto L_00F42E;  // 00F41E  beq $f42e
-    tick(44);
     D0 = (D0 + 0x1E02);  // 00F420  addi.l #$1e02, d0
     wr32(A1, D0);  // 00F426  move.l d0, (a1)
     wr16(A0 + 0x7A, 0x8888);  // 00F428  move.w #$8888, 122(a0)
 L_00F42E:
-    tick(10);
     goto L_00F440;  // 00F42E  bra $f440
 L_00F430:
-    tick(30);
     // 00F430  cmpi.w #$10, $112d4.l
     if (int16_t(rd16(v_death_anim)) >= 16) goto L_00F494;  // 00F438  bge $f494
-    tick(40);
     { A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D0); }  // 00F43C  movem.l regs(80e0), -(a7)
 L_00F440:
-    tick(16);
     A1 = 0x1B1BE;  // 00F440  lea.l $1b1be.l, a1
     D0 = 0x8;  // 00F446  moveq.l #$8, d0
 L_00F448:
-    tick(22);
     // 00F448  tst.l (a1)
     if (rd32(A1) != 0) goto L_00F454;  // 00F44A  bne $f454
-    tick(20);
     A1 += 0x4;  // 00F44C  addq.l #$4, a1
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00F448;  // 00F44E  dbf.w d0, $f448
-    tick(10);
     goto L_00F490;  // 00F452  bra $f490
 L_00F454:
-    tick(40);
     A0 = rd32(0x112BA);  // 00F454  movea.l $112ba.l, a0
     A0 += sxw(rd16(v_death_anim));  // 00F45A  adda.w $112d4.l, a0
 L_00F460:
-    tick(26);
     // 00F460  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00F460;  // 00F466  bne $f460
-    tick(132);
     wr32(A5 + 0x50, A0);  // 00F468  move.l a0, 80(a5)
     {  uint32_t v = rd32(A1); A1 += 4;  wr32(A5 + 0x54, v);  }  // 00F46C  move.l (a1)+, 84(a5)
     wr16(A5 + 0x42, 0);  // 00F470  clr.w 66(a5)
@@ -14033,93 +10662,72 @@ L_00F460:
     wr16(A5 + 0x58, 0x1001);  // 00F486  move.w #$1001, 88(a5)
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00F448;  // 00F48C  dbf.w d0, $f448
 L_00F490:
-    tick(44);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A7 = ea; }  // 00F490  movem.l (a7)+, regs(0701)
 L_00F494:
-    tick(20);
     wr16(v_death_anim, (rd16(v_death_anim) + 0x2));  // 00F494  addq.w #$2, $112d4.l
 L_00F49A:
-    tick(16);
     return;  // 00F49A  rts 
 }
 
 void blit_murphy_frame() {
-    tick(26);
     // 00F49C  tst.w $11306.l
     if (rd16(v_push_ready) != 0) goto L_00F54A;  // 00F4A2  bne $f54a
-    tick(18);
     call(wait_blitter, 0xF4AA);  // 00F4A6  bsr $f8a8
-    tick(122);
     wr32(A5 + 0x50, rd32(0x11326));  // 00F4AA  move.l $11326.l, 80(a5)
     wr32(A5 + 0x54, rd32(0x1132A));  // 00F4B2  move.l $1132a.l, 84(a5)
     wr16(A5 + 0x42, 0);  // 00F4BA  clr.w 66(a5)
     wr16(A5 + 0x40, 0x9F0);  // 00F4BE  move.w #$9f0, 64(a5)
     // 00F4C4  tst.w $11386.l
     if (rd16(0x11386) == 0) goto L_00F4DC;  // 00F4CA  beq $f4dc
-    tick(42);
     wr16(A5 + 0x64, 0x24);  // 00F4CE  move.w #$24, 100(a5)
     wr16(A5 + 0x66, 0x74);  // 00F4D4  move.w #$74, 102(a5)
     goto L_00F4E8;  // 00F4DA  bra $f4e8
 L_00F4DC:
-    tick(32);
     wr16(A5 + 0x64, 0x26);  // 00F4DC  move.w #$26, 100(a5)
     wr16(A5 + 0x66, 0x76);  // 00F4E2  move.w #$76, 102(a5)
 L_00F4E8:
-    tick(26);
     // 00F4E8  tst.w $11386.l
     if (rd16(0x11386) == 0) goto L_00F526;  // 00F4EE  beq $f526
-    tick(118);
     wr32(0x11330, rd32(0x11326));  // 00F4F0  move.l $11326.l, $11330.l
     wr32(0x11334, rd32(0x1132A));  // 00F4FA  move.l $1132a.l, $11334.l
     wr16(0x11338, 0);  // 00F504  clr.w $11338.l
     // 00F50A  tst.w $11378.l
     if (rd16(0x11378) == 0) goto L_00F51E;  // 00F510  beq $f51e
-    tick(56);
     wr32(0x11330, (rd32(0x11330) + 0x2));  // 00F512  addq.l #$2, $11330.l
     wr32(0x11334, (rd32(0x11334) + 0x2));  // 00F518  addq.l #$2, $11334.l
 L_00F51E:
-    tick(32);
     wr16(A5 + 0x58, 0x1002);  // 00F51E  move.w #$1002, 88(a5)
     return;  // 00F524  rts 
 L_00F526:
-    tick(124);
     wr32(0x11330, rd32(0x11326));  // 00F526  move.l $11326.l, $11330.l
     wr32(0x11334, rd32(0x1132A));  // 00F530  move.l $1132a.l, $11334.l
     wr16(0x11338, 0x1);  // 00F53A  move.w #$1, $11338.l
     wr16(A5 + 0x58, 0x1201);  // 00F542  move.w #$1201, 88(a5)
     return;  // 00F548  rts 
 L_00F54A:
-    tick(30);
     // 00F54A  tst.l $11312.l
     if (rd32(0x11312) == 0) goto L_00F55C;  // 00F550  beq $f55c
-    tick(30);
     A0 = rd32(0x1130A);  // 00F552  movea.l $1130a.l, a0
     goto L_00F604;  // 00F558  bra $f604
 L_00F55C:
-    tick(30);
     // 00F55C  cmpi.w #$1, $1137c.l
     if (rd16(0x1137C) == 0x1) goto L_00F5B2;  // 00F564  beq $f5b2
-    tick(26);
     // 00F566  tst.w $1137e.l
     if (rd16(0x1137E) != 0) goto L_00F5D6;  // 00F56C  bne $f5d6
-    tick(26);
     // 00F56E  tst.w $1137a.l
     if (rd16(0x1137A) == 0) goto L_00F592;  // 00F574  beq $f592
-    tick(102);
     A0 = rd32(v_murphy_cell);  // 00F576  movea.l $1131e.l, a0
     wr32(A0 - 0x4, 0x10002);  // 00F57C  move.l #$10002, -4(a0)
     wr32(0x1130E, A0);  // 00F584  move.l a0, $1130e.l
     wr32(0x1130E, (rd32(0x1130E) - 0x2));  // 00F58A  subq.l #$2, $1130e.l
     goto L_00F5F8;  // 00F590  bra $f5f8
 L_00F592:
-    tick(110);
     A0 = rd32(v_murphy_cell);  // 00F592  movea.l $1131e.l, a0
     wr32(A0 + 0x2, 0x20001);  // 00F598  move.l #$20001, 2(a0)
     wr32(0x1130E, A0);  // 00F5A0  move.l a0, $1130e.l
     wr32(0x1130E, (rd32(0x1130E) + 0x2));  // 00F5A6  addi.l #$2, $1130e.l
     goto L_00F5F8;  // 00F5B0  bra $f5f8
 L_00F5B2:
-    tick(118);
     A0 = rd32(v_murphy_cell);  // 00F5B2  movea.l $1131e.l, a0
     wr16(A0 - 0xF0, 0x2);  // 00F5B8  move.w #$2, -240(a0)
     wr16(A0 - 0x78, 0x1);  // 00F5BE  move.w #$1, -120(a0)
@@ -14127,79 +10735,59 @@ L_00F5B2:
     wr32(0x1130E, (rd32(0x1130E) - 0x78));  // 00F5CA  subi.l #$78, $1130e.l
     goto L_00F5F8;  // 00F5D4  bra $f5f8
 L_00F5D6:
-    tick(108);
     A0 = rd32(v_murphy_cell);  // 00F5D6  movea.l $1131e.l, a0
     wr16(A0 + 0xF0, 0x2);  // 00F5DC  move.w #$2, 240(a0)
     wr16(A0 + 0x78, 0x1);  // 00F5E2  move.w #$1, 120(a0)
     wr32(0x1130E, A0);  // 00F5E8  move.l a0, $1130e.l
     wr32(0x1130E, (rd32(0x1130E) + 0x78));  // 00F5EE  addi.l #$78, $1130e.l
 L_00F5F8:
-    tick(40);
     A0 = rd32(v_murphy_screen);  // 00F5F8  movea.l $11398.l, a0
     wr32(0x1130A, A0);  // 00F5FE  move.l a0, $1130a.l
 L_00F604:
-    tick(30);
     // 00F604  cmpi.w #$1, $1137c.l
     if (rd16(0x1137C) == 0x1) goto L_00F70A;  // 00F60C  beq $f70a
-    tick(26);
     // 00F610  tst.w $1137e.l
     if (rd16(0x1137E) != 0) goto L_00F6E4;  // 00F616  bne $f6e4
-    tick(26);
     // 00F61A  tst.w $1137a.l
     if (rd16(0x1137A) == 0) goto L_00F66C;  // 00F620  beq $f66c
-    tick(30);
     // 00F622  cmpi.w #$2, $11308.l
     if (rd16(v_push_kind) == 0x2) goto L_00F644;  // 00F62A  beq $f644
-    tick(30);
     // 00F62E  cmpi.w #$3, $11308.l
     if (rd16(v_push_kind) == 0x3) goto L_00F64E;  // 00F636  beq $f64e
-    tick(22);
     A1 = 0x11658;  // 00F63A  lea.l $11658.l, a1
     goto L_00F654;  // 00F640  bra $f654
 L_00F644:
-    tick(22);
     A1 = 0x11698;  // 00F644  lea.l $11698.l, a1
     goto L_00F654;  // 00F64A  bra $f654
 L_00F64E:
-    tick(12);
     A1 = 0x116D8;  // 00F64E  lea.l $116d8.l, a1
 L_00F654:
-    tick(60);
     A1 += rd32(0x11312);  // 00F654  adda.l $11312.l, a1
     A1 = rd32(A1);  // 00F65A  movea.l (a1), a1
     A0 -= 0x4;  // 00F65C  subq.l #$4, a0
     call(wait_blitter, 0xF662);  // 00F65E  bsr $f8a8
-    tick(42);
     wr32(A5 + 0x54, A0);  // 00F662  move.l a0, 84(a5)
     wr32(A5 + 0x50, A1);  // 00F666  move.l a1, 80(a5)
     goto L_00F6B2;  // 00F66A  bra $f6b2
 L_00F66C:
-    tick(30);
     // 00F66C  cmpi.w #$2, $11308.l
     if (rd16(v_push_kind) == 0x2) goto L_00F68E;  // 00F674  beq $f68e
-    tick(30);
     // 00F678  cmpi.w #$3, $11308.l
     if (rd16(v_push_kind) == 0x3) goto L_00F698;  // 00F680  beq $f698
-    tick(22);
     A1 = 0x11718;  // 00F684  lea.l $11718.l, a1
     goto L_00F69E;  // 00F68A  bra $f69e
 L_00F68E:
-    tick(22);
     A1 = 0x11758;  // 00F68E  lea.l $11758.l, a1
     goto L_00F69E;  // 00F694  bra $f69e
 L_00F698:
-    tick(12);
     A1 = 0x11798;  // 00F698  lea.l $11798.l, a1
 L_00F69E:
-    tick(52);
     A1 += rd32(0x11312);  // 00F69E  adda.l $11312.l, a1
     A1 = rd32(A1);  // 00F6A4  movea.l (a1), a1
     call(wait_blitter, 0xF6AA);  // 00F6A6  bsr $f8a8
-    tick(32);
     wr32(A5 + 0x54, A0);  // 00F6AA  move.l a0, 84(a5)
     wr32(A5 + 0x50, A1);  // 00F6AE  move.l a1, 80(a5)
 L_00F6B2:
-    tick(146);
     wr16(A5 + 0x42, 0);  // 00F6B2  clr.w 66(a5)
     wr16(A5 + 0x40, 0x9F0);  // 00F6B6  move.w #$9f0, 64(a5)
     wr16(A5 + 0x64, 0x22);  // 00F6BC  move.w #$22, 100(a5)
@@ -14208,31 +10796,25 @@ L_00F6B2:
     wr32(0x11312, (rd32(0x11312) + 0x4));  // 00F6CE  addq.l #$4, $11312.l
     // 00F6D4  cmpi.l #$20, $11312.l
     if (rd32(0x11312) == 0x20) goto L_00F75E;  // 00F6DE  beq $f75e
-    tick(16);
     return;  // 00F6E2  rts 
 L_00F6E4:
-    tick(82);
     A2 = 0x117B8;  // 00F6E4  lea.l $117b8.l, a2
     A2 += rd32(0x11312);  // 00F6EA  adda.l $11312.l, a2
     A0 += rd32(A2);  // 00F6F0  adda.l (a2), a0
     A0 -= 0x3C0;  // 00F6F2  suba.l #$3c0, a0
     call(wait_blitter, 0xF6FC);  // 00F6F8  bsr $f8a8
-    tick(58);
     wr32(A5 + 0x54, A0);  // 00F6FC  move.l a0, 84(a5)
     wr32(A5 + 0x50, rd32(0x112BE));  // 00F700  move.l $112be.l, 80(a5)
     goto L_00F72E;  // 00F708  bra $f72e
 L_00F70A:
-    tick(82);
     A2 = 0x117B8;  // 00F70A  lea.l $117b8.l, a2
     A2 += rd32(0x11312);  // 00F710  adda.l $11312.l, a2
     A0 -= rd32(A2);  // 00F716  suba.l (a2), a0
     A0 -= 0x1E00;  // 00F718  suba.l #$1e00, a0
     call(wait_blitter, 0xF722);  // 00F71E  bsr $f8a8
-    tick(48);
     wr32(A5 + 0x54, A0);  // 00F722  move.l a0, 84(a5)
     wr32(A5 + 0x50, rd32(0x112C2));  // 00F726  move.l $112c2.l, 80(a5)
 L_00F72E:
-    tick(146);
     wr16(A5 + 0x42, 0);  // 00F72E  clr.w 66(a5)
     wr16(A5 + 0x40, 0x9F0);  // 00F732  move.w #$9f0, 64(a5)
     wr16(A5 + 0x64, 0x26);  // 00F738  move.w #$26, 100(a5)
@@ -14241,10 +10823,8 @@ L_00F72E:
     wr32(0x11312, (rd32(0x11312) + 0x4));  // 00F74A  addq.l #$4, $11312.l
     // 00F750  cmpi.l #$20, $11312.l
     if (rd32(0x11312) == 0x20) goto L_00F75E;  // 00F75A  beq $f75e
-    tick(16);
     return;  // 00F75C  rts 
 L_00F75E:
-    tick(162);
     wr32(0x11312, 0);  // 00F75E  clr.l $11312.l
     wr16(v_push_ready, 0);  // 00F764  clr.w $11306.l
     wr16(v_push_frames, 0);  // 00F76A  clr.w $11304.l
@@ -14254,72 +10834,53 @@ L_00F75E:
     setW(D0, (((D0 & 0xFFFF) << 1) & 0xFFFF));  // 00F784  lsl.w #$1, d0
     // 00F786  cmpi.w #$2, $11308.l
     if (rd16(v_push_kind) == 0x2) goto L_00F7A6;  // 00F78E  beq $f7a6
-    tick(30);
     // 00F792  cmpi.w #$3, $11308.l
     if (rd16(v_push_kind) == 0x3) goto L_00F7AE;  // 00F79A  beq $f7ae
-    tick(22);
     A0 = 0x14D5E;  // 00F79E  lea.l $14d5e.l, a0
     goto L_00F7CC;  // 00F7A4  bra $f7cc
 L_00F7A6:
-    tick(22);
     A0 = v_orange_disks;  // 00F7A6  lea.l $189ee.l, a0
     goto L_00F7CC;  // 00F7AC  bra $f7cc
 L_00F7AE:
-    tick(22);
     A0 = 0x191BE;  // 00F7AE  lea.l $191be.l, a0
     goto L_00F7CC;  // 00F7B4  bra $f7cc
 L_00F7B6:
-    tick(30);
     // 00F7B6  cmpi.w #$2, $11308.l
     if (rd16(v_push_kind) != 0x2) goto L_00F7C6;  // 00F7BE  bne $f7c6
-    tick(18);
     A0 += 0x6;  // 00F7C0  addq.l #$6, a0
     goto L_00F7C8;  // 00F7C2  bra $f7c8
 L_00F7C6:
-    tick(8);
     A0 += 0x4;  // 00F7C6  addq.l #$4, a0
 L_00F7C8:
-    tick(22);
     // 00F7C8  tst.l (a0)
     if (rd32(A0) == 0) goto L_00F80C;  // 00F7CA  beq $f80c
 L_00F7CC:
-    tick(28);
     D1 = rd32(A0);  // 00F7CC  move.l (a0), d1
     // 00F7CE  cmp.l d0, d1
     if (D1 != D0) goto L_00F7B6;  // 00F7D0  bne $f7b6
-    tick(30);
     // 00F7D2  cmpi.w #$1, $1137c.l
     if (rd16(0x1137C) == 0x1) goto L_00F828;  // 00F7DA  beq $f828
-    tick(26);
     // 00F7DC  tst.w $1137e.l
     if (rd16(0x1137E) != 0) goto L_00F840;  // 00F7E2  bne $f840
-    tick(26);
     // 00F7E4  tst.w $1137a.l
     if (rd16(0x1137A) == 0) goto L_00F7FE;  // 00F7EA  beq $f7fe
-    tick(50);
     wr32(A0, (rd32(A0) - 0x4));  // 00F7EC  subq.l #$4, (a0)
     // 00F7EE  cmpi.w #$2, $11308.l
     if (int16_t(rd16(v_push_kind)) >= 2) goto L_00F880;  // 00F7F6  bge $f880
-    tick(10);
     goto L_00F80C;  // 00F7FA  bra $f80c
 L_00F7FE:
-    tick(50);
     wr32(A0, (rd32(A0) + 0x4));  // 00F7FE  addq.l #$4, (a0)
     // 00F800  cmpi.w #$2, $11308.l
     if (int16_t(rd16(v_push_kind)) >= 2) goto L_00F858;  // 00F808  bge $f858
 L_00F80C:
-    tick(30);
     // 00F80C  cmpi.w #$a, $1133c.l
     if (rd16(v_murphy_screen_x) != 0xA) goto L_00F820;  // 00F814  bne $f820
-    tick(36);
     wr16(0x112CE, 0x1);  // 00F816  move.w #$1, $112ce.l
     return;  // 00F81E  rts 
 L_00F820:
-    tick(36);
     wr16(0x112CE, 0);  // 00F820  clr.w $112ce.l
     return;  // 00F826  rts 
 L_00F828:
-    tick(88);
     wr32(A0, (rd32(A0) - 0xF0));  // 00F828  subi.l #$f0, (a0)
     A4 = v_map;  // 00F82E  lea.l $11928.l, a4
     D7 = rd32(A0);  // 00F834  move.l (a0), d7
@@ -14328,7 +10889,6 @@ L_00F828:
     wr16(A4, 0x12);  // 00F83A  move.w #$12, (a4)
     goto L_00F80C;  // 00F83E  bra $f80c
 L_00F840:
-    tick(88);
     wr32(A0, (rd32(A0) + 0xF0));  // 00F840  addi.l #$f0, (a0)
     A4 = v_map;  // 00F846  lea.l $11928.l, a4
     D7 = rd32(A0);  // 00F84C  move.l (a0), d7
@@ -14337,67 +10897,53 @@ L_00F840:
     wr16(A4, 0x12);  // 00F852  move.w #$12, (a4)
     goto L_00F80C;  // 00F856  bra $f80c
 L_00F858:
-    tick(68);
     A4 = v_map;  // 00F858  lea.l $11928.l, a4
     D7 = rd32(A0);  // 00F85E  move.l (a0), d7
     setW(D7, ((D7 & 0xFFFF) >> 1));  // 00F860  lsr.w #$1, d7
     A4 += D7;  // 00F862  adda.l d7, a4
     // 00F864  cmpi.w #$3, $11308.l
     if (rd16(v_push_kind) == 0x3) goto L_00F878;  // 00F86C  beq $f878
-    tick(22);
     wr16(A4, 0x8);  // 00F870  move.w #$8, (a4)
     goto L_00F80C;  // 00F874  bra $f80c
 L_00F878:
-    tick(22);
     wr16(A4, 0x12);  // 00F878  move.w #$12, (a4)
     goto L_00F80C;  // 00F87C  bra $f80c
 L_00F880:
-    tick(68);
     A4 = v_map;  // 00F880  lea.l $11928.l, a4
     D7 = rd32(A0);  // 00F886  move.l (a0), d7
     setW(D7, ((D7 & 0xFFFF) >> 1));  // 00F888  lsr.w #$1, d7
     A4 += D7;  // 00F88A  adda.l d7, a4
     // 00F88C  cmpi.w #$3, $11308.l
     if (rd16(v_push_kind) == 0x3) goto L_00F8A0;  // 00F894  beq $f8a0
-    tick(22);
     wr16(A4, 0x8);  // 00F898  move.w #$8, (a4)
     goto L_00F80C;  // 00F89C  bra $f80c
 L_00F8A0:
-    tick(22);
     wr16(A4, 0x12);  // 00F8A0  move.w #$12, (a4)
     goto L_00F80C;  // 00F8A4  bra $f80c
 }
 
 void wait_blitter() {
 L_00F8A8:
-    tick(42);
     btst(rd8(A5 + 0x2), 6);  // 00F8A8  btst.b #$6, 2(a5)
     // 00F8AE  btst.b #$6, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00F8A8;  // 00F8B4  bne $f8a8
-    tick(16);
     return;  // 00F8B6  rts 
 }
 
 void explosion_slot_free() {
-    tick(40);
     { A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, D7); }  // 00F8B8  movem.l regs(0120), -(a7)
     A2 = v_explosions;  // 00F8BC  lea.l $1b1e2.l, a2
     D7 = 0xB;  // 00F8C2  moveq.l #$b, d7
 L_00F8C4:
-    tick(18);
     // 00F8C4  tst.w (a2)
     if (rd16(A2) == 0) goto L_00F8DA;  // 00F8C6  beq $f8da
-    tick(20);
     A2 = A2 + 0x30;  // 00F8C8  lea.l 48(a2), a2
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00F8C4;  // 00F8CC  dbf.w d7, $f8c4
-    tick(30);
     wr16(0x113A6, 0x1);  // 00F8D0  move.w #$1, $113a6.l
     goto L_00F8E0;  // 00F8D8  bra $f8e0
 L_00F8DA:
-    tick(20);
     wr16(0x113A6, 0);  // 00F8DA  clr.w $113a6.l
 L_00F8E0:
-    tick(44);
     { uint32_t ea = A7; D7 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A7 = ea; }  // 00F8E0  movem.l (a7)+, regs(0480)
     return;  // 00F8E4  rts 
 }
@@ -14405,583 +10951,417 @@ L_00F8E0:
 // Начать взрыв 3x3 с центром в клетке a0 (a1 — адрес клетки в битмапе).
 // До 12 взрывов одновременно (таблица $1B1E2 по $30 байт).
 void start_explosion() {
-    tick(128);
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 00F8E6  movem.l regs(ff3e), -(a7)
     A2 = v_explosions;  // 00F8EA  lea.l $1b1e2.l, a2
     D7 = 0xB;  // 00F8F0  moveq.l #$b, d7
 L_00F8F2:
-    tick(18);
     // 00F8F2  tst.w (a2)
     if (rd16(A2) == 0) goto L_00F902;  // 00F8F4  beq $f902
-    tick(20);
     A2 = A2 + 0x30;  // 00F8F6  lea.l 48(a2), a2
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00F8F2;  // 00F8FA  dbf.w d7, $f8f2
-    tick(10);
     goto L_00FBCC;  // 00F8FE  bra $fbcc
 L_00F902:
-    tick(26);
     // 00F902  tst.w $11382.l
     if (rd16(0x11382) != 0) goto L_00F92C;  // 00F908  bne $f92c
-    tick(58);
     { A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 00F90A  movem.l regs(c000), -(a7)
     D0 = 0x2;  // 00F90E  moveq.l #$2, d0
     D1 = 0xA;  // 00F910  move.l #$a, d1
     call(sound_effect_lock, 0xF91A);  // 00F916  bsr $10b56
-    tick(64);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; A7 = ea; }  // 00F91A  movem.l (a7)+, regs(0003)
     wr16(0x11382, 0x1);  // 00F91E  move.w #$1, $11382.l
     wr16(A5 + 0x96, 0x2);  // 00F926  move.w #$2, 150(a5)
 L_00F92C:
-    tick(46);
     wr32(A2 + 0x28, A0);  // 00F92C  move.l a0, 40(a2)
     A4 = A1;  // 00F930  movea.l a1, a4
     // 00F932  tst.w $112e8.l
     if (rd16(0x112E8) == 0) goto L_00F942;  // 00F938  beq $f942
-    tick(26);
     wr16(A2 + 0x2E, 0x1);  // 00F93A  move.w #$1, 46(a2)
     goto L_00F946;  // 00F940  bra $f946
 L_00F942:
-    tick(24);
     wr32(A2 + 0x2C, 0);  // 00F942  clr.l 44(a2)
 L_00F946:
-    tick(74);
     wr16(0x112E8, 0);  // 00F946  clr.w $112e8.l
     wr16(A2, 0x1);  // 00F94C  move.w #$1, (a2)
     wr16(A2 + 0x2, 0);  // 00F950  clr.w 2(a2)
     // 00F954  cmpi.w #$8888, -122(a0)
     if (rd16(A0 - 0x7A) == 0x8888) goto L_00F9B6;  // 00F95A  beq $f9b6
-    tick(26);
     // 00F95C  cmpi.w #$6, -122(a0)
     if (rd16(A0 - 0x7A) == 0x6) goto L_00F9B6;  // 00F962  beq $f9b6
-    tick(26);
     // 00F964  cmpi.w #$fb04, -122(a0)
     if (rd16(A0 - 0x7A) == 0xFB04) goto L_00F9B6;  // 00F96A  beq $f9b6
-    tick(26);
     // 00F96C  cmpi.w #$eb01, -122(a0)
     if (rd16(A0 - 0x7A) == 0xEB01) goto L_00F9B6;  // 00F972  beq $f9b6
-    tick(26);
     // 00F974  cmpi.w #$ef01, -122(a0)
     if (rd16(A0 - 0x7A) == 0xEF01) goto L_00F9B6;  // 00F97A  beq $f9b6
-    tick(26);
     // 00F97C  cmpi.w #$eb08, -122(a0)
     if (rd16(A0 - 0x7A) == 0xEB08) goto L_00F9A4;  // 00F982  beq $f9a4
-    tick(26);
     // 00F984  cmpi.w #$eb00, -122(a0)
     if (rd16(A0 - 0x7A) >= 0xEB00) goto L_00F9A4;  // 00F98A  bcc $f9a4
-    tick(26);
     // 00F98C  cmpi.w #$9000, -122(a0)
     if (rd16(A0 - 0x7A) >= 0x9000) goto L_00F9B6;  // 00F992  bcc $f9b6
-    tick(26);
     // 00F994  cmpi.w #$3, -122(a0)
     if (rd16(A0 - 0x7A) != 0x3) goto L_00F9A4;  // 00F99A  bne $f9a4
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00F99C  move.w #$1, $112da.l
 L_00F9A4:
-    tick(52);
     wr16(A0 - 0x7A, 0x8888);  // 00F9A4  move.w #$8888, -122(a0)
     A4 -= 0x1E02;  // 00F9AA  suba.l #$1e02, a4
     wr32(A2 + 0x4, A4);  // 00F9B0  move.l a4, 4(a2)
     A4 = A1;  // 00F9B4  movea.l a1, a4
 L_00F9B6:
-    tick(26);
     // 00F9B6  cmpi.w #$8888, -120(a0)
     if (rd16(A0 - 0x78) == 0x8888) goto L_00FA08;  // 00F9BC  beq $fa08
-    tick(26);
     // 00F9BE  cmpi.w #$6, -120(a0)
     if (rd16(A0 - 0x78) == 0x6) goto L_00FA08;  // 00F9C4  beq $fa08
-    tick(26);
     // 00F9C6  cmpi.w #$ef01, -120(a0)
     if (rd16(A0 - 0x78) == 0xEF01) goto L_00FA08;  // 00F9CC  beq $fa08
-    tick(26);
     // 00F9CE  cmpi.w #$eb08, -120(a0)
     if (rd16(A0 - 0x78) == 0xEB08) goto L_00F9F6;  // 00F9D4  beq $f9f6
-    tick(26);
     // 00F9D6  cmpi.w #$eb00, -120(a0)
     if (rd16(A0 - 0x78) >= 0xEB00) goto L_00F9F6;  // 00F9DC  bcc $f9f6
-    tick(26);
     // 00F9DE  cmpi.w #$9000, -120(a0)
     if (rd16(A0 - 0x78) >= 0x9000) goto L_00FA08;  // 00F9E4  bcc $fa08
-    tick(26);
     // 00F9E6  cmpi.w #$3, -120(a0)
     if (rd16(A0 - 0x78) != 0x3) goto L_00F9F6;  // 00F9EC  bne $f9f6
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00F9EE  move.w #$1, $112da.l
 L_00F9F6:
-    tick(52);
     wr16(A0 - 0x78, 0x8888);  // 00F9F6  move.w #$8888, -120(a0)
     A4 -= 0x1E00;  // 00F9FC  suba.l #$1e00, a4
     wr32(A2 + 0x8, A4);  // 00FA02  move.l a4, 8(a2)
     A4 = A1;  // 00FA06  movea.l a1, a4
 L_00FA08:
-    tick(26);
     // 00FA08  cmpi.w #$8888, -118(a0)
     if (rd16(A0 - 0x76) == 0x8888) goto L_00FA6A;  // 00FA0E  beq $fa6a
-    tick(26);
     // 00FA10  cmpi.w #$6, -118(a0)
     if (rd16(A0 - 0x76) == 0x6) goto L_00FA6A;  // 00FA16  beq $fa6a
-    tick(26);
     // 00FA18  cmpi.w #$fb04, -118(a0)
     if (rd16(A0 - 0x76) == 0xFB04) goto L_00FA6A;  // 00FA1E  beq $fa6a
-    tick(26);
     // 00FA20  cmpi.w #$ef01, -118(a0)
     if (rd16(A0 - 0x76) == 0xEF01) goto L_00FA6A;  // 00FA26  beq $fa6a
-    tick(26);
     // 00FA28  cmpi.w #$eb01, -118(a0)
     if (rd16(A0 - 0x76) == 0xEB01) goto L_00FA6A;  // 00FA2E  beq $fa6a
-    tick(26);
     // 00FA30  cmpi.w #$eb08, -118(a0)
     if (rd16(A0 - 0x76) == 0xEB08) goto L_00FA58;  // 00FA36  beq $fa58
-    tick(26);
     // 00FA38  cmpi.w #$eb00, -118(a0)
     if (rd16(A0 - 0x76) == 0xEB00) goto L_00FA58;  // 00FA3E  beq $fa58
-    tick(26);
     // 00FA40  cmpi.w #$9000, -118(a0)
     if (rd16(A0 - 0x76) >= 0x9000) goto L_00FA6A;  // 00FA46  bcc $fa6a
-    tick(26);
     // 00FA48  cmpi.w #$3, -118(a0)
     if (rd16(A0 - 0x76) != 0x3) goto L_00FA58;  // 00FA4E  bne $fa58
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00FA50  move.w #$1, $112da.l
 L_00FA58:
-    tick(52);
     wr16(A0 - 0x76, 0x8888);  // 00FA58  move.w #$8888, -118(a0)
     A4 -= 0x1DFE;  // 00FA5E  suba.l #$1dfe, a4
     wr32(A2 + 0xC, A4);  // 00FA64  move.l a4, 12(a2)
     A4 = A1;  // 00FA68  movea.l a1, a4
 L_00FA6A:
-    tick(26);
     // 00FA6A  cmpi.w #$8888, -2(a0)
     if (rd16(A0 - 0x2) == 0x8888) goto L_00FAAC;  // 00FA70  beq $faac
-    tick(26);
     // 00FA72  cmpi.w #$6, -2(a0)
     if (rd16(A0 - 0x2) == 0x6) goto L_00FAAC;  // 00FA78  beq $faac
-    tick(26);
     // 00FA7A  cmpi.w #$eb08, -2(a0)
     if (rd16(A0 - 0x2) == 0xEB08) goto L_00FA9A;  // 00FA80  beq $fa9a
-    tick(26);
     // 00FA82  cmpi.w #$9000, -2(a0)
     if (rd16(A0 - 0x2) >= 0x9000) goto L_00FAAC;  // 00FA88  bcc $faac
-    tick(26);
     // 00FA8A  cmpi.w #$3, -2(a0)
     if (rd16(A0 - 0x2) != 0x3) goto L_00FA9A;  // 00FA90  bne $fa9a
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00FA92  move.w #$1, $112da.l
 L_00FA9A:
-    tick(52);
     wr16(A0 - 0x2, 0x8888);  // 00FA9A  move.w #$8888, -2(a0)
     A4 -= 0x2;  // 00FAA0  suba.l #$2, a4
     wr32(A2 + 0x10, A4);  // 00FAA6  move.l a4, 16(a2)
     A4 = A1;  // 00FAAA  movea.l a1, a4
 L_00FAAC:
-    tick(54);
     wr16(A0, 0x8888);  // 00FAAC  move.w #$8888, (a0)
     wr32(A2 + 0x14, A4);  // 00FAB0  move.l a4, 20(a2)
     // 00FAB4  cmpi.w #$8888, 2(a0)
     if (rd16(A0 + 0x2) == 0x8888) goto L_00FAF6;  // 00FABA  beq $faf6
-    tick(26);
     // 00FABC  cmpi.w #$6, 2(a0)
     if (rd16(A0 + 0x2) == 0x6) goto L_00FAF6;  // 00FAC2  beq $faf6
-    tick(26);
     // 00FAC4  cmpi.w #$eb08, 2(a0)
     if (rd16(A0 + 0x2) == 0xEB08) goto L_00FAE4;  // 00FACA  beq $fae4
-    tick(26);
     // 00FACC  cmpi.w #$9000, 2(a0)
     if (rd16(A0 + 0x2) >= 0x9000) goto L_00FAF6;  // 00FAD2  bcc $faf6
-    tick(26);
     // 00FAD4  cmpi.w #$3, 2(a0)
     if (rd16(A0 + 0x2) != 0x3) goto L_00FAE4;  // 00FADA  bne $fae4
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00FADC  move.w #$1, $112da.l
 L_00FAE4:
-    tick(52);
     wr16(A0 + 0x2, 0x8888);  // 00FAE4  move.w #$8888, 2(a0)
     A4 += 0x2;  // 00FAEA  adda.l #$2, a4
     wr32(A2 + 0x18, A4);  // 00FAF0  move.l a4, 24(a2)
     A4 = A1;  // 00FAF4  movea.l a1, a4
 L_00FAF6:
-    tick(26);
     // 00FAF6  cmpi.w #$8888, 118(a0)
     if (rd16(A0 + 0x76) == 0x8888) goto L_00FB38;  // 00FAFC  beq $fb38
-    tick(26);
     // 00FAFE  cmpi.w #$6, 118(a0)
     if (rd16(A0 + 0x76) == 0x6) goto L_00FB38;  // 00FB04  beq $fb38
-    tick(26);
     // 00FB06  cmpi.w #$eb08, 118(a0)
     if (rd16(A0 + 0x76) == 0xEB08) goto L_00FB26;  // 00FB0C  beq $fb26
-    tick(26);
     // 00FB0E  cmpi.w #$9000, 118(a0)
     if (rd16(A0 + 0x76) >= 0x9000) goto L_00FB38;  // 00FB14  bcc $fb38
-    tick(26);
     // 00FB16  cmpi.w #$3, 118(a0)
     if (rd16(A0 + 0x76) != 0x3) goto L_00FB26;  // 00FB1C  bne $fb26
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00FB1E  move.w #$1, $112da.l
 L_00FB26:
-    tick(52);
     wr16(A0 + 0x76, 0x8888);  // 00FB26  move.w #$8888, 118(a0)
     A4 += 0x1DFE;  // 00FB2C  adda.l #$1dfe, a4
     wr32(A2 + 0x1C, A4);  // 00FB32  move.l a4, 28(a2)
     A4 = A1;  // 00FB36  movea.l a1, a4
 L_00FB38:
-    tick(26);
     // 00FB38  cmpi.w #$8888, 120(a0)
     if (rd16(A0 + 0x78) == 0x8888) goto L_00FB8A;  // 00FB3E  beq $fb8a
-    tick(26);
     // 00FB40  cmpi.w #$6, 120(a0)
     if (rd16(A0 + 0x78) == 0x6) goto L_00FB8A;  // 00FB46  beq $fb8a
-    tick(26);
     // 00FB48  cmpi.w #$ff04, 120(a0)
     if (rd16(A0 + 0x78) == 0xFF04) goto L_00FB78;  // 00FB4E  beq $fb78
-    tick(26);
     // 00FB50  cmpi.w #$eb08, 120(a0)
     if (rd16(A0 + 0x78) == 0xEB08) goto L_00FB78;  // 00FB56  beq $fb78
-    tick(26);
     // 00FB58  cmpi.w #$ef01, 120(a0)
     if (rd16(A0 + 0x78) == 0xEF01) goto L_00FB78;  // 00FB5E  beq $fb78
-    tick(26);
     // 00FB60  cmpi.w #$9000, 120(a0)
     if (rd16(A0 + 0x78) >= 0x9000) goto L_00FB8A;  // 00FB66  bcc $fb8a
-    tick(26);
     // 00FB68  cmpi.w #$3, 120(a0)
     if (rd16(A0 + 0x78) != 0x3) goto L_00FB78;  // 00FB6E  bne $fb78
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00FB70  move.w #$1, $112da.l
 L_00FB78:
-    tick(52);
     wr16(A0 + 0x78, 0x8888);  // 00FB78  move.w #$8888, 120(a0)
     A4 += 0x1E00;  // 00FB7E  adda.l #$1e00, a4
     wr32(A2 + 0x20, A4);  // 00FB84  move.l a4, 32(a2)
     A4 = A1;  // 00FB88  movea.l a1, a4
 L_00FB8A:
-    tick(26);
     // 00FB8A  cmpi.w #$8888, 122(a0)
     if (rd16(A0 + 0x7A) == 0x8888) goto L_00FBCC;  // 00FB90  beq $fbcc
-    tick(26);
     // 00FB92  cmpi.w #$6, 122(a0)
     if (rd16(A0 + 0x7A) == 0x6) goto L_00FBCC;  // 00FB98  beq $fbcc
-    tick(26);
     // 00FB9A  cmpi.w #$eb08, 122(a0)
     if (rd16(A0 + 0x7A) == 0xEB08) goto L_00FBCC;  // 00FBA0  beq $fbcc
-    tick(26);
     // 00FBA2  cmpi.w #$9000, 122(a0)
     if (rd16(A0 + 0x7A) >= 0x9000) goto L_00FBCC;  // 00FBA8  bcc $fbcc
-    tick(26);
     // 00FBAA  cmpi.w #$3, 122(a0)
     if (rd16(A0 + 0x7A) != 0x3) goto L_00FBBA;  // 00FBB0  bne $fbba
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00FBB2  move.w #$1, $112da.l
 L_00FBBA:
-    tick(52);
     wr16(A0 + 0x7A, 0x8888);  // 00FBBA  move.w #$8888, 122(a0)
     A4 += 0x1E02;  // 00FBC0  adda.l #$1e02, a4
     wr32(A2 + 0x24, A4);  // 00FBC6  move.l a4, 36(a2)
     A4 = A1;  // 00FBCA  movea.l a1, a4
 L_00FBCC:
-    tick(26);
     // 00FBCC  tst.w $113f4.l
     if (rd16(0x113F4) != 0) goto L_00FBD8;  // 00FBD2  bne $fbd8
-    tick(18);
     call(yellow_disks_hit_by_explosion, 0xFBD8);  // 00FBD6  bsr $fbde
 L_00FBD8:
-    tick(132);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 00FBD8  movem.l (a7)+, regs(7cff)
     return;  // 00FBDC  rts 
 }
 
 void yellow_disks_hit_by_explosion() {
-    tick(20);
     A3 = v_yellow_disk_list;  // 00FBDE  lea.l $191c0.l, a3
     D7 = 0x7;  // 00FBE4  moveq.l #$7, d7
     D0 = 0x0;  // 00FBE6  moveq.l #$0, d0
 L_00FBE8:
-    tick(18);
     // 00FBE8  tst.w (a3)
     if (rd16(A3) == 0) goto L_00FC0E;  // 00FBEA  beq $fc0e
-    tick(22);
     // 00FBEC  cmpi.w #$ffff, (a3)
     if (rd16(A3) == 0xFFFF) goto L_00FC08;  // 00FBF0  beq $fc08
-    tick(56);
     A2 = v_map;  // 00FBF2  lea.l $11928.l, a2
     setW(D0, rd16(A3));  // 00FBF8  move.w (a3), d0
     setW(D0, ((D0 & 0xFFFF) >> 1));  // 00FBFA  lsr.w #$1, d0
     A2 += D0;  // 00FBFC  adda.l d0, a2
     // 00FBFE  cmpi.w #$8888, (a2)
     if (rd16(A2) != 0x8888) goto L_00FC08;  // 00FC02  bne $fc08
-    tick(12);
     wr16(A3, 0xFFFF);  // 00FC04  move.w #$ffff, (a3)
 L_00FC08:
-    tick(20);
     A3 += 0x4;  // 00FC08  addq.l #$4, a3
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00FBE8;  // 00FC0A  dbf.w d7, $fbe8
 L_00FC0E:
-    tick(16);
     return;  // 00FC0E  rts 
 }
 
 // Ведение всех активных взрывов: 8 фаз по 4 кадра, затем клетки очищаются
 // (или становятся инфотронами после взрыва электрона).
 void update_explosions() {
-    tick(20);
     D7 = 0xB;  // 00FC10  moveq.l #$b, d7
     A0 = v_explosions;  // 00FC12  lea.l $1b1e2.l, a0
     A6 = A0;  // 00FC18  movea.l a0, a6
 L_00FC1A:
-    tick(22);
     // 00FC1A  tst.l (a6)
     if (rd32(A6) == 0) goto L_00FC20;  // 00FC1C  beq $fc20
-    tick(18);
     call(update_explosion, 0xFC20);  // 00FC1E  bsr $fc2c
 L_00FC20:
-    tick(24);
     A6 = A6 + 0x30;  // 00FC20  lea.l 48(a6), a6
     A0 = A6;  // 00FC24  movea.l a6, a0
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_00FC1A;  // 00FC26  dbf.w d7, $fc1a
-    tick(16);
     return;  // 00FC2A  rts 
 }
 
 void update_explosion() {
-    tick(42);
     A4 = rd32(A6 + 0x28);  // 00FC2C  movea.l 40(a6), a4
     // 00FC30  cmpi.w #$3, -122(a4)
     if (rd16(A4 - 0x7A) != 0x3) goto L_00FC44;  // 00FC36  bne $fc44
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00FC38  move.w #$1, $112da.l
     goto L_00FCD4;  // 00FC40  bra $fcd4
 L_00FC44:
-    tick(26);
     // 00FC44  cmpi.w #$3, -120(a4)
     if (rd16(A4 - 0x78) != 0x3) goto L_00FC58;  // 00FC4A  bne $fc58
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00FC4C  move.w #$1, $112da.l
     goto L_00FCD4;  // 00FC54  bra $fcd4
 L_00FC58:
-    tick(26);
     // 00FC58  cmpi.w #$3, -118(a4)
     if (rd16(A4 - 0x76) != 0x3) goto L_00FC6C;  // 00FC5E  bne $fc6c
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00FC60  move.w #$1, $112da.l
     goto L_00FCD4;  // 00FC68  bra $fcd4
 L_00FC6C:
-    tick(26);
     // 00FC6C  cmpi.w #$3, -2(a4)
     if (rd16(A4 - 0x2) != 0x3) goto L_00FC7E;  // 00FC72  bne $fc7e
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00FC74  move.w #$1, $112da.l
     goto L_00FCD4;  // 00FC7C  bra $fcd4
 L_00FC7E:
-    tick(22);
     // 00FC7E  cmpi.w #$3, (a4)
     if (rd16(A4) != 0x3) goto L_00FC8E;  // 00FC82  bne $fc8e
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00FC84  move.w #$1, $112da.l
     goto L_00FCD4;  // 00FC8C  bra $fcd4
 L_00FC8E:
-    tick(26);
     // 00FC8E  cmpi.w #$3, 2(a4)
     if (rd16(A4 + 0x2) != 0x3) goto L_00FCA0;  // 00FC94  bne $fca0
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00FC96  move.w #$1, $112da.l
     goto L_00FCD4;  // 00FC9E  bra $fcd4
 L_00FCA0:
-    tick(26);
     // 00FCA0  cmpi.w #$3, 118(a4)
     if (rd16(A4 + 0x76) != 0x3) goto L_00FCB2;  // 00FCA6  bne $fcb2
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00FCA8  move.w #$1, $112da.l
     goto L_00FCD4;  // 00FCB0  bra $fcd4
 L_00FCB2:
-    tick(26);
     // 00FCB2  cmpi.w #$3, 120(a4)
     if (rd16(A4 + 0x78) != 0x3) goto L_00FCC4;  // 00FCB8  bne $fcc4
-    tick(30);
     wr16(v_murphy_killed, 0x1);  // 00FCBA  move.w #$1, $112da.l
     goto L_00FCD4;  // 00FCC2  bra $fcd4
 L_00FCC4:
-    tick(26);
     // 00FCC4  cmpi.w #$3, 122(a4)
     if (rd16(A4 + 0x7A) != 0x3) goto L_00FCD4;  // 00FCCA  bne $fcd4
-    tick(20);
     wr16(v_murphy_killed, 0x1);  // 00FCCC  move.w #$1, $112da.l
 L_00FCD4:
-    tick(22);
     A0 = A6;  // 00FCD4  movea.l a6, a0
     // 00FCD6  tst.w (a0)
     if (rd16(A0) != 0) goto L_00FCDC;  // 00FCD8  bne $fcdc
-    tick(16);
     return;  // 00FCDA  rts 
 L_00FCDC:
-    tick(26);
     // 00FCDC  tst.l 4(a6)
     if (rd32(A6 + 0x4) == 0) goto L_00FCE8;  // 00FCE0  beq $fce8
-    tick(16);
     wr16(A4 - 0x7A, 0x8888);  // 00FCE2  move.w #$8888, -122(a4)
 L_00FCE8:
-    tick(26);
     // 00FCE8  tst.l 8(a6)
     if (rd32(A6 + 0x8) == 0) goto L_00FCF4;  // 00FCEC  beq $fcf4
-    tick(16);
     wr16(A4 - 0x78, 0x8888);  // 00FCEE  move.w #$8888, -120(a4)
 L_00FCF4:
-    tick(26);
     // 00FCF4  tst.l 12(a6)
     if (rd32(A6 + 0xC) == 0) goto L_00FD00;  // 00FCF8  beq $fd00
-    tick(16);
     wr16(A4 - 0x76, 0x8888);  // 00FCFA  move.w #$8888, -118(a4)
 L_00FD00:
-    tick(26);
     // 00FD00  tst.l 16(a6)
     if (rd32(A6 + 0x10) == 0) goto L_00FD0C;  // 00FD04  beq $fd0c
-    tick(16);
     wr16(A4 - 0x2, 0x8888);  // 00FD06  move.w #$8888, -2(a4)
 L_00FD0C:
-    tick(26);
     // 00FD0C  tst.l 20(a6)
     if (rd32(A6 + 0x14) == 0) goto L_00FD16;  // 00FD10  beq $fd16
-    tick(12);
     wr16(A4, 0x8888);  // 00FD12  move.w #$8888, (a4)
 L_00FD16:
-    tick(26);
     // 00FD16  tst.l 24(a6)
     if (rd32(A6 + 0x18) == 0) goto L_00FD22;  // 00FD1A  beq $fd22
-    tick(16);
     wr16(A4 + 0x2, 0x8888);  // 00FD1C  move.w #$8888, 2(a4)
 L_00FD22:
-    tick(26);
     // 00FD22  tst.l 28(a6)
     if (rd32(A6 + 0x1C) == 0) goto L_00FD2E;  // 00FD26  beq $fd2e
-    tick(16);
     wr16(A4 + 0x76, 0x8888);  // 00FD28  move.w #$8888, 118(a4)
 L_00FD2E:
-    tick(26);
     // 00FD2E  tst.l 32(a6)
     if (rd32(A6 + 0x20) == 0) goto L_00FD3A;  // 00FD32  beq $fd3a
-    tick(16);
     wr16(A4 + 0x78, 0x8888);  // 00FD34  move.w #$8888, 120(a4)
 L_00FD3A:
-    tick(26);
     // 00FD3A  tst.l 36(a6)
     if (rd32(A6 + 0x24) == 0) goto L_00FD46;  // 00FD3E  beq $fd46
-    tick(16);
     wr16(A4 + 0x7A, 0x8888);  // 00FD40  move.w #$8888, 122(a4)
 L_00FD46:
-    tick(30);
     A1 = A0;  // 00FD46  movea.l a0, a1
     // 00FD48  cmpi.w #$10, 2(a0)
     if (int16_t(rd16(A0 + 0x2)) >= 16) goto L_00FDC0;  // 00FD4E  bge $fdc0
-    tick(34);
     wr16(A0, (rd16(A0) + 0x1));  // 00FD52  addq.w #$1, (a0)
     // 00FD54  cmpi.w #$5, (a0)
     if (int16_t(rd16(A0)) < 5) goto L_00FD90;  // 00FD58  blt $fd90
-    tick(38);
     wr16(A0, 0x1);  // 00FD5A  move.w #$1, (a0)
     // 00FD5E  tst.l 44(a0)
     if (rd32(A0 + 0x2C) == 0) goto L_00FD6C;  // 00FD62  beq $fd6c
-    tick(30);
     A3 = rd32(0x112CA);  // 00FD64  movea.l $112ca.l, a3
     goto L_00FD72;  // 00FD6A  bra $fd72
 L_00FD6C:
-    tick(20);
     A3 = rd32(0x112C6);  // 00FD6C  movea.l $112c6.l, a3
 L_00FD72:
-    tick(26);
     D0 = 0x8;  // 00FD72  moveq.l #$8, d0
     D1 = 0x0;  // 00FD74  moveq.l #$0, d1
     setW(D1, rd16(A1 + 0x2));  // 00FD76  move.w 2(a1), d1
     A3 += D1;  // 00FD7A  adda.l d1, a3
 L_00FD7C:
-    tick(38);
     A0 += 0x4;  // 00FD7C  adda.l #$4, a0
     // 00FD82  tst.l (a0)
     if (rd32(A0) == 0) goto L_00FD88;  // 00FD84  beq $fd88
-    tick(18);
     call(blit_explosion_cell, 0xFD88);  // 00FD86  bsr $fd92
 L_00FD88:
-    tick(12);
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_00FD7C;  // 00FD88  dbf.w d0, $fd7c
-    tick(16);
     wr16(A1 + 0x2, (rd16(A1 + 0x2) + 0x2));  // 00FD8C  addq.w #$2, 2(a1)
 L_00FD90:
-    tick(16);
     return;  // 00FD90  rts 
 L_00FDC0:
-    tick(86);
     wr16(A5 + 0xA4, 0x1);  // 00FDC0  move.w #$1, 164(a5)
     wr32(A5 + 0xA0, 0);  // 00FDC6  clr.l 160(a5)
     A4 = A1;  // 00FDCA  movea.l a1, a4
     A1 = rd32(A1 + 0x28);  // 00FDCC  movea.l 40(a1), a1
     // 00FDD0  tst.l 44(a6)
     if (rd32(A6 + 0x2C) != 0) goto L_00FE44;  // 00FDD4  bne $fe44
-    tick(26);
     // 00FDD8  tst.l 4(a4)
     if (rd32(A4 + 0x4) == 0) goto L_00FDE2;  // 00FDDC  beq $fde2
-    tick(16);
     wr16(A1 - 0x7A, 0);  // 00FDDE  clr.w -122(a1)
 L_00FDE2:
-    tick(26);
     // 00FDE2  tst.l 8(a4)
     if (rd32(A4 + 0x8) == 0) goto L_00FDEC;  // 00FDE6  beq $fdec
-    tick(16);
     wr16(A1 - 0x78, 0);  // 00FDE8  clr.w -120(a1)
 L_00FDEC:
-    tick(26);
     // 00FDEC  tst.l 12(a4)
     if (rd32(A4 + 0xC) == 0) goto L_00FDF6;  // 00FDF0  beq $fdf6
-    tick(16);
     wr16(A1 - 0x76, 0);  // 00FDF2  clr.w -118(a1)
 L_00FDF6:
-    tick(26);
     // 00FDF6  tst.l 16(a4)
     if (rd32(A4 + 0x10) == 0) goto L_00FE00;  // 00FDFA  beq $fe00
-    tick(16);
     wr16(A1 - 0x2, 0);  // 00FDFC  clr.w -2(a1)
 L_00FE00:
-    tick(26);
     // 00FE00  tst.l 20(a4)
     if (rd32(A4 + 0x14) == 0) goto L_00FE08;  // 00FE04  beq $fe08
-    tick(12);
     wr16(A1, 0);  // 00FE06  clr.w (a1)
 L_00FE08:
-    tick(26);
     // 00FE08  tst.l 24(a4)
     if (rd32(A4 + 0x18) == 0) goto L_00FE12;  // 00FE0C  beq $fe12
-    tick(16);
     wr16(A1 + 0x2, 0);  // 00FE0E  clr.w 2(a1)
 L_00FE12:
-    tick(26);
     // 00FE12  tst.l 28(a4)
     if (rd32(A4 + 0x1C) == 0) goto L_00FE1C;  // 00FE16  beq $fe1c
-    tick(16);
     wr16(A1 + 0x76, 0);  // 00FE18  clr.w 118(a1)
 L_00FE1C:
-    tick(26);
     // 00FE1C  tst.l 32(a4)
     if (rd32(A4 + 0x20) == 0) goto L_00FE26;  // 00FE20  beq $fe26
-    tick(16);
     wr16(A1 + 0x78, 0);  // 00FE22  clr.w 120(a1)
 L_00FE26:
-    tick(26);
     // 00FE26  tst.l 36(a4)
     if (rd32(A4 + 0x24) == 0) goto L_00FE30;  // 00FE2A  beq $fe30
-    tick(16);
     wr16(A1 + 0x7A, 0);  // 00FE2C  clr.w 122(a1)
 L_00FE30:
-    tick(8);
     setW(D6, 0x9);  // 00FE30  move.w #$9, d6
 L_00FE34:
-    tick(32);
     wr32(A0, 0);  // 00FE34  clr.l (a0)+
     A0 += 4;
     setW(D6, D6 - 1); if ((D6 & 0xFFFF) != 0xFFFF) goto L_00FE34;  // 00FE36  dbf.w d6, $fe34
-    tick(64);
     wr32(A6 + 0x28, 0);  // 00FE3A  clr.l 40(a6)
     wr32(A6 + 0x2C, 0);  // 00FE3E  clr.l 44(a6)
     return;  // 00FE42  rts 
 L_00FE44:
-    tick(26);
     // 00FE44  tst.l 4(a4)
     if (rd32(A4 + 0x4) == 0) goto L_00FE64;  // 00FE48  beq $fe64
-    tick(78);
     wr16(A1 - 0x7A, 0x4);  // 00FE4A  move.w #$4, -122(a1)
     D2 = A1;  // 00FE50  move.l a1, d2
     D2 = (D2 - 0x7A);  // 00FE52  subi.l #$7a, d2
@@ -14989,10 +11369,8 @@ L_00FE44:
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 00FE5E  lsl.w #$1, d2
     call(register_infotron, 0xFE64);  // 00FE60  bsr $ff60
 L_00FE64:
-    tick(26);
     // 00FE64  tst.l 8(a4)
     if (rd32(A4 + 0x8) == 0) goto L_00FE84;  // 00FE68  beq $fe84
-    tick(78);
     wr16(A1 - 0x78, 0x4);  // 00FE6A  move.w #$4, -120(a1)
     D2 = A1;  // 00FE70  move.l a1, d2
     D2 = (D2 - 0x78);  // 00FE72  subi.l #$78, d2
@@ -15000,10 +11378,8 @@ L_00FE64:
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 00FE7E  lsl.w #$1, d2
     call(register_infotron, 0xFE84);  // 00FE80  bsr $ff60
 L_00FE84:
-    tick(26);
     // 00FE84  tst.l 12(a4)
     if (rd32(A4 + 0xC) == 0) goto L_00FEA4;  // 00FE88  beq $fea4
-    tick(78);
     wr16(A1 - 0x76, 0x4);  // 00FE8A  move.w #$4, -118(a1)
     D2 = A1;  // 00FE90  move.l a1, d2
     D2 = (D2 - 0x76);  // 00FE92  subi.l #$76, d2
@@ -15011,10 +11387,8 @@ L_00FE84:
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 00FE9E  lsl.w #$1, d2
     call(register_infotron, 0xFEA4);  // 00FEA0  bsr $ff60
 L_00FEA4:
-    tick(26);
     // 00FEA4  tst.l 16(a4)
     if (rd32(A4 + 0x10) == 0) goto L_00FEC0;  // 00FEA8  beq $fec0
-    tick(70);
     wr16(A1 - 0x2, 0x4);  // 00FEAA  move.w #$4, -2(a1)
     D2 = A1;  // 00FEB0  move.l a1, d2
     D2 = (D2 - 0x2);  // 00FEB2  subq.l #$2, d2
@@ -15022,20 +11396,16 @@ L_00FEA4:
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 00FEBA  lsl.w #$1, d2
     call(register_infotron, 0xFEC0);  // 00FEBC  bsr $ff60
 L_00FEC0:
-    tick(26);
     // 00FEC0  tst.l 20(a4)
     if (rd32(A4 + 0x14) == 0) goto L_00FED8;  // 00FEC4  beq $fed8
-    tick(58);
     wr16(A1, 0x4);  // 00FEC6  move.w #$4, (a1)
     D2 = A1;  // 00FECA  move.l a1, d2
     D2 = (D2 - 0x11928);  // 00FECC  subi.l #$11928, d2
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 00FED2  lsl.w #$1, d2
     call(register_infotron, 0xFED8);  // 00FED4  bsr $ff60
 L_00FED8:
-    tick(26);
     // 00FED8  tst.l 24(a4)
     if (rd32(A4 + 0x18) == 0) goto L_00FEF2;  // 00FEDC  beq $fef2
-    tick(70);
     wr16(A1 + 0x2, 0x4);  // 00FEDE  move.w #$4, 2(a1)
     D2 = A1;  // 00FEE4  move.l a1, d2
     D2 = (D2 + 0x2);  // 00FEE6  addq.l #$2, d2
@@ -15043,10 +11413,8 @@ L_00FED8:
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 00FEEE  lsl.w #$1, d2
     call(register_infotron, 0xFEF2);  // 00FEF0  bsr $ff60
 L_00FEF2:
-    tick(26);
     // 00FEF2  tst.l 28(a4)
     if (rd32(A4 + 0x1C) == 0) goto L_00FF10;  // 00FEF6  beq $ff10
-    tick(78);
     wr16(A1 + 0x76, 0x4);  // 00FEF8  move.w #$4, 118(a1)
     D2 = A1;  // 00FEFE  move.l a1, d2
     D2 = (D2 + 0x76);  // 00FF00  addi.l #$76, d2
@@ -15054,10 +11422,8 @@ L_00FEF2:
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 00FF0C  lsl.w #$1, d2
     call(register_infotron, 0xFF10);  // 00FF0E  bsr $ff60
 L_00FF10:
-    tick(26);
     // 00FF10  tst.l 32(a4)
     if (rd32(A4 + 0x20) == 0) goto L_00FF2E;  // 00FF14  beq $ff2e
-    tick(78);
     wr16(A1 + 0x78, 0x4);  // 00FF16  move.w #$4, 120(a1)
     D2 = A1;  // 00FF1C  move.l a1, d2
     D2 = (D2 + 0x78);  // 00FF1E  addi.l #$78, d2
@@ -15065,10 +11431,8 @@ L_00FF10:
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 00FF2A  lsl.w #$1, d2
     call(register_infotron, 0xFF2E);  // 00FF2C  bsr $ff60
 L_00FF2E:
-    tick(26);
     // 00FF2E  tst.l 36(a4)
     if (rd32(A4 + 0x24) == 0) goto L_00FF4C;  // 00FF32  beq $ff4c
-    tick(78);
     wr16(A1 + 0x7A, 0x4);  // 00FF34  move.w #$4, 122(a1)
     D2 = A1;  // 00FF3A  move.l a1, d2
     D2 = (D2 + 0x7A);  // 00FF3C  addi.l #$7a, d2
@@ -15076,14 +11440,11 @@ L_00FF2E:
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 00FF48  lsl.w #$1, d2
     call(register_infotron, 0xFF4C);  // 00FF4A  bsr $ff60
 L_00FF4C:
-    tick(8);
     setW(D6, 0x9);  // 00FF4C  move.w #$9, d6
 L_00FF50:
-    tick(32);
     wr32(A4, 0);  // 00FF50  clr.l (a4)+
     A4 += 4;
     setW(D6, D6 - 1); if ((D6 & 0xFFFF) != 0xFFFF) goto L_00FF50;  // 00FF52  dbf.w d6, $ff50
-    tick(64);
     wr32(A6 + 0x28, 0);  // 00FF56  clr.l 40(a6)
     wr32(A6 + 0x2C, 0);  // 00FF5A  clr.l 44(a6)
     return;  // 00FF5E  rts 
@@ -15091,10 +11452,8 @@ L_00FF50:
 
 void blit_explosion_cell() {
 L_00FD92:
-    tick(26);
     // 00FD92  btst.b #$e, 2(a5)
     if ((rd8(A5 + 0x2) & (1u << 6))) goto L_00FD92;  // 00FD98  bne $fd92
-    tick(136);
     wr32(A5 + 0x50, A3);  // 00FD9A  move.l a3, 80(a5)
     wr32(A5 + 0x54, rd32(A0));  // 00FD9E  move.l (a0), 84(a5)
     wr16(A5 + 0x42, 0);  // 00FDA2  clr.w 66(a5)
@@ -15106,34 +11465,26 @@ L_00FD92:
 }
 
 void register_infotron() {
-    tick(12);
     A0 = 0x167BC;  // 00FF60  lea.l $167bc.l, a0
 L_00FF66:
-    tick(26);
     setW(D3, rd16(A0 + 0x2));  // 00FF66  move.w 2(a0), d3
     // 00FF6A  cmp.w d2, d3
     if ((D3 & 0xFFFF) == (D2 & 0xFFFF)) goto L_00FF7C;  // 00FF6C  beq $ff7c
-    tick(22);
     // 00FF6E  cmpi.b #$ff, (a0)
     if (rd8(A0) == 0xFF) goto L_00FF7C;  // 00FF72  beq $ff7c
-    tick(22);
     // 00FF74  tst.l (a0)
     if (rd32(A0) == 0) goto L_00FF7C;  // 00FF76  beq $ff7c
-    tick(18);
     A0 += 0x4;  // 00FF78  addq.l #$4, a0
     goto L_00FF66;  // 00FF7A  bra $ff66
 L_00FF7C:
-    tick(40);
     wr16(A0, 0);  // 00FF7C  clr.w (a0)
     wr16(A0 + 0x2, (D2 & 0xFFFF));  // 00FF7E  move.w d2, 2(a0)
     return;  // 00FF82  rts 
 }
 
 void init_infotrons_needed() {
-    tick(26);
     // 00FF84  tst.b $12a26.l
     if (rd8(v_infotrons_needed) == 0) { update_infotron_counter(); return; }  // 00FF8A  beq $ff9c
-    tick(56);
     D0 = 0x0;  // 00FF8C  moveq.l #$0, d0
     setB(D0, rd8(v_infotrons_needed));  // 00FF8E  move.b $12a26.l, d0
     wr32(v_infotrons_left, D0);  // 00FF94  move.l d0, $111cc.l
@@ -15142,28 +11493,21 @@ void init_infotrons_needed() {
 
 // Пересчитать и нарисовать число оставшихся инфотронов на панели.
 void update_infotron_counter() {
-    tick(140);
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 00FF9C  movem.l regs(fffe), -(a7)
     A0 = 0x167B8;  // 00FFA0  lea.l $167b8.l, a0
 L_00FFA6:
-    tick(30);
     A0 += 0x4;  // 00FFA6  addq.l #$4, a0
     // 00FFA8  tst.l (a0)
     if (rd32(A0) == 0) goto L_00FFC6;  // 00FFAA  beq $ffc6
-    tick(22);
     // 00FFAC  cmpi.b #$ee, (a0)
     if (rd8(A0) != 0xEE) goto L_00FFA6;  // 00FFB0  bne $ffa6
-    tick(42);
     wr8(A0, 0xFF);  // 00FFB2  move.b #$ff, (a0)
     // 00FFB6  tst.l $111cc.l
     if (rd32(v_infotrons_left) == 0) goto L_00FFA6;  // 00FFBC  beq $ffa6
-    tick(38);
     wr32(v_infotrons_left, (rd32(v_infotrons_left) - 0x1));  // 00FFBE  subq.l #$1, $111cc.l
     goto L_00FFA6;  // 00FFC4  bra $ffa6
 L_00FFC6:
-    tick(18);
     call(infotrons_to_text, 0xFFCA);  // 00FFC6  bsr $100c0
-    tick(108);
     D0 = 0x0;  // 00FFCA  moveq.l #$0, d0
     A0 = rd32(0x1B5C0);  // 00FFCC  movea.l $1b5c0.l, a0
     A0 = A0 + 0x40C;  // 00FFD2  lea.l 1036(a0), a0
@@ -15173,7 +11517,6 @@ L_00FFC6:
     setW(D0, ((D0 & 0xFFFF) - 0x30));  // 00FFE6  subi.w #$30, d0
     A1 += D0;  // 00FFEA  adda.l d0, a1
     call(draw_digit_7x9, 0xFFF0);  // 00FFEC  bsr $10082
-    tick(92);
     A0 = rd32(0x1B5C0);  // 00FFF0  movea.l $1b5c0.l, a0
     A0 = A0 + 0x40B;  // 00FFF6  lea.l 1035(a0), a0
     A1 = rd32(0x1B5D4);  // 00FFFA  movea.l $1b5d4.l, a1
@@ -15181,7 +11524,6 @@ L_00FFC6:
     setW(D0, ((D0 & 0xFFFF) - 0x30));  // 010004  subi.w #$30, d0
     A1 += D0;  // 010008  adda.l d0, a1
     call(draw_digit_7x9, 0x1000C);  // 01000A  bsr $10082
-    tick(92);
     A0 = rd32(0x1B5C0);  // 01000C  movea.l $1b5c0.l, a0
     A0 = A0 + 0x40A;  // 010012  lea.l 1034(a0), a0
     A1 = rd32(0x1B5D4);  // 010016  movea.l $1b5d4.l, a1
@@ -15189,72 +11531,55 @@ L_00FFC6:
     setW(D0, ((D0 & 0xFFFF) - 0x30));  // 010020  subi.w #$30, d0
     A1 += D0;  // 010024  adda.l d0, a1
     call(draw_digit_7x9, 0x10028);  // 010026  bsr $10082
-    tick(148);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 010028  movem.l (a7)+, regs(7fff)
     return;  // 01002C  rts 
 }
 
 void reset_panel_clock() {
-    tick(106);
     wr16(v_clock_hours, 0);  // 01002E  clr.w $11298.l
     wr8(v_clock_minutes, 0);  // 010034  clr.b $11297.l
     wr8(v_clock_seconds, 0);  // 01003A  clr.b $11296.l
     A4 = rd32(0x1B5C0);  // 010040  movea.l $1b5c0.l, a4
     A4 = A4 + 0x17C;  // 010046  lea.l 380(a4), a4
     call(draw_panel_zero, 0x1004C);  // 01004A  bsr $1005c
-    tick(18);
     call(draw_panel_zero, 0x1004E);  // 01004C  bsr $1005c
-    tick(26);
     A4 += 0x1;  // 01004E  addq.l #$1, a4
     call(draw_panel_zero, 0x10052);  // 010050  bsr $1005c
-    tick(18);
     call(draw_panel_zero, 0x10054);  // 010052  bsr $1005c
-    tick(26);
     A4 += 0x1;  // 010054  addq.l #$1, a4
     call(draw_panel_zero, 0x10058);  // 010056  bsr $1005c
-    tick(18);
     call(draw_panel_zero, 0x1005A);  // 010058  bsr $1005c
-    tick(16);
     return;  // 01005A  rts 
 }
 
 void draw_panel_zero() {
-    tick(46);
     A0 = A4;  // 01005C  movea.l a4, a0
     D0 = 0x0;  // 01005E  moveq.l #$0, d0
     A1 = rd32(0x1B5D4);  // 010060  movea.l $1b5d4.l, a1
     call(draw_digit_7x9, 0x10068);  // 010066  bsr $10082
-    tick(24);
     A4 += 0x1;  // 010068  addq.l #$1, a4
     return;  // 01006A  rts 
 }
 
 void draw_digit_7x9() {
-    tick(4);
     D3 = 0x6;  // 010082  moveq.l #$6, d3
 L_010084:
-    tick(56);
     wr8(A0, rd8(A1));  // 010084  move.b (a1), (a0)
     A0 += 0x28;  // 010086  adda.l #$28, a0
     A1 += 0xA;  // 01008C  adda.l #$a, a1
     setW(D3, D3 - 1); if ((D3 & 0xFFFF) != 0xFFFF) goto L_010084;  // 010092  dbf.w d3, $10084
-    tick(16);
     return;  // 010096  rts 
 }
 
 void parse_decimal() {
-    tick(8);
     D0 = 0x0;  // 010098  moveq.l #$0, d0
     D2 = 0x0;  // 01009A  moveq.l #$0, d2
 L_01009C:
-    tick(26);
     {  uint32_t v = rd8(A4); A4 += 1;  setB(D2, v);  }  // 01009C  move.b (a4)+, d2
     // 01009E  cmpi.b #$30, d2
     if ((D2 & 0xFF) < 0x30) goto L_0100BC;  // 0100A2  bcs $100bc
-    tick(18);
     // 0100A4  cmpi.b #$39, d2
     if ((D2 & 0xFF) > 0x39) goto L_0100BC;  // 0100A8  bhi $100bc
-    tick(52);
     D0 = (D0 + D0);  // 0100AA  add.l d0, d0
     D1 = D0;  // 0100AC  move.l d0, d1
     D0 = (D0 + D0);  // 0100AE  add.l d0, d0
@@ -15264,13 +11589,11 @@ L_01009C:
     D0 = (D0 + D2);  // 0100B8  add.l d2, d0
     goto L_01009C;  // 0100BA  bra $1009c
 L_0100BC:
-    tick(24);
     A4 -= 0x1;  // 0100BC  subq.l #$1, a4
     return;  // 0100BE  rts 
 }
 
 void infotrons_to_text() {
-    tick(32);
     A6 = 0x111C2;  // 0100C0  lea.l $111c2.l, a6
     D4 = rd32(v_infotrons_left);  // 0100C6  move.l $111cc.l, d4
     { number_to_decimal(); return; }
@@ -15278,36 +11601,28 @@ void infotrons_to_text() {
 
 // Число d4 -> десятичные ASCII-цифры по адресу a6 (без ведущих нулей).
 void number_to_decimal() {
-    tick(26);
     D4 = (0 - D4);  // 0100CC  neg.l d4
     A0 = 0x111E8;  // 0100CE  lea.l $111e8.l, a0
     setW(D1, 0xFFFF);  // 0100D4  move.w #$ffff, d1
 L_0100D8:
-    tick(22);
     {  uint32_t v = logic<4>(rd32(A0)); A0 += 4;  D2 = v;  }  // 0100D8  move.l (a0)+, d2
     if (CC_EQ) goto L_0100FA;  // 0100DA  beq $100fa
-    tick(4);
     D0 = 0xFFFFFFFF;  // 0100DC  moveq.l #$ffffffff, d0
 L_0100DE:
-    tick(18);
     D4 = add<4>(D2, D4);  // 0100DE  add.l d2, d4
     if (!CC_GT) { setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_0100DE; }  // 0100E0  dbgt.w d0, $100de
-    tick(20);
     D4 = (D4 - D2);  // 0100E4  sub.l d2, d4
     setW(D0, add<2>(0x1, (D0 & 0xFFFF)));  // 0100E6  addq.w #$1, d0
     if (CC_NE) goto L_0100EE;  // 0100E8  bne $100ee
-    tick(14);
     // 0100EA  tst.w d1
     if ((D1 & 0xFFFF) == 0) goto L_0100D8;  // 0100EC  beq $100d8
 L_0100EE:
-    tick(34);
     D1 = 0xFFFFFFFF;  // 0100EE  moveq.l #$ffffffff, d1
     setB(D0, (0 - (D0 & 0xFF)));  // 0100F0  neg.b d0
     setB(D0, ((D0 & 0xFF) + 0x30));  // 0100F2  addi.b #$30, d0
     {  wr8(A6, (D0 & 0xFF)); A6 += 1; }  // 0100F6  move.b d0, (a6)+
     goto L_0100D8;  // 0100F8  bra $100d8
 L_0100FA:
-    tick(36);
     setB(D4, (0 - (D4 & 0xFF)));  // 0100FA  neg.b d4
     setB(D4, ((D4 & 0xFF) + 0x30));  // 0100FC  addi.b #$30, d4
     {  wr8(A6, (D4 & 0xFF)); A6 += 1; }  // 010100  move.b d4, (a6)+
@@ -15316,32 +11631,24 @@ L_0100FA:
 
 // Звуковые эффекты: запуск образцов через несколько кадров после запроса.
 void sound_effects_frame() {
-    tick(26);
     // 010104  tst.w $11380.l
     if (rd16(0x11380) == 0) goto L_01011E;  // 01010A  beq $1011e
-    tick(50);
     wr16(0x11380, (rd16(0x11380) + 0x1));  // 01010C  addq.w #$1, $11380.l
     // 010112  cmpi.w #$5, $11380.l
     if (rd16(0x11380) != 0x5) goto L_01011E;  // 01011A  bne $1011e
-    tick(18);
     call(play_sample_ch0_ch2, 0x1011E);  // 01011C  bsr $1013a
 L_01011E:
-    tick(26);
     // 01011E  tst.w $11382.l
     if (rd16(0x11382) == 0) goto L_010138;  // 010124  beq $10138
-    tick(50);
     wr16(0x11382, (rd16(0x11382) + 0x1));  // 010126  addq.w #$1, $11382.l
     // 01012C  cmpi.w #$5, $11382.l
     if (rd16(0x11382) != 0x5) goto L_010138;  // 010134  bne $10138
-    tick(18);
     call(play_sample_ch1, 0x10138);  // 010136  bsr $1017a
 L_010138:
-    tick(16);
     return;  // 010138  rts 
 }
 
 void play_sample_ch0_ch2() {
-    tick(200);
     wr32(A5 + 0xA0, rd32(0x1B5B8));  // 01013A  move.l $1b5b8.l, 160(a5)
     wr32(A5 + 0xC0, rd32(0x1B5B8));  // 010142  move.l $1b5b8.l, 192(a5)
     wr16(A5 + 0xA4, 0x1DBE);  // 01014A  move.w #$1dbe, 164(a5)
@@ -15357,7 +11664,6 @@ void play_sample_ch0_ch2() {
 }
 
 void play_sample_ch1() {
-    tick(140);
     wr32(A5 + 0xB0, rd32(0x1B5B0));  // 01017A  move.l $1b5b0.l, 176(a5)
     wr16(A5 + 0xB4, 0x2BC);  // 010182  move.w #$2bc, 180(a5)
     wr16(A5 + 0xB8, 0x40);  // 010188  move.w #$40, 184(a5)
@@ -15370,22 +11676,18 @@ void play_sample_ch1() {
 }
 
 void stop_samples_ch0_ch2() {
-    tick(30);
     // 0101A6  cmpi.w #$1c, $11380.l
     if (int16_t(rd16(0x11380)) < 28) goto L_0101D2;  // 0101AE  blt $101d2
-    tick(96);
     wr32(A5 + 0xA0, 0x0);  // 0101B0  move.l #$0, 160(a5)
     wr32(A5 + 0xC0, 0x0);  // 0101B8  move.l #$0, 192(a5)
     wr16(A5 + 0xA4, 0x1);  // 0101C0  move.w #$1, 164(a5)
     wr16(A5 + 0xC4, 0x1);  // 0101C6  move.w #$1, 196(a5)
     wr16(A5 + 0x96, 0x8005);  // 0101CC  move.w #$8005, 150(a5)
 L_0101D2:
-    tick(16);
     return;  // 0101D2  rts 
 }
 
 void install_keyboard_irq() {
-    tick(136);
     { A7 -= 4; wr32(A7, A0);  }  // 0101D4  move.l a0, -(a7)
     A0 = 0x00068;  // 0101D6  lea.l $68.w, a0
     wr32(0x10292, rd32(A0));  // 0101DA  move.l (a0), $10292.l
@@ -15397,7 +11699,6 @@ void install_keyboard_irq() {
 }
 
 void remove_keyboard_irq() {
-    tick(88);
     wr16(0xDFF09A, 0x8);  // 0101FA  move.w #$8, $dff09a.l
     wr8(0xBFED01, 0x7F);  // 010202  move.b #$7f, $bfed01.l
     wr32(0x00068, rd32(0x10292));  // 01020A  move.l $10292.l, $68.w
@@ -15406,7 +11707,6 @@ void remove_keyboard_irq() {
 
 // Прерывание клавиатуры (уровень 2, CIA-A SP): таблица нажатых клавиш $10298.
 void keyboard_interrupt() {
-    tick(116);
     { A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D0); }  // 010214  movem.l regs(80c0), -(a7)
     A0 = 0xBFE001;  // 010218  lea.l $bfe001.l, a0
     setW(D0, rd16(0xDFF01E));  // 01021E  move.w $dff01e.l, d0
@@ -15415,10 +11715,8 @@ void keyboard_interrupt() {
     setB(D0, rd8(A0 + 0xD00));  // 01022E  move.b 3328(a0), d0
     // 010232  btst.l #$4, d0
     if ((D0 & (1u << 4))) goto L_01028C;  // 010236  bne $1028c
-    tick(20);
     // 01023A  btst.l #$3, d0
     if (!(D0 & (1u << 3))) goto L_01028C;  // 01023E  beq $1028c
-    tick(134);
     setW(D0, 0);  // 010242  clr.w d0
     setB(D0, rd8(A0 + 0xC00));  // 010244  move.b 3072(a0), d0
     wr8(A0 + 0xC00, 0x1);  // 010248  move.b #$1, 3072(a0)
@@ -15430,27 +11728,21 @@ void keyboard_interrupt() {
     setB(D0, (~(D0 & 0xFF)));  // 01026A  not.b d0
     setB(D0, ror<1>((D0 & 0xFF), 1));  // 01026C  ror.b #$1, d0
     if (CC_PL) goto L_01027A;  // 01026E  bpl $1027a
-    tick(36);
     setW(D0, ((D0 & 0xFFFF) & 0x7F));  // 010270  andi.w #$7f, d0
     wr8(A1 + sxw(D0), 0);  // 010274  clr.b 0(a1,d0.w)
     goto L_010280;  // 010278  bra $10280
 L_01027A:
-    tick(18);
     wr8(A1 + sxw(D0), 0x1);  // 01027A  move.b #$1, 0(a1,d0.w)
 L_010280:
-    tick(26);
     // 010280  btst.b #$0, 3328(a0)
     if (!(rd8(A0 + 0xD00) & (1u << 0))) goto L_010280;  // 010286  beq $10280
-    tick(16);
     wr8(A0 + 0xE00, 0);  // 010288  clr.b 3584(a0)
 L_01028C:
-    tick(56);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A7 = ea; }  // 01028C  movem.l (a7)+, regs(0301)
     return;  // 010290  rte 
 }
 
 void read_keyboard() {
-    tick(84);
     { A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 010318  movem.l regs(c030), -(a7)
     setW(D0, rd16(0xDFF01C));  // 01031C  move.w $dff01c.l, d0
     A3 = 0x10296;  // 010322  lea.l $10296(pc), a3
@@ -15458,28 +11750,21 @@ void read_keyboard() {
     A2 = v_key_matrix;  // 010328  lea.l $10298(pc), a2
     D5 = 0x0;  // 01032C  moveq.l #$0, d5
 L_01032E:
-    tick(18);
     logic<1>(rd8(A2));  // 01032E  tst.b (a2)+
     A2 += 1;
     if (CC_NE) goto L_010340;  // 010330  bne $10340
-    tick(22);
     setW(D5, ((D5 & 0xFFFF) + 0x1));  // 010332  addq.w #$1, d5
     // 010334  cmpi.w #$80, d5
     if ((D5 & 0xFFFF) < 0x80) goto L_01032E;  // 010338  bcs $1032e
-    tick(18);
     setB(D1, ((D1 & 0xFF) & 0x3F));  // 01033A  andi.b #$3f, d1
     goto L_010350;  // 01033E  bra $10350
 L_010340:
-    tick(20);
     // 010340  btst.l #$6, d1
     if ((D1 & (1u << 6))) goto L_010350;  // 010344  bne $10350
-    tick(22);
     btst(D1, 7); D1 = D1 | (1u << 7);  // 010346  bset.l #$7, d1
     if (CC_EQ) goto L_010350;  // 01034A  beq $10350
-    tick(8);
     setB(D1, ((D1 & 0xFF) ^ 0xC0));  // 01034C  eori.b #$c0, d1
 L_010350:
-    tick(84);
     wr8(A3, (D1 & 0xFF));  // 010350  move.b d1, (a3)
     setB(D1, ((D1 & 0xFF) & 0xC0));  // 010352  andi.b #$c0, d1
     setB(D1, rol<1>((D1 & 0xFF), 1));  // 010356  rol.b #$1, d1
@@ -15488,19 +11773,15 @@ L_010350:
 }
 
 void music_start() {
-    tick(58);
     D0 = 0x0;  // 010AAA  moveq.l #$0, d0
     wr32(0x10AD4, rd32(0x1B5AC));  // 010AAC  move.l $1b5ac.l, $10ad4.l
     call(music_init, 0x10AB8);  // 010AB6  bsr $10aec
-    tick(16);
     return;  // 010AB8  rts 
 }
 
 // Прерывание кадровой развёртки (уровень 3): музыка и звуковые эффекты.
 void vertical_blank_interrupt() {
-    tick(18);
     call(music_tick, 0x10ABE);  // 010ABA  bsr $10b78
-    tick(76);
     { A7 -= 2; wr16(A7, (D0 & 0xFFFF));  }  // 010ABE  move.w d0, -(a7)
     setW(D0, rd16(0xDFF01E));  // 010AC0  move.w $dff01e.l, d0
     setW(D0, ((D0 & 0xFFFF) & 0x20));  // 010AC6  andi.w #$20, d0
@@ -15510,7 +11791,6 @@ void vertical_blank_interrupt() {
 }
 
 void music_init() {
-    tick(210);
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); }  // 010AEC  movem.l regs(3f3e), -(a7)
     A0 = rd32(0x10AD4);  // 010AF0  movea.l $10ad4.l, a0
     A0 = A0 + 0x214;  // 010AF6  lea.l 532(a0), a0
@@ -15522,12 +11802,9 @@ void music_init() {
     setW(D0, ((D0 & 0xFFFF) - 0x1));  // 010B10  subq.w #$1, d0
     A1 = 0x1112E;  // 010B12  lea.l $1112e.l, a1
 L_010B18:
-    tick(24);
     {  uint32_t v = rd8(A0); A0 += 1;  wr8(A1, v); A1 += 1; }  // 010B18  move.b (a0)+, (a1)+
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_010B18;  // 010B1A  dbf.w d0, $10b18
-    tick(18);
     call(music_pattern_count, 0x10B22);  // 010B1E  bsr $10c40
-    tick(70);
     A0 = rd32(0x10AD4);  // 010B22  movea.l $10ad4.l, a0
     A0 = A0 + 0x294;  // 010B28  lea.l 660(a0), a0
     A0 += D0;  // 010B2C  adda.l d0, a0
@@ -15535,98 +11812,74 @@ L_010B18:
     A1 = 0x110C2;  // 010B34  lea.l $110c2.l, a1
     D7 = 0xE;  // 010B3A  moveq.l #$e, d7
 L_010B3C:
-    tick(38);
     {  wr32(A1, A0); A1 += 4; }  // 010B3C  move.l a0, (a1)+
     {  uint32_t s = rd32(A2); A2 += 4; A0 += s; }  // 010B3E  adda.l (a2)+, a0
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_010B3C;  // 010B40  dbf.w d7, $10b3c
-    tick(18);
     call(music_stop, 0x10B48);  // 010B44  bsr $10c1c
-    tick(18);
     call(music_clear_samples, 0x10B4C);  // 010B48  bsr $10bda
-    tick(18);
     call(music_play, 0x10B50);  // 010B4C  bsr $10bec
-    tick(116);
     { uint32_t ea = A7; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 010B50  movem.l (a7)+, regs(7cfc)
     return;  // 010B54  rts 
 }
 
 void sound_effect_lock() {
-    tick(40);
     { A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D2); }  // 010B56  movem.l regs(2080), -(a7)
     A0 = 0x11030;  // 010B5A  lea.l $11030.l, a0
     D2 = 0x3;  // 010B60  moveq.l #$3, d2
 L_010B62:
-    tick(16);
     // 010B62  btst.l d2, d0
     if (!(D0 & (1u << (D2 & 31)))) goto L_010B6A;  // 010B64  beq $10b6a
-    tick(12);
     wr16(A0 + 0x16, (D1 & 0xFFFF));  // 010B66  move.w d1, 22(a0)
 L_010B6A:
-    tick(20);
     A0 = A0 - 0x18;  // 010B6A  lea.l -24(a0), a0
     setW(D2, D2 - 1); if ((D2 & 0xFFFF) != 0xFFFF) goto L_010B62;  // 010B6E  dbf.w d2, $10b62
-    tick(44);
     { uint32_t ea = A7; D2 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A7 = ea; }  // 010B72  movem.l (a7)+, regs(0104)
     return;  // 010B76  rts 
 }
 
 void music_tick() {
-    tick(178);
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 010B78  movem.l regs(fffe), -(a7)
     wr16(0x11106, (rd16(0x11106) + 0x1));  // 010B7C  addq.w #$1, $11106.l
     // 010B82  cmpi.w #$6, $11106.l
     if (rd16(0x11106) != 0x6) goto L_010B98;  // 010B8A  bne $10b98
-    tick(38);
     wr16(0x11106, 0);  // 010B8C  clr.w $11106.l
     call(music_next_row, 0x10B96);  // 010B92  bsr $10db0
-    tick(10);
     goto L_010BD4;  // 010B96  bra $10bd4
 L_010B98:
-    tick(40);
     D7 = 0x3;  // 010B98  moveq.l #$3, d7
     A4 = 0x1110E;  // 010B9A  lea.l $1110e.l, a4
     A6 = 0x10FE8;  // 010BA0  lea.l $10fe8.l, a6
     A5 = 0xDFF0A0;  // 010BA6  lea.l $dff0a0.l, a5
 L_010BAC:
-    tick(22);
     // 010BAC  tst.w 22(a6)
     if (rd16(A6 + 0x16) == 0) goto L_010BB8;  // 010BB0  beq $10bb8
-    tick(26);
     wr16(A6 + 0x16, (rd16(A6 + 0x16) - 0x1));  // 010BB2  subq.w #$1, 22(a6)
     goto L_010BC4;  // 010BB6  bra $10bc4
 L_010BB8:
-    tick(42);
     { A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, D7); }  // 010BB8  movem.l regs(0104), -(a7)
     call(music_channel_effect, 0x10BC0);  // 010BBC  bsr $10c72
-    tick(28);
     { uint32_t ea = A7; D7 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A7 = ea; }  // 010BC0  movem.l (a7)+, regs(2080)
 L_010BC4:
-    tick(54);
     A4 += sxw(0x8);  // 010BC4  adda.w #$8, a4
     A5 += sxw(0x10);  // 010BC8  adda.w #$10, a5
     A6 += sxw(0x18);  // 010BCC  adda.w #$18, a6
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_010BAC;  // 010BD0  dbf.w d7, $10bac
 L_010BD4:
-    tick(148);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 010BD4  movem.l (a7)+, regs(7fff)
     return;  // 010BD8  rts 
 }
 
 void music_clear_samples() {
-    tick(16);
     A0 = 0x110C2;  // 010BDA  lea.l $110c2.l, a0
     D0 = 0xE;  // 010BE0  moveq.l #$e, d0
 L_010BE2:
-    tick(44);
     { uint32_t v = rd32(A0); A0 += 4; A1 = v; }  // 010BE2  movea.l (a0)+, a1
     wr32(A1, 0);  // 010BE4  clr.l (a1)
     setW(D0, D0 - 1); if ((D0 & 0xFFFF) != 0xFFFF) goto L_010BE2;  // 010BE6  dbf.w d0, $10be2
-    tick(16);
     return;  // 010BEA  rts 
 }
 
 void music_play() {
-    tick(188);
     A0 = 0xDFF000;  // 010BEC  lea.l $dff000.l, a0
     wr8(0x1110C, (CC_T ? 0xFF : 0x00));  // 010BF2  st.b $1110c.l
     wr16(A0 + 0xA8, 0);  // 010BF8  clr.w 168(a0)
@@ -15640,7 +11893,6 @@ void music_play() {
 }
 
 void music_stop() {
-    tick(128);
     A0 = 0xDFF000;  // 010C1C  lea.l $dff000.l, a0
     wr8(0x1110C, (CC_F ? 0xFF : 0x00));  // 010C22  sf.b $1110c.l
     wr16(A0 + 0xA8, 0);  // 010C28  clr.w 168(a0)
@@ -15652,7 +11904,6 @@ void music_stop() {
 }
 
 void music_pattern_count() {
-    tick(176);
     { A7 -= 4; wr32(A7, A6); A7 -= 4; wr32(A7, A5); A7 -= 4; wr32(A7, A4); A7 -= 4; wr32(A7, A3); A7 -= 4; wr32(A7, A2); A7 -= 4; wr32(A7, A1); A7 -= 4; wr32(A7, A0); A7 -= 4; wr32(A7, D7); A7 -= 4; wr32(A7, D6); A7 -= 4; wr32(A7, D5); A7 -= 4; wr32(A7, D4); A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); }  // 010C40  movem.l regs(7ffe), -(a7)
     A0 = rd32(0x10AD4);  // 010C44  movea.l $10ad4.l, a0
     A0 = A0 + 0x214;  // 010C4A  lea.l 532(a0), a0
@@ -15662,16 +11913,12 @@ void music_pattern_count() {
     D0 = 0x0;  // 010C56  moveq.l #$0, d0
     D1 = 0x0;  // 010C58  moveq.l #$0, d1
 L_010C5A:
-    tick(22);
     {  uint32_t v = rd8(A0); A0 += 1;  setB(D1, v);  }  // 010C5A  move.b (a0)+, d1
     // 010C5C  cmp.b d1, d0
     if ((D0 & 0xFF) > (D1 & 0xFF)) goto L_010C62;  // 010C5E  bhi $10c62
-    tick(4);
     setB(D0, (D1 & 0xFF));  // 010C60  move.b d1, d0
 L_010C62:
-    tick(12);
     setW(D2, D2 - 1); if ((D2 & 0xFFFF) != 0xFFFF) goto L_010C5A;  // 010C62  dbf.w d2, $10c5a
-    tick(186);
     setW(D0, ((D0 & 0xFFFF) + 0x1));  // 010C66  addq.w #$1, d0
     D0 = mulu(0x400, D0);  // 010C68  mulu.w #$400, d0
     { uint32_t ea = A7; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; D4 = rd32(ea); ea += 4; D5 = rd32(ea); ea += 4; D6 = rd32(ea); ea += 4; D7 = rd32(ea); ea += 4; A0 = rd32(ea); ea += 4; A1 = rd32(ea); ea += 4; A2 = rd32(ea); ea += 4; A3 = rd32(ea); ea += 4; A4 = rd32(ea); ea += 4; A5 = rd32(ea); ea += 4; A6 = rd32(ea); ea += 4; A7 = ea; }  // 010C6C  movem.l (a7)+, regs(7ffe)
@@ -15679,56 +11926,42 @@ L_010C62:
 }
 
 void music_channel_effect() {
-    tick(18);
     setW(D0, logic<2>(rd16(A4)));  // 010C72  move.w (a4), d0
     if (CC_EQ) goto L_010CA8;  // 010C74  beq $10ca8
-    tick(10);
     if (CC_MI) goto L_010C94;  // 010C76  bmi $10c94
-    tick(54);
     wr16(A4 + 0x2, (rd16(A4 + 0x2) + (D0 & 0xFFFF)));  // 010C78  add.w d0, 2(a4)
     setW(D0, rd16(A4 + 0x2));  // 010C7C  move.w 2(a4), d0
     setW(D1, rd16(A4 + 0x4));  // 010C80  move.w 4(a4), d1
     // 010C84  cmp.w d0, d1
     if ((D1 & 0xFFFF) > (D0 & 0xFFFF)) goto L_010C8A;  // 010C86  bhi $10c8a
-    tick(4);
     setW(D0, (D1 & 0xFFFF));  // 010C88  move.w d1, d0
 L_010C8A:
-    tick(40);
     wr16(A5 + 0x6, (D0 & 0xFFFF));  // 010C8A  move.w d0, 6(a5)
     wr16(A4 + 0x2, (D0 & 0xFFFF));  // 010C8E  move.w d0, 2(a4)
     return;  // 010C92  rts 
 L_010C94:
-    tick(54);
     wr16(A4 + 0x2, (rd16(A4 + 0x2) + (D0 & 0xFFFF)));  // 010C94  add.w d0, 2(a4)
     setW(D0, rd16(A4 + 0x2));  // 010C98  move.w 2(a4), d0
     setW(D1, rd16(A4 + 0x4));  // 010C9C  move.w 4(a4), d1
     // 010CA0  cmp.w d0, d1
     if (int16_t((D1 & 0xFFFF)) < int16_t((D0 & 0xFFFF))) goto L_010C8A;  // 010CA2  blt $10c8a
-    tick(14);
     setW(D0, (D1 & 0xFFFF));  // 010CA4  move.w d1, d0
     goto L_010C8A;  // 010CA6  bra $10c8a
 L_010CA8:
-    tick(38);
     setB(D0, rd8(A6 + 0x2));  // 010CA8  move.b 2(a6), d0
     setB(D0, ((D0 & 0xFF) & 0xF));  // 010CAC  andi.b #$f, d0
     // 010CB0  cmpi.b #$1, d0
     if ((D0 & 0xFF) == 0x1) goto L_010D38;  // 010CB4  beq $10d38
-    tick(18);
     // 010CB8  cmpi.b #$2, d0
     if ((D0 & 0xFF) == 0x2) goto L_010D82;  // 010CBC  beq $10d82
-    tick(18);
     // 010CC0  cmpi.b #$7, d0
     if ((D0 & 0xFF) == 0x7) goto L_010CCE;  // 010CC4  beq $10cce
-    tick(18);
     // 010CC6  cmpi.b #$8, d0
     if ((D0 & 0xFF) == 0x8) goto L_010D20;  // 010CCA  beq $10d20
-    tick(16);
     return;  // 010CCC  rts 
 L_010CCE:
-    tick(4);
     D4 = 0x0;  // 010CCE  moveq.l #$0, d4
 L_010CD0:
-    tick(66);
     wr16(A4, 0);  // 010CD0  clr.w (a4)
     wr16(A4 + 0x2, rd16(A6));  // 010CD2  move.w (a6), 2(a4)
     D2 = 0x0;  // 010CD6  moveq.l #$0, d2
@@ -15736,10 +11969,8 @@ L_010CD0:
     setW(D2, ((D2 & 0xFFFF) & 0xF));  // 010CDC  andi.w #$f, d2
     // 010CE0  tst.w d4
     if ((D4 & 0xFFFF) == 0) goto L_010CE6;  // 010CE2  beq $10ce6
-    tick(4);
     setW(D2, (0 - (D2 & 0xFFFF)));  // 010CE4  neg.w d2
 L_010CE6:
-    tick(58);
     wr16(A4, (D2 & 0xFFFF));  // 010CE6  move.w d2, (a4)
     D2 = 0x0;  // 010CE8  moveq.l #$0, d2
     setB(D2, rd8(A6 + 0x3));  // 010CEA  move.b 3(a6), d2
@@ -15747,93 +11978,74 @@ L_010CE6:
     setW(D0, rd16(A6));  // 010CF0  move.w (a6), d0
     A0 = 0x11060;  // 010CF2  lea.l $11060.l, a0
 L_010CF8:
-    tick(26);
     setW(D1, rd16(A0));  // 010CF8  move.w (a0), d1
     // 010CFA  cmpi.w #$ffff, d1
     if ((D1 & 0xFFFF) == 0xFFFF) goto L_010D1A;  // 010CFE  beq $10d1a
-    tick(14);
     // 010D00  cmp.w d1, d0
     if ((D0 & 0xFFFF) == (D1 & 0xFFFF)) goto L_010D08;  // 010D02  beq $10d08
-    tick(14);
     A0 += 0x2;  // 010D04  addq.w #$2, a0
     goto L_010CF8;  // 010D06  bra $10cf8
 L_010D08:
-    tick(22);
     setW(D2, (((D2 & 0xFFFF) << 1) & 0xFFFF));  // 010D08  lsl.w #$1, d2
     // 010D0A  tst.w d4
     if ((D4 & 0xFFFF) != 0) goto L_010D10;  // 010D0C  bne $10d10
-    tick(4);
     setW(D2, (0 - (D2 & 0xFFFF)));  // 010D0E  neg.w d2
 L_010D10:
-    tick(42);
     setW(D0, rd16(A0 + sxw(D2)));  // 010D10  move.w 0(a0,d2.w), d0
     wr16(A4 + 0x4, (D0 & 0xFFFF));  // 010D14  move.w d0, 4(a4)
     return;  // 010D18  rts 
 L_010D1A:
-    tick(28);
     wr16(A4 + 0x4, (D0 & 0xFFFF));  // 010D1A  move.w d0, 4(a4)
     return;  // 010D1E  rts 
 L_010D20:
-    tick(16);
     setB(D4, (CC_T ? 0xFF : 0x00));  // 010D20  st.b d4
     goto L_010CD0;  // 010D22  bra $10cd0
 L_010D38:
-    tick(56);
     setW(D0, rd16(0x11106));  // 010D38  move.w $11106.l, d0
     setW(D0, ((D0 & 0xFFFF) - 0x1));  // 010D3E  subq.w #$1, d0
     setW(D0, (((D0 & 0xFFFF) << 2) & 0xFFFF));  // 010D40  lsl.w #$2, d0
     A0 = rd32(0x10D24 + sxw(D0));  // 010D42  movea.l $10d24(pc,d0.w), a0
     callAddress(A0); return;  // 010D46  jmp (a0)
 L_010D82:
-    tick(50);
     D0 = 0;  // 010D82  clr.l d0
     setB(D0, rd8(A6 + 0x3));  // 010D84  move.b 3(a6), d0
     setB(D0, ((D0 & 0xFF) >> 4));  // 010D88  lsr.b #$4, d0
     // 010D8A  cmpi.b #$0, d0
     if ((D0 & 0xFF) == 0x0) goto L_010D98;  // 010D8E  beq $10d98
-    tick(44);
     wr16(A6, (rd16(A6) + (D0 & 0xFFFF)));  // 010D90  add.w d0, (a6)
     wr16(A5 + 0x6, rd16(A6));  // 010D92  move.w (a6), 6(a5)
     return;  // 010D96  rts 
 L_010D98:
-    tick(44);
     D0 = 0;  // 010D98  clr.l d0
     setB(D0, rd8(A6 + 0x3));  // 010D9A  move.b 3(a6), d0
     setB(D0, ((D0 & 0xFF) & 0xF));  // 010D9E  andi.b #$f, d0
     // 010DA2  cmpi.b #$0, d0
     if ((D0 & 0xFF) == 0x0) goto L_010DAE;  // 010DA6  beq $10dae
-    tick(28);
     wr16(A6, (rd16(A6) - (D0 & 0xFFFF)));  // 010DA8  sub.w d0, (a6)
     wr16(A5 + 0x6, rd16(A6));  // 010DAA  move.w (a6), 6(a5)
 L_010DAE:
-    tick(16);
     return;  // 010DAE  rts 
 }
 
 void music_arpeggio_hi() {
     goto L_010D62;
 L_010D48:
-    tick(40);
     D0 = ((D0 << 1) & 0xFFFFFFFFu);  // 010D48  lsl.l #$1, d0
     D1 = 0;  // 010D4A  clr.l d1
     setW(D1, rd16(A6 + 0x10));  // 010D4C  move.w 16(a6), d1
     A0 = 0x11060;  // 010D50  lea.l $11060.l, a0
 L_010D56:
-    tick(32);
     setW(D2, rd16(A0 + D0));  // 010D56  move.w 0(a0,d0.l), d2
     // 010D5A  cmp.w (a0), d1
     if ((D1 & 0xFFFF) == rd16(A0)) goto L_010D7C;  // 010D5C  beq $10d7c
-    tick(18);
     A0 += 0x2;  // 010D5E  addq.l #$2, a0
     goto L_010D56;  // 010D60  bra $10d56
 L_010D62:
-    tick(42);
     D0 = 0;  // 010D62  clr.l d0
     setB(D0, rd8(A6 + 0x3));  // 010D64  move.b 3(a6), d0
     setB(D0, ((D0 & 0xFF) >> 4));  // 010D68  lsr.b #$4, d0
     goto L_010D48;  // 010D6A  bra $10d48
 L_010D7C:
-    tick(28);
     wr16(A5 + 0x6, (D2 & 0xFFFF));  // 010D7C  move.w d2, 6(a5)
     return;  // 010D80  rts 
 }
@@ -15841,41 +12053,33 @@ L_010D7C:
 void music_arpeggio_lo() {
     goto L_010D6C;
 L_010D48:
-    tick(40);
     D0 = ((D0 << 1) & 0xFFFFFFFFu);  // 010D48  lsl.l #$1, d0
     D1 = 0;  // 010D4A  clr.l d1
     setW(D1, rd16(A6 + 0x10));  // 010D4C  move.w 16(a6), d1
     A0 = 0x11060;  // 010D50  lea.l $11060.l, a0
 L_010D56:
-    tick(32);
     setW(D2, rd16(A0 + D0));  // 010D56  move.w 0(a0,d0.l), d2
     // 010D5A  cmp.w (a0), d1
     if ((D1 & 0xFFFF) == rd16(A0)) goto L_010D7C;  // 010D5C  beq $10d7c
-    tick(18);
     A0 += 0x2;  // 010D5E  addq.l #$2, a0
     goto L_010D56;  // 010D60  bra $10d56
 L_010D6C:
-    tick(36);
     D0 = 0;  // 010D6C  clr.l d0
     setB(D0, rd8(A6 + 0x3));  // 010D6E  move.b 3(a6), d0
     setB(D0, ((D0 & 0xFF) & 0xF));  // 010D72  andi.b #$f, d0
     goto L_010D48;  // 010D76  bra $10d48
 L_010D7C:
-    tick(28);
     wr16(A5 + 0x6, (D2 & 0xFFFF));  // 010D7C  move.w d2, 6(a5)
     return;  // 010D80  rts 
 }
 
 void music_arpeggio_base() {
-    tick(12);
     setW(D2, rd16(A6 + 0x10));  // 010D78  move.w 16(a6), d2
-    tick(28);
     wr16(A5 + 0x6, (D2 & 0xFFFF));  // 010D7C  move.w d2, 6(a5)
     return;  // 010D80  rts 
 }
 
 void music_next_row() {
-    tick(206);
     A0 = rd32(0x10AD4);  // 010DB0  movea.l $10ad4.l, a0
     A0 = A0 + 0x3C;  // 010DB6  lea.l 60(a0), a0
     A2 = A0;  // 010DBA  movea.l a0, a2
@@ -15895,89 +12099,70 @@ void music_next_row() {
     A6 = 0x10FE8;  // 010DF2  lea.l $10fe8.l, a6
     D7 = 0x3;  // 010DF8  moveq.l #$3, d7
 L_010DFA:
-    tick(34);
     { A7 -= 4; wr32(A7, A5);  }  // 010DFA  move.l a5, -(a7)
     // 010DFC  tst.w 22(a6)
     if (rd16(A6 + 0x16) == 0) goto L_010E08;  // 010E00  beq $10e08
-    tick(12);
     A5 = 0x111AE;  // 010E02  lea.l $111ae.l, a5
 L_010E08:
-    tick(18);
     call(music_channel_row, 0x10E0C);  // 010E08  bsr $10eb6
-    tick(66);
     A4 += sxw(0x8);  // 010E0C  adda.w #$8, a4
     { uint32_t v = rd32(A7); A7 += 4; A5 = v; }  // 010E10  movea.l (a7)+, a5
     A5 += sxw(0x10);  // 010E12  adda.w #$10, a5
     A6 += sxw(0x18);  // 010E16  adda.w #$18, a6
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_010DFA;  // 010E1A  dbf.w d7, $10dfa
-    tick(62);
     setW(D0, rd16(0x11108));  // 010E1E  move.w $11108.l, d0
     btst(D0, 15); D0 = D0 | (1u << 15);  // 010E24  bset.l #$f, d0
     wr16(0xDFF096, (D0 & 0xFFFF));  // 010E28  move.w d0, $dff096.l
     call(dma_wait, 0x10E32);  // 010E2E  bsr $10fb0
-    tick(28);
     A6 = 0x11030;  // 010E32  lea.l $11030.l, a6
     A5 = 0xDFF0D0;  // 010E38  lea.l $dff0d0.l, a5
     D7 = 0x3;  // 010E3E  moveq.l #$3, d7
 L_010E40:
-    tick(34);
     { A7 -= 4; wr32(A7, A5);  }  // 010E40  move.l a5, -(a7)
     // 010E42  tst.w 22(a6)
     if (rd16(A6 + 0x16) == 0) goto L_010E5C;  // 010E46  beq $10e5c
-    tick(68);
     wr16(A6 + 0x16, (rd16(A6 + 0x16) - 0x1));  // 010E48  subq.w #$1, 22(a6)
     wr32(A6 + 0xA, 0);  // 010E4C  clr.l 10(a6)
     wr16(A6 + 0xE, 0x1);  // 010E50  move.w #$1, 14(a6)
     A5 = 0x111AE;  // 010E56  lea.l $111ae.l, a5
 L_010E5C:
-    tick(96);
     wr32(A5, rd32(A6 + 0xA));  // 010E5C  move.l 10(a6), (a5)
     wr16(A5 + 0x4, rd16(A6 + 0xE));  // 010E60  move.w 14(a6), 4(a5)
     A6 -= sxw(0x18);  // 010E66  suba.w #$18, a6
     { uint32_t v = rd32(A7); A7 += 4; A5 = v; }  // 010E6A  movea.l (a7)+, a5
     A5 -= sxw(0x10);  // 010E6C  suba.w #$10, a5
     setW(D7, D7 - 1); if ((D7 & 0xFFFF) != 0xFFFF) goto L_010E40;  // 010E70  dbf.w d7, $10e40
-    tick(26);
     // 010E74  tst.b $1110c.l
     if (rd8(0x1110C) == 0) goto L_010EB4;  // 010E7A  beq $10eb4
-    tick(74);
     wr32(0x110FE, (rd32(0x110FE) + 0x10));  // 010E7C  addi.l #$10, $110fe.l
     // 010E86  cmpi.l #$400, $110fe.l
     if (int32_t(rd32(0x110FE)) < 1024) goto L_010EB4;  // 010E90  blt $10eb4
-    tick(106);
     wr32(0x110FE, 0);  // 010E92  clr.l $110fe.l
     wr32(0x11102, (rd32(0x11102) + 0x1));  // 010E98  addq.l #$1, $11102.l
     setW(D0, rd16(0x1110A));  // 010E9E  move.w $1110a.l, d0
     D1 = rd32(0x11102);  // 010EA4  move.l $11102.l, d1
     // 010EAA  cmp.w d0, d1
     if ((D1 & 0xFFFF) != (D0 & 0xFFFF)) goto L_010EB4;  // 010EAC  bne $10eb4
-    tick(28);
     wr32(0x11102, 0);  // 010EAE  clr.l $11102.l
 L_010EB4:
-    tick(16);
     return;  // 010EB4  rts 
 }
 
 void music_channel_row() {
-    tick(46);
     wr32(A6, 0);  // 010EB6  clr.l (a6)
     // 010EB8  tst.b $1110c.l
     if (rd8(0x1110C) == 0) goto L_010EC4;  // 010EBE  beq $10ec4
-    tick(26);
     wr32(A6, rd32(A0 + D1));  // 010EC0  move.l 0(a0,d1.l), (a6)
 L_010EC4:
-    tick(36);
     D1 = (D1 + 0x4);  // 010EC4  addq.l #$4, d1
     D2 = 0;  // 010EC6  clr.l d2
     // 010EC8  cmpi.w #$fffd, (a6)
     if (rd16(A6) == 0xFFFD) goto L_010F60;  // 010ECC  beq $10f60
-    tick(48);
     setB(D2, rd8(A6 + 0x2));  // 010ED0  move.b 2(a6), d2
     setB(D2, ((D2 & 0xFF) & 0xF0));  // 010ED4  andi.b #$f0, d2
     setB(D2, ((D2 & 0xFF) >> 4));  // 010ED8  lsr.b #$4, d2
     // 010EDA  tst.b d2
     if ((D2 & 0xFF) == 0) goto L_010F60;  // 010EDC  beq $10f60
-    tick(276);
     D3 = 0;  // 010EE0  clr.l d3
     A1 = 0x110C2;  // 010EE2  lea.l $110c2.l, a1
     D4 = D2;  // 010EE8  move.l d2, d4
@@ -15997,103 +12182,78 @@ L_010EC4:
     setW(D2, ((D2 & 0xFFFF) & 0xF));  // 010F20  andi.w #$f, d2
     // 010F24  cmpi.b #$5, d2
     if ((D2 & 0xFF) == 0x5) goto L_010F46;  // 010F28  beq $10f46
-    tick(18);
     // 010F2A  cmpi.b #$6, d2
     if ((D2 & 0xFF) != 0x6) goto L_010F5C;  // 010F2E  bne $10f5c
-    tick(34);
     D2 = 0x0;  // 010F32  moveq.l #$0, d2
     setB(D2, rd8(A6 + 0x3));  // 010F34  move.b 3(a6), d2
     setW(D3, ((D3 & 0xFFFF) - (D2 & 0xFFFF)));  // 010F38  sub.w d2, d3
     // 010F3A  tst.w d3
     if (int16_t((D3 & 0xFFFF)) >= 0) goto L_010F5C;  // 010F3C  bpl $10f5c
-    tick(14);
     setW(D3, 0);  // 010F40  clr.w d3
     goto L_010F5C;  // 010F42  bra $10f5c
 L_010F46:
-    tick(42);
     D2 = 0x0;  // 010F46  moveq.l #$0, d2
     setB(D2, rd8(A6 + 0x3));  // 010F48  move.b 3(a6), d2
     setW(D3, ((D3 & 0xFFFF) + (D2 & 0xFFFF)));  // 010F4C  add.w d2, d3
     ; // 010F4E  tst.w d3
     // 010F50  cmpi.w #$40, d3
     if (int16_t((D3 & 0xFFFF)) <= 64) goto L_010F5C;  // 010F54  ble $10f5c
-    tick(8);
     setW(D3, 0x40);  // 010F58  move.w #$40, d3
 L_010F5C:
-    tick(12);
     wr16(A5 + 0x8, (D3 & 0xFFFF));  // 010F5C  move.w d3, 8(a5)
 L_010F60:
-    tick(22);
     // 010F60  cmpi.w #$fffd, (a6)
     if (rd16(A6) != 0xFFFD) goto L_010F6C;  // 010F64  bne $10f6c
-    tick(26);
     wr16(A6 + 0x2, 0);  // 010F66  clr.w 2(a6)
     goto L_010FAE;  // 010F6A  bra $10fae
 L_010F6C:
-    tick(18);
     // 010F6C  tst.w (a6)
     if (rd16(A6) == 0) goto L_010FAE;  // 010F6E  beq $10fae
-    tick(50);
     wr16(A4, 0);  // 010F70  clr.w (a4)
     wr16(A6 + 0x10, rd16(A6));  // 010F72  move.w (a6), 16(a6)
     // 010F76  tst.w 22(a6)
     if (rd16(A6 + 0x16) != 0) goto L_010F86;  // 010F7A  bne $10f86
-    tick(42);
     wr16(0xDFF096, rd16(A6 + 0x14));  // 010F7C  move.w 20(a6), $dff096.l
     call(dma_wait, 0x10F86);  // 010F84  bsr $10fb0
 L_010F86:
-    tick(22);
     // 010F86  cmpi.w #$fffe, (a6)
     if (rd16(A6) != 0xFFFE) goto L_010F92;  // 010F8A  bne $10f92
-    tick(26);
     wr16(A5 + 0x8, 0);  // 010F8C  clr.w 8(a5)
     goto L_010FA4;  // 010F90  bra $10fa4
 L_010F92:
-    tick(68);
     wr32(A5, rd32(A6 + 0x4));  // 010F92  move.l 4(a6), 0(a5)
     wr16(A5 + 0x4, rd16(A6 + 0x8));  // 010F98  move.w 8(a6), 4(a5)
     wr16(A5 + 0x6, rd16(A6));  // 010F9E  move.w 0(a6), 6(a5)
 L_010FA4:
-    tick(32);
     setW(D0, rd16(A6 + 0x14));  // 010FA4  move.w 20(a6), d0
     wr16(0x11108, (rd16(0x11108) | (D0 & 0xFFFF)));  // 010FA8  or.w d0, $11108.l
 L_010FAE:
-    tick(16);
     return;  // 010FAE  rts 
 }
 
 void dma_wait() {
-    tick(48);
     { A7 -= 4; wr32(A7, D3); A7 -= 4; wr32(A7, D2); A7 -= 4; wr32(A7, D1); A7 -= 4; wr32(A7, D0); }  // 010FB0  movem.l regs(f000), -(a7)
     D0 = 0x5;  // 010FB4  moveq.l #$5, d0
     D1 = D0;  // 010FB6  move.l d0, d1
 L_010FB8:
-    tick(18);
     call(wait_line_change, 0x10FBA);  // 010FB8  bsr $10fce
-    tick(4);
     setW(D2, (D0 & 0xFFFF));  // 010FBA  move.w d0, d2
 L_010FBC:
-    tick(18);
     call(wait_line_change, 0x10FBE);  // 010FBC  bsr $10fce
-    tick(14);
     // 010FBE  cmp.w d0, d2
     if ((D2 & 0xFFFF) == (D0 & 0xFFFF)) goto L_010FBC;  // 010FC0  beq $10fbc
-    tick(12);
     setW(D1, D1 - 1); if ((D1 & 0xFFFF) != 0xFFFF) goto L_010FB8;  // 010FC4  dbf.w d1, $10fb8
-    tick(60);
     { uint32_t ea = A7; D0 = rd32(ea); ea += 4; D1 = rd32(ea); ea += 4; D2 = rd32(ea); ea += 4; D3 = rd32(ea); ea += 4; A7 = ea; }  // 010FC8  movem.l (a7)+, regs(000f)
     return;  // 010FCC  rts 
 }
 
 void wait_line_change() {
 L_010FCE:
-    tick(72);
     D0 = rd32(0xDFF004);  // 010FCE  move.l $dff004.l, d0
     D0 = (D0 & 0x1FFFF);  // 010FD4  andi.l #$1ffff, d0
     D0 = (D0 >> 8);  // 010FDA  lsr.l #$8, d0
     // 010FDC  tst.w d0
     if ((D0 & 0xFFFF) == 0) goto L_010FCE;  // 010FDE  beq $10fce
-    tick(16);
     return;  // 010FE2  rts 
 }
 
