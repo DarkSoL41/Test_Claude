@@ -38,6 +38,10 @@ find_package(SDL2 REQUIRED)
 if(WIN32)
   set(GAME_RC res/supaplex.rc)
   set(EDITOR_RC res/supaplex_editor.rc)
+  # the resource compiler does not report the .ico as a dependency: rebuild
+  # the resources when the icons change
+  set_source_files_properties(res/supaplex.rc PROPERTIES OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/res/supaplex.ico)
+  set_source_files_properties(res/supaplex_editor.rc PROPERTIES OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/res/supaplex_editor.ico)
 endif()
 add_executable(supaplex WIN32 src/platform/main_sdl.cpp ${GAME_RC})
 target_link_libraries(supaplex PRIVATE supaplexgame)
