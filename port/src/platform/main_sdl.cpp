@@ -185,7 +185,7 @@ public:
         if (inLevel_ || (testLevel && testState_ < 3)) return;
         if (hw_.chip()[0x11294] == lastTick_) return;
         holdLmb_ = lmb_;
-        holdRmb_ = rmb_;
+        holdRmb_ = rmb_ || keyDown(SDL_SCANCODE_P);
         holdFire_ = true;
         hw_.setMouseButtons(false, false);
         updateJoystick();
@@ -193,7 +193,7 @@ public:
 
     void diskAccess() {
         holdLmb_ = lmb_;
-        holdRmb_ = rmb_;
+        holdRmb_ = rmb_ || keyDown(SDL_SCANCODE_P);
         holdFire_ = true;
         hw_.setMouseButtons(false, false);
         updateJoystick();
@@ -507,6 +507,10 @@ private:
     // only while a player name is typed in.
     bool nameEntry() const { return hw_.chipL(0x68) == 0x10214; }
 
+    // The level's pause (right button, $7F1A): $112E6 is set while the game
+    // waits for the button; game_frame does not run then, but the level goes on.
+    bool levelPaused() const { return (hw_.chip()[0x112E6] | hw_.chip()[0x112E7]) != 0; }
+
     // A level (or the demo) runs while game_frame counts v_frame_div50
     // ($11294) every frame (nothing else writes it); the first count comes
     // one frame before the level first looks at the mouse button.
@@ -521,12 +525,12 @@ private:
                 // is up. Here it starts at once, so a button still held from
                 // the menu must not reach the level (left button = give up).
                 holdLmb_ = lmb_;
-                holdRmb_ = rmb_;
+                holdRmb_ = rmb_ || keyDown(SDL_SCANCODE_P);
                 holdFire_ = true;
             }
             inLevel_ = true;
             idle_ = 0;
-        } else if (inLevel_ && ++idle_ > 5) {
+        } else if (inLevel_ && ++idle_ > 5 && !levelPaused()) {
             inLevel_ = false;
         }
     }
@@ -560,8 +564,10 @@ private:
 
     void updateMouse() {
         if (!lmb_) holdLmb_ = false;
-        if (!rmb_) holdRmb_ = false;
-        hw_.setMouseButtons(lmb_ && !holdLmb_, rmb_ && !holdRmb_);
+        // P in a level acts as the right button: pause (as in the PC version)
+        bool rmb = rmb_ || (inLevel_ && !nameEntry() && keyDown(SDL_SCANCODE_P));
+        if (!rmb) holdRmb_ = false;
+        hw_.setMouseButtons(lmb_ && !holdLmb_, rmb && !holdRmb_);
 
         // The game moves its pointer by the change of the mouse counters and
         // keeps the position in $112EC/$112EE (in counts, pixel = count / 2).
