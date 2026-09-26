@@ -240,11 +240,22 @@ public:
         }
         handleEvents();
         if (!menuSeen_ && hw_.copperList() == kMenuCopper) menuSeen_ = true;
-        while (paused_) {
-            present();
-            SDL_Delay(20);
-            handleEvents();
-            nextFrame_ = SDL_GetPerformanceCounter();
+        if (paused_ || minimized_) {
+            // Pause, or the window is minimized: the game stands where it is.
+            // A minimized window has no vertical blank to wait for and its
+            // sound would break up, so nothing is drawn and the sound stops
+            // until the window comes back.
+            if (audio_) SDL_PauseAudioDevice(audio_, 1);
+            while (paused_ || minimized_) {
+                if (!minimized_) present();
+                SDL_Delay(minimized_ ? 50 : 20);
+                handleEvents();
+            }
+            if (audio_) {
+                SDL_ClearQueuedAudio(audio_);
+                SDL_PauseAudioDevice(audio_, 0);
+            }
+            nextFrame_ = lastPresent_ = SDL_GetPerformanceCounter();
         }
         present();
         queueAudio();
@@ -611,6 +622,9 @@ private:
             }
             case SDL_WINDOWEVENT:
                 if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) mouseLmb_ = rmb_ = false;
+                if (e.window.event == SDL_WINDOWEVENT_MINIMIZED || e.window.event == SDL_WINDOWEVENT_HIDDEN) minimized_ = true;
+                if (e.window.event == SDL_WINDOWEVENT_RESTORED || e.window.event == SDL_WINDOWEVENT_MAXIMIZED ||
+                    e.window.event == SDL_WINDOWEVENT_SHOWN) minimized_ = false;
                 if (e.window.event == SDL_WINDOWEVENT_DISPLAY_CHANGED || e.window.event == SDL_WINDOWEVENT_MOVED) configureTiming();
                 break;
             case SDL_CONTROLLERDEVICEADDED:
@@ -746,6 +760,7 @@ private:
     std::vector<int16_t> resampled_;
     double resamplePos_ = 0;
     int resampleLast_[2] = {};
+    bool minimized_ = false;
     bool fullscreen_ = false, paused_ = false, lmb_ = false, rmb_ = false;
     bool mouseLmb_ = false;                      // the left mouse button itself (lmb_ also counts keyClick)
     bool menuSeen_ = false, skipIntro_ = false;  // the intro is over / is being skipped
