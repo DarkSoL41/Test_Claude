@@ -1,6 +1,7 @@
 #include "level.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
@@ -329,6 +330,50 @@ bool LevelSet::writeFile(const std::string& path, const std::vector<uint8_t>& da
     if (!f) return false;
     f.write(reinterpret_cast<const char*>(data.data()), std::streamsize(data.size()));
     return bool(f);
+}
+
+bool LevelSet::loadMenu(const std::vector<uint8_t>& mainBin, const std::vector<uint8_t>& graphicsBin) {
+    haveMenu = false;
+    // resource pointers: the first entry is an address, the others sizes
+    // (the game adds them up); entry 11 is the menu's level list
+    const size_t table = 0x1B5A0 - 0x7E00;
+    if (mainBin.size() < table + 12 * 4) return false;
+    auto be32 = [&](size_t o) {
+        return uint32_t(mainBin[o]) << 24 | uint32_t(mainBin[o + 1]) << 16 | uint32_t(mainBin[o + 2]) << 8 | mainBin[o + 3];
+    };
+    uint32_t addr = 0;
+    for (int i = 0; i <= 11; i++) addr += be32(table + size_t(i) * 4);
+    if (addr < 0x1EE00) return false;
+    size_t off = addr - 0x1EE00, size = size_t(kLevelCount) * 28;
+    if (off + size > graphicsBin.size()) return false;
+    for (int i = 0; i < kLevelCount; i++) {
+        const uint8_t* line = &graphicsBin[off + size_t(i) * 28];
+        char num[5];
+        std::snprintf(num, sizeof num, "%03d ", i + 1);
+        if (std::memcmp(line, num, 4) != 0 || line[27] != '\n') return false;
+        std::copy_n(line + 4, kTitleLen + 1, menuTitle[size_t(i)].begin());
+    }
+    menuOffset = off;
+    haveMenu = true;
+    return true;
+}
+
+std::vector<uint8_t> LevelSet::graphicsWithMenu(const std::vector<uint8_t>& graphicsBin) const {
+    std::vector<uint8_t> g = graphicsBin;
+    if (!haveMenu || menuOffset + size_t(kLevelCount) * 28 > g.size()) return g;
+    for (int i = 0; i < kLevelCount; i++) {
+        uint8_t* line = &g[menuOffset + size_t(i) * 28];
+        char num[5];
+        std::snprintf(num, sizeof num, "%03d ", i + 1);
+        std::memcpy(line, num, 4);
+        if (edited[size_t(i)]) {
+            std::copy_n(levels[size_t(i)].b.begin() + 1446, kTitleLen, line + 4);
+            line[27] = '\n';
+        } else {
+            std::copy_n(menuTitle[size_t(i)].begin(), kTitleLen + 1, line + 4);
+        }
+    }
+    return g;
 }
 
 bool LevelSet::load(const std::string& path, std::string* err) {

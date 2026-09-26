@@ -195,6 +195,7 @@ private:
 
     // ---- files ----
     bool save();
+    bool saveMenu();
     void reload();
     void exportLevel();
     void exportPicture();
@@ -294,7 +295,7 @@ private:
     std::vector<std::string> testArgs_;
     static int testThreadMain(void* self);
     void finishTest();
-    bool backupDone_ = false;
+    bool backupDone_ = false, graphicsBackupDone_ = false;
 
     // testing without a screen: --script FILE (see runScript)
     struct ScriptLine { long frame; std::string cmd; std::vector<std::string> a; };
@@ -355,6 +356,7 @@ bool App::init(int argc, char** argv) {
     std::string err;
     if (!set_.load(levelsPath_.u8string(), &err)) return fail(err);
     if (!gfx_.load(files_, &err)) return fail(err);
+    set_.loadMenu(files_.read("PHIL_01"), files_.read("PHIL_02"));  // the menu's level list
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
     win_ = SDL_CreateWindow(tr("Supaplex level editor (Amiga)", "Редактор уровней Supaplex (Amiga)"), SDL_WINDOWPOS_CENTERED,
@@ -639,6 +641,7 @@ void App::swapLevels(int a, int b) {
     std::swap(undo_[size_t(a)], undo_[size_t(b)]);
     std::swap(redo_[size_t(a)], redo_[size_t(b)]);
     std::swap(set_.edited[size_t(a)], set_.edited[size_t(b)]);
+    std::swap(set_.menuTitle[size_t(a)], set_.menuTitle[size_t(b)]);  // the menu line moves with the level
     unsaved_[size_t(a)] = unsaved_[size_t(b)] = true;
     changeCounter_++;
     cur_ = b;
@@ -699,9 +702,38 @@ bool App::save() {
     }
     std::string err;
     if (!set_.save(levelsPath_.u8string(), &err, autoCamera_)) { message(tr("Save failed: ", "Ошибка сохранения: ") + err, theme::error); return false; }
+    if (!saveMenu()) return false;
     unsaved_.fill(false);
     changeCounter_++;
     message(tr("Saved: ", "Сохранено: ") + levelsPath_.u8string() + tr(" (the previous file is LEVELS.DAT.bak)", " (копия прежнего файла — LEVELS.DAT.bak)"), theme::ok);
+    return true;
+}
+
+// The level names of the main menu live in GRAPHICS.BIN (LevelSet::menuTitle):
+// written there too, so that the menu shows the new titles and the new order.
+bool App::saveMenu() {
+    if (!set_.haveMenu) return true;
+    fs::path p = dataDir_ / "GRAPHICS.BIN";
+    std::vector<uint8_t> old;
+    if (!LevelSet::readFile(p.u8string(), old)) return true;
+    std::vector<uint8_t> now = set_.graphicsWithMenu(old);
+    if (now == old) return true;
+    std::error_code ec;
+    if (!graphicsBackupDone_) {
+        fs::copy_file(p, fs::path(p.u8string() + ".bak"), fs::copy_options::overwrite_existing, ec);
+        graphicsBackupDone_ = true;
+    }
+    fs::path tmp = fs::path(p.u8string() + ".tmp");
+    if (!LevelSet::writeFile(tmp.u8string(), now)) {
+        message(tr("Cannot write ", "Не удалось записать ") + tmp.u8string(), theme::error);
+        return false;
+    }
+    fs::rename(tmp, p, ec);
+    if (ec) {
+        fs::remove(p, ec);
+        fs::rename(tmp, p, ec);
+    }
+    if (ec) { message(tr("Cannot replace ", "Не удалось заменить ") + p.u8string(), theme::error); return false; }
     return true;
 }
 
@@ -709,6 +741,7 @@ void App::reload() {
     std::string err;
     LevelSet s;
     if (!s.load(levelsPath_.u8string(), &err)) { message(err, theme::error); return; }
+    s.loadMenu(files_.read("PHIL_01"), files_.read("PHIL_02"));
     set_ = s;
     for (auto& u : undo_) u.clear();
     for (auto& r : redo_) r.clear();
@@ -797,8 +830,16 @@ void App::startTest() {
     // a copy of the data folder with the levels as they are now
     fs::path dir = gameDir_ / "editor_test";
     fs::create_directories(dir, ec);
-    for (const char* f : {"INTRO.BIN", "MAIN.BIN", "GRAPHICS.BIN", "HISCORE.BIN"})
+    for (const char* f : {"INTRO.BIN", "MAIN.BIN", "HISCORE.BIN"})
         fs::copy_file(dataDir_ / f, dir / f, fs::copy_options::overwrite_existing, ec);
+    {
+        std::vector<uint8_t> g;  // with the menu's level list as the levels are now
+        if (!LevelSet::readFile((dataDir_ / "GRAPHICS.BIN").u8string(), g) ||
+            !LevelSet::writeFile((dir / "GRAPHICS.BIN").u8string(), set_.graphicsWithMenu(g))) {
+            message(tr("Cannot prepare the test", "Не удалось подготовить тест"), theme::error);
+            return;
+        }
+    }
     std::vector<uint8_t> all;
     for (int i = 0; i < kLevelCount; i++) {
         Level l = set_.levels[size_t(i)];

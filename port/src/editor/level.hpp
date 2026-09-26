@@ -101,6 +101,18 @@ public:
     std::array<Level, kLevelCount> levels;
     std::array<bool, kLevelCount> edited{};
 
+    // The level list of the main menu is not read from LEVELS.DAT: the game
+    // copies a table of 111 lines "NNN " + 23-character title + "\n" from
+    // GRAPHICS.BIN (resource 11 of the table at $1B5A0 in MAIN.BIN) to
+    // $13270. Its titles, in the order of the levels (they move with them).
+    std::array<std::array<uint8_t, kTitleLen + 1>, kLevelCount> menuTitle{};
+    bool haveMenu = false;
+    size_t menuOffset = 0;  // of the table in GRAPHICS.BIN
+    bool loadMenu(const std::vector<uint8_t>& mainBin, const std::vector<uint8_t>& graphicsBin);
+    // GRAPHICS.BIN with the menu lines of the edited levels made from their
+    // titles (the others stay byte for byte)
+    std::vector<uint8_t> graphicsWithMenu(const std::vector<uint8_t>& graphicsBin) const;
+
     bool load(const std::string& path, std::string* err);
     bool save(const std::string& path, std::string* err, bool autoCamera = true);  // normalizes the edited levels
     static bool readFile(const std::string& path, std::vector<uint8_t>& out);

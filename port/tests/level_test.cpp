@@ -1,6 +1,7 @@
 // Checks of the editor's level model against the original levels:
 //   level_test <data/LEVELS.DAT>
 #include <cstdio>
+#include <string>
 #include <vector>
 
 #include "../src/editor/level.hpp"
@@ -54,6 +55,21 @@ int main(int argc, char** argv) {
     LevelSet::readFile("level_test_out.dat", again);
     std::remove("level_test_out.dat");
     if (again != orig) { std::printf("round trip changed the file\n"); fails++; }
+    // the main menu's level list (GRAPHICS.BIN next to LEVELS.DAT): found, and
+    // saved byte for byte when nothing was edited
+    {
+        std::string dir(path);
+        size_t slash = dir.find_last_of("/\\");
+        dir = slash == std::string::npos ? std::string(".") : dir.substr(0, slash);
+        std::vector<uint8_t> mainBin, gfxBin;
+        editor::LevelSet ms;
+        std::string err;
+        if (editor::LevelSet::readFile(dir + "/MAIN.BIN", mainBin) && editor::LevelSet::readFile(dir + "/GRAPHICS.BIN", gfxBin) &&
+            ms.load(path, &err)) {
+            if (!ms.loadMenu(mainBin, gfxBin)) { std::printf("menu level list not found in GRAPHICS.BIN\n"); fails++; }
+            else if (ms.graphicsWithMenu(gfxBin) != gfxBin) { std::printf("GRAPHICS.BIN changed without edits\n"); fails++; }
+        }
+    }
     std::printf(fails ? "FAILED: %d\n" : "OK: level model checks passed\n", fails);
     return fails ? 1 : 0;
 }
