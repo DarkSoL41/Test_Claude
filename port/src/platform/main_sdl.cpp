@@ -9,7 +9,10 @@
 //   game controller : the joystick (d-pad / left stick, A B X Y = fire)
 //   mouse           : the Amiga mouse; the Windows cursor leads the game's
 //                     pointer, nothing is captured
-//   keyboard        : in a level, cursor keys + Space act as the joystick
+//   keyboard        : in a level, cursor keys + Space act as the joystick, Esc
+//                     gives up (the left button); Space / Enter / Esc go on
+//                     from the screens that wait for a click; any key or
+//                     click skips the intro;
 //                     (a PC has no joystick port); while the game asks for a
 //                     player name the keys go to the Amiga keyboard. Elsewhere
 //                     the keyboard does nothing, like in the original.
@@ -49,6 +52,7 @@ namespace {
 constexpr int kSampleRate = 48000;
 // PAL frame: 313 lines of 227.5 colour clocks at 3.546895 MHz
 constexpr double kFrameSeconds = 313.0 * 227.5 / 3546895.0;
+constexpr uint32_t kMenuCopper = 0x1B896;  // copper list of the main menu (main_menu, $99C0)
 
 // Settings from supaplex.ini (next to the program) and the command line.
 struct Settings {
@@ -213,7 +217,28 @@ public:
             nextFrame_ = SDL_GetPerformanceCounter();
             return;
         }
+        if (skipIntro_ && !menuSeen_) {
+            // a key or a click during the intro: run it at full speed, without
+            // picture and sound, up to the main menu (the game does the same
+            // things, only nobody waits for it)
+            if (hw_.copperList() == kMenuCopper) {
+                menuSeen_ = true;
+                skipIntro_ = false;
+                holdLmb_ = holdRmb_ = holdFire_ = true;  // the key or click that skipped stays out of the menu
+                nextFrame_ = SDL_GetPerformanceCounter();
+            } else {
+                if (++skipFrames_ % 25 == 0) {
+                    SDL_Event e;
+                    while (SDL_PollEvent(&e))
+                        if (e.type == SDL_QUIT) throw game::QuitGame{};
+                }
+                paula_.samples().clear();
+                nextFrame_ = SDL_GetPerformanceCounter();
+                return;
+            }
+        }
         handleEvents();
+        if (!menuSeen_ && hw_.copperList() == kMenuCopper) menuSeen_ = true;
         while (paused_) {
             present();
             SDL_Delay(20);
@@ -569,18 +594,20 @@ private:
                 if (down && sc == SDL_SCANCODE_ESCAPE && testLevel) throw game::QuitGame{};  // back to the editor
                 if (down && sc == SDL_SCANCODE_PAUSE) { paused_ = !paused_; break; }
                 if (e.key.repeat) break;
+                if (down && !menuSeen_ && !testLevel) skipIntro_ = true;
                 typeKey(sc, down);
                 break;
             }
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP: {
                 bool d = e.type == SDL_MOUSEBUTTONDOWN;
-                if (e.button.button == SDL_BUTTON_LEFT) lmb_ = d;
+                if (e.button.button == SDL_BUTTON_LEFT) mouseLmb_ = d;
                 if (e.button.button == SDL_BUTTON_RIGHT) rmb_ = d;
+                if (d && !menuSeen_ && !testLevel) skipIntro_ = true;
                 break;
             }
             case SDL_WINDOWEVENT:
-                if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) lmb_ = rmb_ = false;
+                if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) mouseLmb_ = rmb_ = false;
                 if (e.window.event == SDL_WINDOWEVENT_DISPLAY_CHANGED || e.window.event == SDL_WINDOWEVENT_MOVED) configureTiming();
                 break;
             case SDL_CONTROLLERDEVICEADDED:
@@ -596,10 +623,28 @@ private:
             }
         }
         if (testMode_) applyTestInput();
+        lmb_ = mouseLmb_ || keyClick();
         trackLevel();
         if (testLevel) driveTest();
         updateJoystick();
         updateMouse();
+    }
+
+    // Keys that act as the left mouse button, like in the PC version: in a
+    // level Esc gives up (the left button there; Space stays the joystick's
+    // fire), on the screens that wait for a click (results, credits,
+    // statistics, gfx tutor, ...) Space, Enter and Esc go on. Not in the main
+    // menu (a click there presses what is under the pointer) and not while a
+    // name is typed in (the keys are the Amiga keyboard then).
+    bool keyClick() const {
+        if (nameEntry()) return false;
+        bool esc = keyDown(SDL_SCANCODE_ESCAPE) && !testLevel;  // the editor's test: Esc goes back
+        if (inLevel_) return esc;
+        if (!menuSeen_ || hw_.copperList() == kMenuCopper) return false;
+        const Uint8* ks = testMode_ ? nullptr : SDL_GetKeyboardState(nullptr);
+        bool alt = ks && (ks[SDL_SCANCODE_LALT] || ks[SDL_SCANCODE_RALT]);  // Alt+Enter: fullscreen
+        return esc || keyDown(SDL_SCANCODE_SPACE) ||
+               (!alt && (keyDown(SDL_SCANCODE_RETURN) || keyDown(SDL_SCANCODE_KP_ENTER)));
     }
 
     void typeKey(SDL_Scancode sc, bool down) {
@@ -657,7 +702,8 @@ private:
         for (const TestEvent& ev : test_) {
             if (ev.frame != frame) continue;
             if (ev.what == "mouse") { testX_ = ev.a; testY_ = ev.b; }
-            else if (ev.what == "lmb") lmb_ = ev.a != 0;
+            else if (ev.what == "lmb") mouseLmb_ = ev.a != 0;
+            if ((ev.what == "lmb" || ev.what == "key") && ev.a && !menuSeen_ && !testLevel) skipIntro_ = true;
             else if (ev.what == "rmb") rmb_ = ev.a != 0;
             else if (ev.what == "key") {
                 SDL_Scancode sc = SDL_GetScancodeFromName(ev.arg.c_str());
@@ -688,6 +734,9 @@ private:
     double resamplePos_ = 0;
     int resampleLast_[2] = {};
     bool fullscreen_ = false, paused_ = false, lmb_ = false, rmb_ = false;
+    bool mouseLmb_ = false;                      // the left mouse button itself (lmb_ also counts keyClick)
+    bool menuSeen_ = false, skipIntro_ = false;  // the intro is over / is being skipped
+    long skipFrames_ = 0;
     bool inLevel_ = false, holdLmb_ = false, holdRmb_ = false, holdFire_ = false;
     uint8_t lastTick_ = 0;
     bool keySent_[128] = {};  // Amiga keys whose press went to the game
