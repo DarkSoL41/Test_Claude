@@ -9,13 +9,13 @@
 //   game controller : the joystick (d-pad / left stick, A B X Y = fire)
 //   mouse           : the Amiga mouse; the Windows cursor leads the game's
 //                     pointer, nothing is captured
-//   keyboard        : in a level, cursor keys + Space act as the joystick, Esc
-//                     gives up (the left button); Space / Enter / Esc go on
-//                     from the screens that wait for a click; any key or
-//                     click skips the intro;
-//                     (a PC has no joystick port); while the game asks for a
-//                     player name the keys go to the Amiga keyboard. Elsewhere
-//                     the keyboard does nothing, like in the original.
+//   keyboard        : in a level, cursor keys + Space act as the joystick (a
+//                     PC has no joystick port) and Esc gives up (the left
+//                     button, as in the PC version); Space / Enter / Esc go on
+//                     from the screens that wait for a click; any key or click
+//                     skips the intro; while the game asks for a player name
+//                     the keys go to the Amiga keyboard. In the main menu the
+//                     keyboard does nothing, like in the original.
 //   F11 or Alt+Enter : fullscreen,  Pause : pause,  F12 or window close : quit
 //
 // Smooth picture: the game draws 50 frames a second (PAL) and moves the
