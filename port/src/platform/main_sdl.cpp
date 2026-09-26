@@ -14,8 +14,9 @@
 //                     button, as in the PC version); Space / Enter / Esc go on
 //                     from the screens that wait for a click; any key or click
 //                     skips the intro; while the game asks for a player name
-//                     the keys go to the Amiga keyboard. In the main menu the
-//                     keyboard does nothing, like in the original.
+//                     the keys go to the Amiga keyboard. In the main menu
+//                     Space starts the level (the fire button, as in the PC
+//                     version); a Space held from another screen does not.
 //   F11 or Alt+Enter : fullscreen,  Pause : pause,  F12 or window close : quit
 //
 // Smooth picture: the game draws 50 frames a second (PAL) and moves the
@@ -528,6 +529,8 @@ private:
             right = keyDown(SDL_SCANCODE_RIGHT);
             fire = keyDown(SDL_SCANCODE_SPACE);
         }
+        if (!inMenu()) menuSpace_ = false;
+        if (menuSpace_) fire = true;
         if (pad_) {
             auto b = [&](SDL_GameControllerButton x) { return SDL_GameControllerGetButton(pad_, x) != 0; };
             const int dz = 12000;
@@ -647,7 +650,17 @@ private:
                (!alt && (keyDown(SDL_SCANCODE_RETURN) || keyDown(SDL_SCANCODE_KP_ENTER)));
     }
 
+    // Space in the main menu starts the level, like the fire button (as in
+    // the PC version). Only a press that begins while the menu is shown
+    // counts: Space still held from the results or from a level does not.
+    bool inMenu() const { return menuSeen_ && !inLevel_ && hw_.copperList() == kMenuCopper && !nameEntry(); }
+    void noteMenuSpace(SDL_Scancode sc, bool down) {
+        if (sc != SDL_SCANCODE_SPACE) return;
+        menuSpace_ = down && inMenu();
+    }
+
     void typeKey(SDL_Scancode sc, bool down) {
+        noteMenuSpace(sc, down);
         int code = amigaKey(sc);
         if (code < 0) return;
         if (down) {
@@ -737,6 +750,7 @@ private:
     bool mouseLmb_ = false;                      // the left mouse button itself (lmb_ also counts keyClick)
     bool menuSeen_ = false, skipIntro_ = false;  // the intro is over / is being skipped
     long skipFrames_ = 0;
+    bool menuSpace_ = false;  // Space pressed in the main menu (acts as fire there)
     bool inLevel_ = false, holdLmb_ = false, holdRmb_ = false, holdFire_ = false;
     uint8_t lastTick_ = 0;
     bool keySent_[128] = {};  // Amiga keys whose press went to the game
